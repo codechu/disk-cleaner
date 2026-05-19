@@ -72,7 +72,8 @@ pip install -e .
 
 ```bash
 disk-cleaner          # GUI
-disk-cleaner --scan   # headless JSON scan
+disk-cleaner --scan   # headless JSON scan (full system; can be slow)
+disk-cleaner --scan --sources artifacts --workspace .   # quick demo on a workspace
 disk-cleaner --scan --format table | head
 disk-cleaner --clean --dry-run
 python3 -m disk_cleaner --help
