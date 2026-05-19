@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codechu-disk-cleaner"
+version = "0.1.0"
+description = "Safe, transparent disk cleaner with smart suggestions, treemap & sunburst visualization, and a quiet background watchdog."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Codechu" },
+    { name = "Onur Barlık" },
+]
+keywords = ["disk", "cleaner", "treemap", "sunburst", "linux", "gtk", "filesystem"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications :: GTK",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Filesystems",
+    "Topic :: Utilities",
+]
+dependencies = [
+    # Sistem paketleri: python3-gi (PyGObject), gir1.2-gtk-3.0, python3-cairo
+    # pip ile değil apt/dnf ile gelir; bu yüzden pyproject deps'de değil.
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.1",
+    "ruff>=0.4",
+    "mypy>=1.5",
+    "bandit>=1.7",
+]
+
+[project.urls]
+Homepage = "https://github.com/codechu/disk-cleaner"
+Source = "https://github.com/codechu/disk-cleaner"
+Issues = "https://github.com/codechu/disk-cleaner/issues"
+
+[project.scripts]
+disk-cleaner = "disk_cleaner.cli:cli_entry"
+
+[tool.setuptools.packages.find]
+include = ["disk_cleaner*"]
+exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+disk_cleaner = ["locale/*/LC_MESSAGES/*.mo"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "W"]
+ignore = [
+    "E501",  # line length handled by formatter; long Türkçe strings ok
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"

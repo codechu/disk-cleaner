@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Wordmark: "Disk Cleaner" Ubuntu Sans 600, letter-spacing -1.5
+     Tek başına kullanım: dar yerler, footer, header text-only -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 100" width="480" height="100">
+  <text x="0" y="68" font-family="Ubuntu Sans, Inter, system-ui" font-size="56" font-weight="600" letter-spacing="-1.5" fill="#1d2939">Disk Cleaner</text>
+</svg>

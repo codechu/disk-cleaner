@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Codechu Disk Cleaner — symbolic mono (v4, G3 era)
+  16px monokrom, GTK tray / status-area. currentColor ile renklenir.
+  Form: dolu daire + D harf cutout + dairesel counter cutout.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <g fill="#2e3436" fill-rule="evenodd">
+    <!-- Disk + counter cut + D cut combined as single path with evenodd -->
+    <path d="M 8 1
+             A 7 7 0 1 0 8 15
+             A 7 7 0 1 0 8 1 Z
+             M 4 4 H 7
+             Q 11 4 11 8
+             Q 11 12 7 12 H 4 Z
+             M 8.5 6
+             A 2 2 0 1 1 8.5 10
+             A 2 2 0 1 1 8.5 6 Z"/>
+  </g>
+</svg>

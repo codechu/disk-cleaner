@@ -1,0 +1,9 @@
+#!/usr/bin/make -f
+# Codechu Disk Cleaner — debian/rules
+# pybuild + dh-python; desktop/appdata/icon dh_install ile codechu-disk-cleaner.install üstünden gelir.
+
+export PYBUILD_NAME=disk-cleaner
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild

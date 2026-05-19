@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Codechu Disk Cleaner — app icon master (v4.1, G3 Spotlight + outline)
+  Logo mark'ın 128 viewBox'a uyarlanmış hali. assets/logo/mark.svg ile
+  görsel olarak özdeş; subtle outline ile dark-bg dayanıklılığı.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128"
+     role="img" aria-label="Codechu Disk Cleaner">
+  <defs>
+    <radialGradient id="diskLight" cx="0.32" cy="0.28" r="0.85">
+      <stop offset="0%"  stop-color="#34507a"/>
+      <stop offset="55%" stop-color="#1d2939"/>
+      <stop offset="100%" stop-color="#0f1928"/>
+    </radialGradient>
+  </defs>
+  <g transform="translate(64 64)">
+    <circle cx="0" cy="0" r="56" fill="url(#diskLight)"/>
+    <circle cx="0" cy="0" r="56" fill="none" stroke="#0a1320" stroke-width="1" stroke-opacity="0.5"/>
+    <path d="M -26 -30 H 6 Q 32 -30 32 0 Q 32 30 6 30 H -26 Z" fill="#fafaf7"/>
+    <circle cx="6" cy="0" r="17" fill="#1d2939"/>
+    <circle cx="6" cy="0" r="4" fill="#e0a020"/>
+  </g>
+</svg>

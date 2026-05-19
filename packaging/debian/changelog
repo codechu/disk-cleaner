@@ -1,0 +1,35 @@
+codechu-disk-cleaner (0.1.0-1ubuntu1~resolute1) resolute; urgency=medium
+
+  * Ubuntu 26.04 (Resolute) hedef build.
+
+ -- Codechu <info@codechu.com>  Mon, 18 May 2026 22:00:00 +0300
+
+codechu-disk-cleaner (0.1.0-1ubuntu1~questing1) questing; urgency=medium
+
+  * Ubuntu 25.10 (Questing) hedef build.
+
+ -- Codechu <info@codechu.com>  Mon, 18 May 2026 22:00:00 +0300
+
+codechu-disk-cleaner (0.1.0-1ubuntu1~plucky1) plucky; urgency=medium
+
+  * Ubuntu 25.04 (Plucky) hedef build.
+
+ -- Codechu <info@codechu.com>  Mon, 18 May 2026 22:00:00 +0300
+
+codechu-disk-cleaner (0.1.0-1ubuntu1~oracular1) oracular; urgency=medium
+
+  * Ubuntu 24.10 (Oracular) hedef build.
+
+ -- Codechu <info@codechu.com>  Mon, 18 May 2026 22:00:00 +0300
+
+codechu-disk-cleaner (0.1.0-1ubuntu1~noble1) noble; urgency=medium
+
+  * İlk açık kaynak yayın.
+  * Akıllı, süreç-farkındalıklı temizlik önerileri.
+  * Treemap + sunburst görselleştirme.
+  * Opsiyonel düşük-alan watchdog'u + bildirimler.
+  * Yıkıcı işlemler varsayılan olarak çöp kutusuna gider.
+  * Codechu/disk-cleaner XDG namespace (~/.config/codechu/disk-cleaner/).
+  * i18n: English + Türkçe (gettext).
+
+ -- Codechu <info@codechu.com>  Mon, 18 May 2026 22:00:00 +0300

@@ -1,0 +1,64 @@
+name: i18n
+# Guard: yeni stringler _() ile sarılmadan kaynaklara sızmasın, .po dosyaları
+# .pot ile senkron olsun, format-string drift olmasın.
+
+on:
+  pull_request:
+    paths:
+      - 'disk_cleaner/**'
+      - 'po/**'
+      - '.github/workflows/i18n.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'disk_cleaner/**'
+      - 'po/**'
+
+jobs:
+  check:
+    name: gettext consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install gettext
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gettext
+
+      - name: Regenerate pot from sources
+        working-directory: po
+        run: make pot
+
+      - name: Check po files synced with pot
+        working-directory: po
+        run: |
+          for po in *.po; do
+            echo "── Checking $po ──"
+            msgmerge --no-fuzzy-matching --quiet "$po" messages.pot > /tmp/$po.merged
+            # New strings since last update?
+            new_count=$(msgcmp --use-untranslated "$po" /tmp/$po.merged 2>&1 | wc -l)
+            if [ "$new_count" -gt 0 ]; then
+              echo "::warning file=po/$po::$new_count msgids missing from $po (run \`make update\` in po/)"
+            fi
+            # Format-string sanity
+            msgfmt --check --check-format --check-domain --output=/dev/null "$po"
+          done
+
+      - name: Compile all .mo files
+        working-directory: po
+        run: make compile
+
+      - name: Hard fail on Turkish leaks in source
+        run: |
+          # Türkçe-spesifik karakter içeren string literal'lar (docstring/comment hariç)
+          # Bulgular kaynak kodu hâlâ Türkçe demektir — _() ile sarılıp .pot'a aktarılmalı
+          leaks=$(grep -rnE '"[^"]*[şŞıİğĞçÇöÖüÜ][^"]*"' disk_cleaner/ \
+            --include='*.py' \
+            | grep -v -E ':[[:space:]]*#|"""' \
+            | grep -v -E 'i18n\.py:|İndirilenler|Resimler' \
+            || true)
+          if [ -n "$leaks" ]; then
+            echo "::error::Turkish strings leaked into source code:"
+            echo "$leaks"
+            exit 1
+          fi
+          echo "✓ no Turkish leaks in source"

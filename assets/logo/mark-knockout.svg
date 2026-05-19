@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Knockout: koyu zeminde kullanım için. Disk beyaz, D koyu, hub altın korunur.
+  Dark mode banner / dark background contexts.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <g transform="translate(100 100)">
+    <circle cx="0" cy="0" r="80" fill="#fafaf7"/>
+    <path d="M -38 -44 H 8 Q 48 -44 48 0 Q 48 44 8 44 H -38 Z" fill="#1d2939"/>
+    <circle cx="10" cy="0" r="25" fill="#fafaf7"/>
+    <circle cx="10" cy="0" r="6" fill="#e0a020"/>
+  </g>
+</svg>

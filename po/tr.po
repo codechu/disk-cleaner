@@ -1,0 +1,1506 @@
+# Turkish translations for disk_cleaner package
+# disk_cleaner paketi için Türkçe çeviriler.
+# Copyright (C) 2026 Codechu
+# This file is distributed under the same license as the disk_cleaner package.
+# Codechu <info@codechu.com>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: disk_cleaner\n"
+"Report-Msgid-Bugs-To: info@codechu.com\n"
+"POT-Creation-Date: 2026-05-19 12:25+0300\n"
+"PO-Revision-Date: 2026-05-19 12:30+0300\n"
+"Last-Translator: Codechu <info@codechu.com>\n"
+"Language-Team: Turkish\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:309
+#, python-brace-format
+msgid ""
+"\n"
+"📈 Largest growth over the last ~{days}d:"
+msgstr ""
+"\n"
+"📈 Son ~{days} gündeki en büyük büyüme:"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:319
+#, python-brace-format
+msgid "  + {path} → {size} (grew by {delta}, {pct:.0f}%)"
+msgstr "  + {path} → {size} ({delta} arttı, %{pct:.0f})"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:314
+#, python-brace-format
+msgid "  + {path} → {size} (new)"
+msgstr "  + {path} → {size} (yeni)"
+
+#: ../disk_cleaner/_tasks.py:144
+msgid " (user rule)"
+msgstr " (kullanıcı kuralı)"
+
+#: ../disk_cleaner/_tasks.py:176
+#, python-brace-format
+msgid " + {n} folders ({size})"
+msgstr " + {n} klasör ({size})"
+
+#: ../disk_cleaner/api/server.py:262
+#, python-brace-format
+msgid ""
+"'{target}' blocked via API — destructive operations can only be triggered "
+"manually by the user"
+msgstr ""
+"'{target}' API üzerinden engellendi — yıkıcı işlemler yalnızca kullanıcı "
+"tarafından manuel olarak tetiklenebilir"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:253
+msgid "(automatic)"
+msgstr "(otomatik)"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:450
+msgid "(empty folder)"
+msgstr "(boş klasör)"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:373
+#, python-brace-format
+msgid "(sparse, nominal: {size})"
+msgstr "(sparse, nominal: {size})"
+
+#: ../disk_cleaner/viz/sunburst.py:63 ../disk_cleaner/viz/treemap.py:49
+#, python-brace-format
+msgid "({n} items)"
+msgstr "({n} öğe)"
+
+#: ../disk_cleaner/controllers/task_list.py:334
+msgid "...(truncated)"
+msgstr "...(kısaltıldı)"
+
+#: ../disk_cleaner/watchdog/daemon.py:126
+#, python-format, python-brace-format
+msgid ""
+"/ is {pct}% full. Would you like to open Disk Cleaner and free up space?"
+msgstr ""
+"/ {pct}% fazla dolu. Disk Cleaner'ı açıp yer açmak ister misiniz?"
+
+#: ../disk_cleaner/_tasks.py:667
+msgid "/var/crash + /var/lib/systemd/coredump — requires root."
+msgstr "/var/crash + /var/lib/systemd/coredump — root gerektirir."
+
+#: ../disk_cleaner/_tasks.py:340
+msgid "0-byte file"
+msgstr "0-byte dosya"
+
+#: ../disk_cleaner/core/walker.py:317
+#, python-brace-format
+msgid "1/2 scanning files · {n} · {root}"
+msgstr "1/2 dosyalar taranıyor · {n} · {root}"
+
+#: ../disk_cleaner/core/walker.py:346
+#, python-brace-format
+msgid "2/2 hash · {i}/{n} · {name} ({size})"
+msgstr "2/2 hash · {i}/{n} · {name} ({size})"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:133
+msgid ""
+"<i>Each colored block is a child of the current folder. Size = disk size. "
+"<b>Click</b> a folder → drill in. <b>Right-click</b> or ⬆ Up → go up.</i>"
+msgstr ""
+"<i>Her renkli blok mevcut klasörün bir alt öğesidir. Boyut = disk boyutu. "
+"Klasöre <b>tıkla</b> → içine in. <b>Sağ tık</b> veya ⬆ Yukarı → yukarı çık.</i>"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:113
+msgid ""
+"<span foreground='#888'>Press the <b>🎯 Smart scan</b> button above to view "
+"suggestions.\n"
+"System caches, old projects and large files are scored automatically.</span>"
+msgstr ""
+"<span foreground='#888'>Önerileri görmek için yukarıdaki <b>🎯 Akıllı tara</b> "
+"düğmesine basın.\n"
+"Sistem cache'leri, eski projeler ve büyük dosyalar otomatik olarak puanlanır.</span>"
+
+#: ../disk_cleaner/_tasks.py:471
+msgid "APT cache + autoremove"
+msgstr "APT cache + autoremove"
+
+#: ../disk_cleaner/ui/gtk/old_files_panel.py:29
+msgid "Age (days):"
+msgstr "Yaş (gün):"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:185
+#: ../disk_cleaner/ui/gtk/task_panel.py:166
+msgid "All"
+msgstr "Hepsi"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:74
+msgid "All (including active)"
+msgstr "Hepsi (aktifler dahil)"
+
+#: ../disk_cleaner/_tasks.py:512
+msgid "Always PERMANENT deletion (trash mode ignored)."
+msgstr "Her zaman KALICI silme (çöp modu yoksayılır)."
+
+#: ../disk_cleaner/ui/gtk/main_window.py:300
+msgid "App uninstaller (apt + cache)"
+msgstr "Uygulama kaldırıcı (apt + cache)"
+
+#: ../disk_cleaner/_tasks.py:388
+msgid "Browser cache. Sessions/passwords are not affected."
+msgstr "Tarayıcı önbelleği. Oturumlar/şifreler etkilenmez."
+
+#: ../disk_cleaner/_tasks.py:413
+msgid "Bun cache"
+msgstr "Bun cache"
+
+#: ../disk_cleaner/_tasks.py:414
+msgid "Bun package cache."
+msgstr "Bun paket cache'i."
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:431
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:361
+msgid "Cancel"
+msgstr "İptal"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:74
+msgid "Cancel ongoing operation"
+msgstr "Devam eden işlemi iptal et"
+
+#: ../disk_cleaner/controllers/suggestion.py:339
+#: ../disk_cleaner/controllers/task_list.py:292
+msgid "Cancelled"
+msgstr "İptal edildi"
+
+#: ../disk_cleaner/controllers/suggestion.py:551
+#, python-brace-format
+msgid "Cancelled: {done}/{total} done"
+msgstr "İptal edildi: {done}/{total} tamamlandı"
+
+#: ../disk_cleaner/controllers/suggestion.py:135
+#: ../disk_cleaner/controllers/task_list.py:137
+msgid "Cancelling…"
+msgstr "İptal ediliyor…"
+
+#: ../disk_cleaner/_tasks.py:562
+msgid "Cargo registry + git"
+msgstr "Cargo registry + git"
+
+#: ../disk_cleaner/_tasks.py:387
+msgid "Chrome cache"
+msgstr "Chrome cache"
+
+#: ../disk_cleaner/controllers/task_list.py:318
+#, python-brace-format
+msgid "Cleanup cancelled ({done}/{total} completed)."
+msgstr "Temizlik iptal edildi ({done}/{total} tamamlandı)."
+
+#: ../disk_cleaner/controllers/task_list.py:357
+msgid "Cleanup complete"
+msgstr "Temizlik tamamlandı"
+
+#: ../disk_cleaner/_tasks.py:574
+msgid "Conda package cache"
+msgstr "Conda paket cache'i"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:311
+msgid "Confirm cleanup"
+msgstr "Temizliği onayla"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:368
+msgid "Confirm smart cleanup"
+msgstr "Akıllı temizliği onayla"
+
+#: ../disk_cleaner/api/server.py:52
+#, python-brace-format
+msgid "Control socket: {path}\n"
+msgstr "Kontrol soketi: {path}\n"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:365
+#, python-brace-format
+msgid "Could not start control server: {err}\n"
+msgstr "Kontrol sunucusu başlatılamadı: {err}\n"
+
+#: ../disk_cleaner/cli.py:201
+msgid "DRY-RUN"
+msgstr "KURU-ÇALIŞTIRMA"
+
+#: ../disk_cleaner/_tasks.py:422
+msgid "Dependency and build cache."
+msgstr "Bağımlılık ve build cache'i."
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:134
+msgid "Description"
+msgstr "Açıklama"
+
+#: ../disk_cleaner/controllers/suggestion.py:128
+msgid "Detecting open files…"
+msgstr "Açık dosyalar tespit ediliyor…"
+
+#: ../disk_cleaner/_tasks.py:493
+msgid "Disabled snap revisions (root)."
+msgstr "Devre dışı snap revizyonları (root)."
+
+#: ../disk_cleaner/_tasks.py:640
+msgid "Discord cache"
+msgstr "Discord cache"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:80
+#: ../disk_cleaner/ui/gtk/main_window.py:93
+#: ../disk_cleaner/watchdog/daemon.py:43
+msgid "Disk Cleaner"
+msgstr "Disk Cleaner"
+
+#: ../disk_cleaner/cli.py:105
+msgid "Disk Cleaner — GUI or CLI"
+msgstr "Disk Cleaner — GUI veya CLI"
+
+#: ../disk_cleaner/controllers/treemap.py:189
+msgid "Disk map cancelled/errored."
+msgstr "Disk haritası iptal edildi/hata verdi."
+
+#: ../disk_cleaner/controllers/treemap.py:181
+#, python-brace-format
+msgid "Disk map error: {err}"
+msgstr "Disk haritası hatası: {err}"
+
+#: ../disk_cleaner/controllers/treemap.py:198
+#, python-brace-format
+msgid "Disk map ready: total {size}"
+msgstr "Disk haritası hazır: toplam {size}"
+
+#: ../disk_cleaner/controllers/treemap.py:82
+#, python-brace-format
+msgid "Disk map: scanning {path}"
+msgstr "Disk haritası: {path} taranıyor"
+
+#: ../disk_cleaner/cli.py:112
+msgid "Do not delete anything, only show what would be done"
+msgstr "Hiçbir şey silme, sadece yapılacakları göster"
+
+#: ../disk_cleaner/_tasks.py:447
+msgid "Docker build cache"
+msgstr "Docker build cache'i"
+
+#: ../disk_cleaner/_tasks.py:455
+msgid "Docker dangling images"
+msgstr "Docker artık imajları"
+
+#: ../disk_cleaner/controllers/main.py:175
+msgid "Dry-run: OFF"
+msgstr "Dry-run: Kapalı"
+
+#: ../disk_cleaner/controllers/main.py:173
+msgid "Dry-run: ON (nothing will be deleted)"
+msgstr "Dry-run: Açık (hiçbir şey silinmeyecek)"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:297
+msgid "Duplicates"
+msgstr "Duplikatlar"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:440
+msgid ""
+"Each folder is drawn as a block proportional to its size. Click to drill in."
+msgstr ""
+"Her klasör boyutuyla orantılı bir blok olarak çizilir. İçine inmek için tıkla."
+
+#: ../disk_cleaner/ui/gtk/main_window.py:298
+msgid "Empty folders + 0-byte files"
+msgstr "Boş klasör + 0-byte dosyalar"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:232
+msgid "Empty folders and 0-byte files — skeletal leftovers from projects."
+msgstr "Boş klasörler ve 0-byte dosyalar — projelerden kalan iskelet artıkları."
+
+#: ../disk_cleaner/_tasks.py:511
+msgid "Empty the trash"
+msgstr "Çöpü boşalt"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:434
+msgid "Enter a path and press Scan"
+msgstr "Bir yol girin ve Tara'ya basın"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:304
+#, python-brace-format
+msgid "Estimated gain: {size}"
+msgstr "Tahmini kazanç: {size}"
+
+#: ../disk_cleaner/cli.py:219
+msgid "FAIL"
+msgstr "BAŞARISIZ"
+
+#: ../disk_cleaner/ui/gtk/old_files_panel.py:41
+msgid ""
+"Files older than N days in the specified folder. High risk: these are your "
+"own files — select intentionally."
+msgstr ""
+"Belirtilen klasörde N günden eski dosyalar. Yüksek risk: bunlar sizin kendi "
+"dosyalarınız — bilinçli seçin."
+
+#: ../disk_cleaner/ui/gtk/main_window.py:223
+msgid ""
+"Finds files with identical content (≥1MB). The newest in each group is kept; "
+"extras are listed."
+msgstr ""
+"İçeriği aynı olan dosyaları bulur (≥1MB). Her grupta en yenisi tutulur; "
+"fazlalıklar listelenir."
+
+#: ../disk_cleaner/ui/gtk/main_window.py:245
+msgid ""
+"Finds visually similar photos (dHash + Hamming). Different shots of the same "
+"scene, compressed copies — the largest is kept. Requires Pillow."
+msgstr ""
+"Görsel olarak benzer fotoğrafları bulur (dHash + Hamming). Aynı sahnenin farklı "
+"karelerini, sıkıştırılmış kopyaları — en büyüğü tutulur. Pillow gerektirir."
+
+#: ../disk_cleaner/_tasks.py:657
+msgid "Firefox cache2 (all profiles)"
+msgstr "Firefox cache2 (tüm profiller)"
+
+#: ../disk_cleaner/_tasks.py:500
+msgid "Flatpak unused runtimes"
+msgstr "Flatpak kullanılmayan runtime'lar"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:295
+msgid "Folder explorer (look inside)"
+msgstr "Klasör gezgini (içine bak)"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:210
+#: ../disk_cleaner/ui/gtk/main_window.py:221
+#: ../disk_cleaner/ui/gtk/main_window.py:230
+#: ../disk_cleaner/ui/gtk/main_window.py:243
+#: ../disk_cleaner/ui/gtk/old_files_panel.py:21
+msgid "Folder:"
+msgstr "Klasör:"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:175
+msgid "GB"
+msgstr "GB"
+
+#: ../disk_cleaner/_tasks.py:554
+msgid "Go module cache"
+msgstr "Go modül cache'i"
+
+#: ../disk_cleaner/_tasks.py:421
+msgid "Gradle cache"
+msgstr "Gradle cache"
+
+#: ../disk_cleaner/cli.py:108
+msgid "Headless scan, prints result (default: json)"
+msgstr "Başsız tarama, sonucu yazdırır (varsayılan: json)"
+
+#: ../disk_cleaner/_tasks.py:585
+msgid "Hugging Face cache"
+msgstr "Hugging Face cache"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:73
+msgid "Including medium"
+msgstr "Orta dahil"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:133
+msgid "Item"
+msgstr "Öğe"
+
+#: ../disk_cleaner/_tasks.py:430
+msgid "JARs will be re-downloaded."
+msgstr "JAR'lar yeniden indirilecek."
+
+#: ../disk_cleaner/_tasks.py:610
+msgid "JetBrains cache"
+msgstr "JetBrains cache"
+
+#: ../disk_cleaner/controllers/task_list.py:231
+#, python-brace-format
+msgid "List error: {err}"
+msgstr "Listeleme hatası: {err}"
+
+#: ../disk_cleaner/_tasks.py:165
+msgid "Listing installed packages…"
+msgstr "Yüklü paketler listeleniyor…"
+
+#: ../disk_cleaner/controllers/task_list.py:129
+msgid "Listing items…"
+msgstr "Öğeler listeleniyor…"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:211
+msgid "Lists direct children of a folder with their sizes."
+msgstr "Bir klasörün doğrudan alt öğelerini boyutlarıyla birlikte listeler."
+
+#: ../disk_cleaner/ui/gtk/main_window.py:255
+msgid ""
+"Lists installed applications (≥5MB) by size. The selected package is removed "
+"with apt purge + ~/.config/<x>, ~/.cache/<x>, ~/.local/share/<x> shared "
+"folders are also deleted. HIGH RISK — select intentionally."
+msgstr ""
+"Yüklü uygulamaları (≥5MB) boyuta göre listeler. Seçilen paket apt purge ile "
+"kaldırılır + ~/.config/<x>, ~/.cache/<x>, ~/.local/share/<x> paylaşılan "
+"klasörleri de silinir. YÜKSEK RİSK — bilinçli seçin."
+
+#: ../disk_cleaner/_tasks.py:429
+msgid "Maven repository"
+msgstr "Maven deposu"
+
+#: ../disk_cleaner/_tasks.py:396
+msgid "Mesa shader cache, fontconfig, etc."
+msgstr "Mesa shader cache, fontconfig, vb."
+
+#: ../disk_cleaner/cli.py:124
+msgid "Minimum score threshold for auto cleanup (default 40)"
+msgstr "Otomatik temizlik için minimum skor eşiği (varsayılan 40)"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:152
+#, python-brace-format
+msgid ""
+"Monitor disk usage in the background.\n"
+"Threshold: {threshold}% — interval {interval}s"
+msgstr ""
+"Disk kullanımını arka planda izle.\n"
+"Eşik: %{threshold} — aralık {interval}s"
+
+#: ../disk_cleaner/core/system_helpers.py:203
+msgid "No disabled snaps to remove"
+msgstr "Kaldırılacak devre dışı snap yok"
+
+#: ../disk_cleaner/core/kernels.py:84
+msgid "No old kernels"
+msgstr "Eski kernel yok"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:107
+msgid "No scan yet"
+msgstr "Henüz tarama yok"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:188
+#: ../disk_cleaner/ui/gtk/task_panel.py:170
+msgid "None"
+msgstr "Hiçbiri"
+
+#: ../disk_cleaner/_tasks.py:437
+msgid "NuGet cache"
+msgstr "NuGet cache"
+
+#: ../disk_cleaner/cli.py:219
+msgid "OK"
+msgstr "TAMAM"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:296
+msgid "Old files"
+msgstr "Eski dosyalar"
+
+#: ../disk_cleaner/_tasks.py:679
+msgid "Old kernel packages"
+msgstr "Eski kernel paketleri"
+
+#: ../disk_cleaner/_tasks.py:492
+msgid "Old snap versions"
+msgstr "Eski snap sürümleri"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:127
+msgid ""
+"On: items go to trash (reversible).\n"
+"Off: permanent deletion.\n"
+"Subprocess commands (npm, docker, apt) are always permanent."
+msgstr ""
+"Açık: öğeler çöpe gider (geri alınabilir).\n"
+"Kapalı: kalıcı silme.\n"
+"Alt süreç komutları (npm, docker, apt) her zaman kalıcıdır."
+
+#: ../disk_cleaner/ui/gtk/main_window.py:140
+msgid ""
+"On: nothing is deleted, only logs what would happen.\n"
+"For testing and risk analysis."
+msgstr ""
+"Açık: hiçbir şey silinmez, sadece ne olacağı kaydedilir.\n"
+"Test ve risk analizi için."
+
+#: ../disk_cleaner/ui/gtk/main_window.py:54
+msgid "Open window"
+msgstr "Pencereyi aç"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:537
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:712
+msgid "Other"
+msgstr "Diğer"
+
+#: ../disk_cleaner/_tasks.py:395
+msgid "Other ~/.cache contents"
+msgstr "Diğer ~/.cache içeriği"
+
+#: ../disk_cleaner/cli.py:118
+msgid "Output format (with --scan)"
+msgstr "Çıktı formatı (--scan ile)"
+
+#: ../disk_cleaner/cli.py:205
+msgid "PERMANENT"
+msgstr "KALICI"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:121
+msgid "Path"
+msgstr "Yol"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:343
+#, python-brace-format
+msgid "Path missing or abstract: {path}"
+msgstr "Yol eksik veya soyut: {path}"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:66
+msgid "Path:"
+msgstr "Yol:"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:242
+#, python-brace-format
+msgid "Path: {path} (press Scan)\n"
+msgstr "Yol: {path} (Tara'ya basın)\n"
+
+#: ../disk_cleaner/cli.py:116
+msgid "Permanent delete"
+msgstr "Kalıcı silme"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:176
+msgid "Pick"
+msgstr "Seç"
+
+#: ../disk_cleaner/_tasks.py:301
+msgid "Pillow is not installed"
+msgstr "Pillow yüklü değil"
+
+#: ../disk_cleaner/core/walker.py:190
+msgid "Pillow not available — `pip install pillow` required"
+msgstr "Pillow yok — `pip install pillow` gerekli"
+
+#: ../disk_cleaner/cli.py:132
+msgid "Print watchdog status"
+msgstr "Watchdog durumunu yazdır"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:294
+msgid "Project artifacts (node_modules, build…)"
+msgstr "Proje artefaktları (node_modules, build…)"
+
+#: ../disk_cleaner/_tasks.py:681
+msgid ""
+"Purges linux-image/headers/modules packages except the current and the "
+"previous one (apt purge, root)."
+msgstr ""
+"Mevcut ve önceki dışındaki linux-image/headers/modules paketlerini temizler "
+"(apt purge, root)."
+
+#: ../disk_cleaner/_tasks.py:593
+msgid "PyTorch hub cache"
+msgstr "PyTorch hub cache"
+
+#: ../disk_cleaner/_tasks.py:531
+msgid "Python pip wheel download cache."
+msgstr "Python pip wheel indirme cache'i."
+
+#: ../disk_cleaner/ui/gtk/main_window.py:58
+msgid "Quit"
+msgstr "Çıkış"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:357
+msgid "Ready. Trash mode ON — deleted items can be restored.\n"
+msgstr "Hazır. Çöp modu açık — silinen öğeler geri alınabilir.\n"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:156
+msgid "Reason"
+msgstr "Neden"
+
+#: ../disk_cleaner/_tasks.py:464
+msgid "Removes containers; volumes and images remain."
+msgstr "Container'ları kaldırır; volume'ler ve imajlar kalır."
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:118
+msgid "Risk"
+msgstr "Risk"
+
+#: ../disk_cleaner/cli.py:121
+msgid "Root path for artifact scan"
+msgstr "Artefakt taraması için kök yol"
+
+#: ../disk_cleaner/cli.py:122
+msgid "Root path for old-files scan"
+msgstr "Eski dosya taraması için kök yol"
+
+#: ../disk_cleaner/cli.py:126
+msgid "Run in background watchdog mode (infinite loop)"
+msgstr "Arka plan watchdog modunda çalıştır (sonsuz döngü)"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:72
+msgid "Safe only"
+msgstr "Sadece güvenli"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:432
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:362
+msgid "Save"
+msgstr "Kaydet"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:83
+msgid "Save current visualization as PNG"
+msgstr "Mevcut görselleştirmeyi PNG olarak kaydet"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:426
+msgid "Save scan result"
+msgstr "Tarama sonucunu kaydet"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:200
+msgid "Save scan results as JSON or CSV."
+msgstr "Tarama sonuçlarını JSON veya CSV olarak kaydet."
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:356
+msgid "Save treemap as PNG"
+msgstr "Treemap'i PNG olarak kaydet"
+
+#: ../disk_cleaner/cli.py:110
+msgid "Scan and clean low-risk + safe items"
+msgstr "Düşük risk + güvenli öğeleri tara ve temizle"
+
+#: ../disk_cleaner/controllers/treemap.py:188
+msgid "Scan cancelled or errored."
+msgstr "Tarama iptal edildi veya hata verdi."
+
+#: ../disk_cleaner/controllers/task_list.py:296
+msgid "Scan cancelled."
+msgstr "Tarama iptal edildi."
+
+#: ../disk_cleaner/controllers/task_list.py:302
+msgid "Scan complete."
+msgstr "Tarama tamamlandı."
+
+#: ../disk_cleaner/controllers/task_list.py:299
+msgid "Scan complete. Low-risk items >100MB auto-selected."
+msgstr "Tarama tamamlandı. >100MB düşük riskli öğeler otomatik seçildi."
+
+#: ../disk_cleaner/controllers/task_list.py:131
+msgid "Scan started"
+msgstr "Tarama başlatıldı"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:290
+msgid "Scan type:"
+msgstr "Tarama türü:"
+
+#: ../disk_cleaner/controllers/suggestion.py:439
+msgid "Scanning old files…"
+msgstr "Eski dosyalar taranıyor…"
+
+#: ../disk_cleaner/controllers/suggestion.py:404
+msgid "Scanning system caches…"
+msgstr "Sistem cache'leri taranıyor…"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:335
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:171
+#, python-brace-format
+msgid "Scanning: {path}"
+msgstr "Taranıyor: {path}"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:148
+msgid "Score"
+msgstr "Skor"
+
+#: ../disk_cleaner/controllers/suggestion.py:460
+msgid "Scoring…"
+msgstr "Puanlanıyor…"
+
+#: ../disk_cleaner/controllers/suggestion.py:418
+msgid "Searching for project artifacts…"
+msgstr "Proje artefaktları aranıyor…"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:153
+#: ../disk_cleaner/ui/gtk/task_panel.py:263
+msgid "Select a row to see its contents here."
+msgstr "İçeriğini burada görmek için bir satır seçin."
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:231
+#, python-brace-format
+msgid "Selected: {size}"
+msgstr "Seçili: {size}"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:178
+msgid ""
+"Selects low-risk, highest-scored items until the total target is reached "
+"(previous selection is reset)."
+msgstr ""
+"Toplam hedefe ulaşana kadar düşük riskli, en yüksek skorlu öğeleri seçer "
+"(önceki seçim sıfırlanır)."
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:78
+msgid "Show:"
+msgstr "Göster:"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:299
+msgid "Similar images (perceptual hash)"
+msgstr "Benzer resimler (perceptual hash)"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:140
+#: ../disk_cleaner/ui/gtk/task_panel.py:128
+msgid "Size"
+msgstr "Boyut"
+
+#: ../disk_cleaner/_tasks.py:632
+msgid "Slack cache"
+msgstr "Slack cache"
+
+#: ../disk_cleaner/controllers/suggestion.py:570
+msgid "Smart cleanup complete"
+msgstr "Akıllı temizlik tamamlandı"
+
+#: ../disk_cleaner/controllers/suggestion.py:383
+#, python-brace-format
+msgid "Smart scan complete: {suggestions} ({groups})"
+msgstr "Akıllı tarama tamamlandı: {suggestions} ({groups})"
+
+#: ../disk_cleaner/controllers/suggestion.py:129
+msgid "Smart scan started"
+msgstr "Akıllı tarama başlatıldı"
+
+#: ../disk_cleaner/cli.py:120
+msgid "Sources (comma-separated): system,artifacts,oldfiles"
+msgstr "Kaynaklar (virgülle ayrılmış): system,artifacts,oldfiles"
+
+#: ../disk_cleaner/_tasks.py:648
+msgid "Spotify cache"
+msgstr "Spotify cache"
+
+#: ../disk_cleaner/cli.py:128
+msgid "Start watchdog in the background (detach)"
+msgstr "Watchdog'u arka planda başlat (detach)"
+
+#: ../disk_cleaner/cli.py:130
+msgid "Stop running watchdog"
+msgstr "Çalışan watchdog'u durdur"
+
+#: ../disk_cleaner/_tasks.py:463
+msgid "Stopped Docker containers"
+msgstr "Durmuş Docker container'ları"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:293
+msgid "System cache & packages"
+msgstr "Sistem cache & paketler"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:193
+msgid ""
+"System caches, package caches, old snaps. Low-risk + >100MB items are auto-"
+"selected."
+msgstr ""
+"Sistem cache'leri, paket cache'leri, eski snap'ler. Düşük risk + >100MB öğeler "
+"otomatik seçilir."
+
+#: ../disk_cleaner/_tasks.py:666
+msgid "System crash dumps"
+msgstr "Sistem crash dökümleri"
+
+#: ../disk_cleaner/_tasks.py:482
+msgid "Systemd journal (older than 7 days)"
+msgstr "Systemd journal (7 günden eski)"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:170
+msgid "Target:"
+msgstr "Hedef:"
+
+#: ../disk_cleaner/controllers/suggestion.py:198
+#, python-brace-format
+msgid "Targeted selection: {picked} items, {total} (target: {target})"
+msgstr "Hedefli seçim: {picked} öğe, {total} (hedef: {target})"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:110
+msgid "Task"
+msgstr "Görev"
+
+#: ../disk_cleaner/_tasks.py:601
+msgid "TensorFlow cache"
+msgstr "TensorFlow cache"
+
+#: ../disk_cleaner/_tasks.py:521
+msgid "Thumbnail cache"
+msgstr "Thumbnail önbelleği"
+
+#: ../disk_cleaner/cli.py:114
+msgid "Trash mode (default on)"
+msgstr "Çöp modu (varsayılan açık)"
+
+#: ../disk_cleaner/controllers/main.py:163
+msgid "Trash mode: OFF (permanent deletion!)"
+msgstr "Çöp modu: Kapalı (kalıcı silme!)"
+
+#: ../disk_cleaner/controllers/main.py:161
+msgid "Trash mode: ON (recoverable)"
+msgstr "Çöp modu: Açık (geri alınabilir)"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:373
+msgid "Tray icon created.\n"
+msgstr "Tray ikonu oluşturuldu.\n"
+
+#: ../disk_cleaner/_tasks.py:456
+msgid "Untagged images not attached to any container."
+msgstr "Hiçbir container'a bağlı olmayan etiketsiz imajlar."
+
+#: ../disk_cleaner/_tasks.py:110
+msgid "User-defined"
+msgstr "Kullanıcı tanımlı"
+
+#: ../disk_cleaner/_tasks.py:618
+msgid "VS Code (config) cache"
+msgstr "VS Code (config) cache"
+
+#: ../disk_cleaner/controllers/main.py:201
+msgid "Watchdog is already running."
+msgstr "Watchdog zaten çalışıyor."
+
+#: ../disk_cleaner/controllers/main.py:193
+#, python-brace-format
+msgid "Watchdog started (threshold {pct}%, every {interval}s)."
+msgstr "Watchdog başlatıldı (eşik %{pct}, her {interval}s)."
+
+#: ../disk_cleaner/controllers/main.py:188
+msgid "Watchdog stopped."
+msgstr "Watchdog durduruldu."
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:91
+msgid "What does this panel do?"
+msgstr "Bu panel ne yapar?"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:200
+msgid "Workspace:"
+msgstr "Çalışma alanı:"
+
+#: ../disk_cleaner/_tasks.py:546
+msgid "Yarn (Berry) cache"
+msgstr "Yarn (Berry) cache"
+
+#: ../disk_cleaner/_tasks.py:538
+msgid "Yarn (v1) cache"
+msgstr "Yarn (v1) cache"
+
+#: ../disk_cleaner/core/system_helpers.py:205
+msgid "[DRY] snaps to remove:"
+msgstr "[KURU] kaldırılacak snap'ler:"
+
+#: ../disk_cleaner/core/safe_remove.py:74
+#, python-brace-format
+msgid "[DRY] would have deleted: {p}"
+msgstr "[KURU] silinecekti: {p}"
+
+#: ../disk_cleaner/cleaners/command.py:34
+#, python-brace-format
+msgid "[DRY] would have run: {display}"
+msgstr "[KURU] çalıştırılacaktı: {display}"
+
+#: ../disk_cleaner/core/kernels.py:87
+msgid "[DRY] would purge:"
+msgstr "[KURU] temizlenecek:"
+
+#: ../disk_cleaner/_tasks.py:472
+msgid "`apt clean` + `apt autoremove --purge` (root)."
+msgstr "`apt clean` + `apt autoremove --purge` (root)."
+
+#: ../disk_cleaner/_tasks.py:575
+msgid "`conda clean --all` (if available)."
+msgstr "`conda clean --all` (varsa)."
+
+#: ../disk_cleaner/_tasks.py:448
+msgid "`docker builder prune -a -f`. Images/containers not affected."
+msgstr "`docker builder prune -a -f`. İmajlar/container'lar etkilenmez."
+
+#: ../disk_cleaner/_tasks.py:483
+msgid "`journalctl --vacuum-time=7d` (root)."
+msgstr "`journalctl --vacuum-time=7d` (root)."
+
+#: ../disk_cleaner/core/score.py:83
+msgid "active project, KEEP recommended"
+msgstr "aktif proje, TUT önerilir"
+
+#: ../disk_cleaner/_tasks.py:269
+msgid "child item"
+msgstr "alt öğe"
+
+#: ../disk_cleaner/_tasks.py:358
+#, python-brace-format
+msgid "copy of: {path}"
+msgstr "şunun kopyası: {path}"
+
+#: ../disk_cleaner/core/score.py:78
+#, python-brace-format
+msgid "currently open: {names}"
+msgstr "şu an açık: {names}"
+
+#: ../disk_cleaner/core/safe_remove.py:81
+#: ../disk_cleaner/core/safe_remove.py:108
+#: ../disk_cleaner/core/system_helpers.py:238
+msgid "deleted"
+msgstr "silindi"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:253
+msgid "dpkg packages"
+msgstr "dpkg paketleri"
+
+#: ../disk_cleaner/core/score.py:32
+msgid "duplicate"
+msgstr "duplikat"
+
+#: ../disk_cleaner/_tasks.py:331
+msgid "empty folder"
+msgstr "boş klasör"
+
+#: ../disk_cleaner/core/system_helpers.py:211
+msgid "error"
+msgstr "hata"
+
+#: ../disk_cleaner/cleaners/safe_path.py:25 ../disk_cleaner/utils.py:88
+#, python-brace-format
+msgid "error: {e}"
+msgstr "hata: {e}"
+
+#: ../disk_cleaner/core/safe_remove.py:111
+#: ../disk_cleaner/core/system_helpers.py:241
+msgid "errors:"
+msgstr "hatalar:"
+
+#: ../disk_cleaner/controllers/suggestion.py:564
+#: ../disk_cleaner/controllers/task_list.py:328
+#, python-brace-format
+msgid "exception: {err}"
+msgstr "istisna: {err}"
+
+#: ../disk_cleaner/core/safe_remove.py:79
+#, python-brace-format
+msgid "gio trash error: {msg}"
+msgstr "gio trash hatası: {msg}"
+
+#: ../disk_cleaner/core/walker.py:220
+#, python-brace-format
+msgid "hash {i}/{n} · {name}"
+msgstr "hash {i}/{n} · {name}"
+
+#: ../disk_cleaner/_tasks.py:297
+msgid "installation error"
+msgstr "kurulum hatası"
+
+#: ../disk_cleaner/core/score.py:71
+msgid "modified in last 24 hours"
+msgstr "son 24 saatte değişti"
+
+#: ../disk_cleaner/_tasks.py:374
+#, python-brace-format
+msgid "modified {days} days ago"
+msgstr "{days} gün önce değiştirildi"
+
+#: ../disk_cleaner/core/safe_remove.py:78
+#: ../disk_cleaner/core/safe_remove.py:108
+#: ../disk_cleaner/core/system_helpers.py:238
+msgid "moved to trash"
+msgstr "çöpe taşındı"
+
+#: ../disk_cleaner/api/server.py:279
+#, python-brace-format
+msgid "no button or blocked: {target}"
+msgstr "düğme yok veya engellendi: {target}"
+
+#: ../disk_cleaner/api/server.py:312
+#, python-brace-format
+msgid "no checkbox: {name}"
+msgstr "checkbox yok: {name}"
+
+#: ../disk_cleaner/api/server.py:373
+msgid "no current_node"
+msgstr "current_node yok"
+
+#: ../disk_cleaner/api/server.py:301
+#, python-brace-format
+msgid "no entry: {pid}"
+msgstr "girdi yok: {pid}"
+
+#: ../disk_cleaner/controllers/task_list.py:254
+msgid "no items"
+msgstr "öğe yok"
+
+#: ../disk_cleaner/api/server.py:213 ../disk_cleaner/api/server.py:225
+msgid "no notebook"
+msgstr "notebook yok"
+
+#: ../disk_cleaner/api/server.py:269
+#, python-brace-format
+msgid "no panel: {pid}"
+msgstr "panel yok: {pid}"
+
+#: ../disk_cleaner/api/server.py:322 ../disk_cleaner/api/server.py:337
+#, python-brace-format
+msgid "no widget: {target}"
+msgstr "widget yok: {target}"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:202
+msgid ""
+"node_modules, target, build, dist, .next, .gradle, venv, __pycache__ etc. "
+"Projects modified in the last 14 days get a red ACTIVE label and are not "
+"auto-selected."
+msgstr ""
+"node_modules, target, build, dist, .next, .gradle, venv, __pycache__ vb. "
+"Son 14 günde değiştirilmiş projeler kırmızı AKTİF etiketi alır ve otomatik "
+"seçilmez."
+
+#: ../disk_cleaner/core/safe_remove.py:71
+msgid "not found, skipped"
+msgstr "bulunamadı, atlandı"
+
+#: ../disk_cleaner/core/score.py:69
+#, python-brace-format
+msgid "not touched in {n} days"
+msgstr "{n} gün dokunulmadı"
+
+#: ../disk_cleaner/_tasks.py:405
+msgid "npm cache"
+msgstr "npm cache"
+
+#: ../disk_cleaner/core/score.py:33
+msgid "old file"
+msgstr "eski dosya"
+
+#: ../disk_cleaner/core/walker.py:193
+#, python-brace-format
+msgid "path not found: {p}"
+msgstr "yol bulunamadı: {p}"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:412
+#, python-brace-format
+msgid "path: {path}"
+msgstr "yol: {path}"
+
+#: ../disk_cleaner/core/safe_remove.py:81
+#: ../disk_cleaner/core/safe_remove.py:106
+msgid "permanently deleted"
+msgstr "kalıcı silindi"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:351
+#, python-brace-format
+msgid "permission/access: {err}"
+msgstr "izin/erişim: {err}"
+
+#: ../disk_cleaner/_tasks.py:530
+msgid "pip cache"
+msgstr "pip cache"
+
+#: ../disk_cleaner/core/score.py:31
+msgid "project artifact"
+msgstr "proje artefaktı"
+
+#: ../disk_cleaner/core/score.py:86
+msgid "safe, regeneratable"
+msgstr "güvenli, yeniden üretilir"
+
+#: ../disk_cleaner/_tasks.py:314
+#, python-brace-format
+msgid "similar to: {path}"
+msgstr "şuna benzer: {path}"
+
+#: ../disk_cleaner/_tasks.py:272
+#, python-brace-format
+msgid "sparse file (nominal: {size})"
+msgstr "sparse dosya (nominal: {size})"
+
+#: ../disk_cleaner/core/score.py:30
+msgid "system cache"
+msgstr "sistem cache"
+
+#: ../disk_cleaner/scanners/system.py:45
+#, python-brace-format
+msgid "system: {name}"
+msgstr "sistem: {name}"
+
+#: ../disk_cleaner/api/server.py:237
+#, python-brace-format
+msgid "tab not found: {name}"
+msgstr "sekme bulunamadı: {name}"
+
+#: ../disk_cleaner/cli.py:203
+msgid "trash"
+msgstr "çöp"
+
+#: ../disk_cleaner/api/server.py:182
+#, python-brace-format
+msgid "unknown cmd: {cmd}"
+msgstr "bilinmeyen komut: {cmd}"
+
+#: ../disk_cleaner/api/server.py:405
+#, python-brace-format
+msgid "unknown target: {target}"
+msgstr "bilinmeyen hedef: {target}"
+
+#: ../disk_cleaner/controllers/task_list.py:280
+#: ../disk_cleaner/controllers/task_list.py:349
+msgid "unmeasurable"
+msgstr "ölçülemez"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:655
+msgid "up"
+msgstr "yukarı"
+
+#: ../disk_cleaner/cli.py:171
+#, python-brace-format
+msgid "watchdog RUNNING (pid {pid})"
+msgstr "watchdog ÇALIŞIYOR (pid {pid})"
+
+#: ../disk_cleaner/cli.py:173
+msgid "watchdog STOPPED"
+msgstr "watchdog DURDURULDU"
+
+#: ../disk_cleaner/cli.py:160
+msgid "watchdog is already running"
+msgstr "watchdog zaten çalışıyor"
+
+#: ../disk_cleaner/cli.py:166
+msgid "watchdog is not running"
+msgstr "watchdog çalışmıyor"
+
+#: ../disk_cleaner/cli.py:158
+msgid "watchdog started"
+msgstr "watchdog başlatıldı"
+
+#: ../disk_cleaner/cli.py:164
+msgid "watchdog stopped"
+msgstr "watchdog durduruldu"
+
+#: ../disk_cleaner/core/walker.py:275
+#, python-brace-format
+msgid "{dirs} empty folders · {files} 0-byte files · {root}"
+msgstr "{dirs} boş klasör · {files} 0-byte dosya · {root}"
+
+#: ../disk_cleaner/controllers/suggestion.py:489
+#, python-brace-format
+msgid "{items_part} · {inactive} old + {active} active"
+msgstr "{items_part} · {inactive} eski + {active} aktif"
+
+#: ../disk_cleaner/_tasks.py:241
+#, python-brace-format
+msgid "{kind} folder"
+msgstr "{kind} klasörü"
+
+#: ../disk_cleaner/_tasks.py:251
+#, python-brace-format
+msgid "{kind} folder • last git {days} days ago"
+msgstr "{kind} klasörü • son git {days} gün önce"
+
+#: ../disk_cleaner/controllers/task_list.py:271
+#, python-brace-format
+msgid "{name}: error {err}"
+msgstr "{name}: hata {err}"
+
+#: ../disk_cleaner/core/walker.py:68
+#, python-brace-format
+msgid "{n} artifacts · {path}"
+msgstr "{n} artefakt · {path}"
+
+#: ../disk_cleaner/core/system_helpers.py:158
+#, python-brace-format
+msgid "{n} cache items cleaned"
+msgstr "{n} cache öğesi temizlendi"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:328
+#, python-brace-format
+msgid "{n} child"
+msgid_plural "{n} children"
+msgstr[0] "{n} alt öğe"
+msgstr[1] "{n} alt öğe"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:340
+#, python-brace-format
+msgid "{n} day ago"
+msgid_plural "{n} days ago"
+msgstr[0] "{n} gün önce"
+msgstr[1] "{n} gün önce"
+
+#: ../disk_cleaner/viz/tree_node.py:78
+#, python-brace-format
+msgid "{n} files · {p}"
+msgstr "{n} dosya · {p}"
+
+#: ../disk_cleaner/core/system_helpers.py:179
+#, python-brace-format
+msgid "{n} folders cleaned"
+msgstr "{n} klasör temizlendi"
+
+#: ../disk_cleaner/controllers/suggestion.py:380
+#, python-brace-format
+msgid "{n} group"
+msgid_plural "{n} groups"
+msgstr[0] "{n} grup"
+msgstr[1] "{n} grup"
+
+#: ../disk_cleaner/core/walker.py:213
+#, python-brace-format
+msgid "{n} images found, hashing…"
+msgstr "{n} resim bulundu, hashleniyor…"
+
+#: ../disk_cleaner/controllers/suggestion.py:486
+#: ../disk_cleaner/ui/gtk/task_panel.py:362
+#, python-brace-format
+msgid "{n} item"
+msgid_plural "{n} items"
+msgstr[0] "{n} öğe"
+msgstr[1] "{n} öğe"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:299
+#, python-brace-format
+msgid "{n} item selected — {size}"
+msgid_plural "{n} items selected — {size}"
+msgstr[0] "{n} öğe seçili — {size}"
+msgstr[1] "{n} öğe seçili — {size}"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:298
+#, python-brace-format
+msgid "{n} item will be deleted."
+msgid_plural "{n} items will be deleted."
+msgstr[0] "{n} öğe silinecek."
+msgstr[1] "{n} öğe silinecek."
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:371
+#, python-brace-format
+msgid "{n} item · estimated gain: {size}"
+msgid_plural "{n} items · estimated gain: {size}"
+msgstr[0] "{n} öğe · tahmini kazanç: {size}"
+msgstr[1] "{n} öğe · tahmini kazanç: {size}"
+
+#: ../disk_cleaner/cli.py:207
+#, python-brace-format
+msgid "{n} item, ~{size} ({mode})"
+msgid_plural "{n} items, ~{size} ({mode})"
+msgstr[0] "{n} öğe, ~{size} ({mode})"
+msgstr[1] "{n} öğe, ~{size} ({mode})"
+
+#: ../disk_cleaner/core/safe_remove.py:109
+#, python-brace-format
+msgid "{n} items {mode}"
+msgstr "{n} öğe {mode}"
+
+#: ../disk_cleaner/controllers/suggestion.py:377
+#, python-brace-format
+msgid "{n} suggestion"
+msgid_plural "{n} suggestions"
+msgstr[0] "{n} öneri"
+msgstr[1] "{n} öneri"
+
+#: ../disk_cleaner/cli.py:224
+#, python-brace-format
+msgid "{ok}/{total} successful"
+msgstr "{ok}/{total} başarılı"
+
+#: ../disk_cleaner/core/safe_remove.py:92
+#, python-brace-format
+msgid "{path} not found, skipped"
+msgstr "{path} bulunamadı, atlandı"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:108
+#, python-brace-format
+msgid "{target}  ({avail} free)"
+msgstr "{target}  ({avail} boş)"
+
+#: ../disk_cleaner/core/system_helpers.py:227
+msgid "~/.cache not found"
+msgstr "~/.cache bulunamadı"
+
+#: ../disk_cleaner/_tasks.py:611
+msgid "~/.cache/JetBrains — IntelliJ/PyCharm/WebStorm etc."
+msgstr "~/.cache/JetBrains — IntelliJ/PyCharm/WebStorm vb."
+
+#: ../disk_cleaner/_tasks.py:586
+msgid "~/.cache/huggingface — downloaded models. Will be re-downloaded."
+msgstr "~/.cache/huggingface — indirilmiş modeller. Yeniden indirilecek."
+
+#: ../disk_cleaner/_tasks.py:649
+msgid "~/.cache/spotify — local media cache."
+msgstr "~/.cache/spotify — yerel medya cache'i."
+
+#: ../disk_cleaner/_tasks.py:602
+msgid "~/.cache/tensorflow — saved models."
+msgstr "~/.cache/tensorflow — kaydedilmiş modeller."
+
+#: ../disk_cleaner/_tasks.py:522
+msgid "~/.cache/thumbnails — regeneratable."
+msgstr "~/.cache/thumbnails — yeniden üretilir."
+
+#: ../disk_cleaner/_tasks.py:594
+msgid "~/.cache/torch — model checkpoints."
+msgstr "~/.cache/torch — model checkpoint'leri."
+
+#: ../disk_cleaner/_tasks.py:539
+msgid "~/.cache/yarn — package cache."
+msgstr "~/.cache/yarn — paket cache'i."
+
+#: ../disk_cleaner/core/system_helpers.py:239
+#, python-brace-format
+msgid "~/.cache: {n} items {mode} (chrome preserved)"
+msgstr "~/.cache: {n} öğe {mode} (chrome korundu)"
+
+#: ../disk_cleaner/_tasks.py:563
+msgid "~/.cargo/registry and ~/.cargo/git — Rust crate cache."
+msgstr "~/.cargo/registry ve ~/.cargo/git — Rust crate cache'i."
+
+#: ../disk_cleaner/_tasks.py:619
+msgid "~/.config/Code/Cache + CachedData — extension/session cache."
+msgstr "~/.config/Code/Cache + CachedData — eklenti/oturum cache'i."
+
+#: ../disk_cleaner/_tasks.py:633
+msgid "~/.config/Slack/Cache — will be re-downloaded."
+msgstr "~/.config/Slack/Cache — yeniden indirilecek."
+
+#: ../disk_cleaner/_tasks.py:658
+msgid "~/.mozilla/firefox/*/cache2 — disk cache."
+msgstr "~/.mozilla/firefox/*/cache2 — disk cache'i."
+
+#: ../disk_cleaner/_tasks.py:547
+msgid "~/.yarn/cache — package cache."
+msgstr "~/.yarn/cache — paket cache'i."
+
+#: ../disk_cleaner/_tasks.py:555
+msgid "~/go/pkg/mod — `go clean -modcache` (files are read-only)."
+msgstr "~/go/pkg/mod — `go clean -modcache` (dosyalar salt-okunur)."
+
+#: ../disk_cleaner/cli.py:273 ../disk_cleaner/ui/gtk/suggestion_panel.py:360
+#: ../disk_cleaner/ui/gtk/task_panel.py:293
+#: ../disk_cleaner/ui/gtk/task_panel.py:384
+#, python-brace-format
+msgid "… and {n} more item"
+msgid_plural "… and {n} more items"
+msgstr[0] "… ve {n} öğe daha"
+msgstr[1] "… ve {n} öğe daha"
+
+#: ../disk_cleaner/controllers/main.py:144
+#, python-brace-format
+msgid ""
+"⚠  {fs} filesystem — `du`/`df` hide the real space used by snapshots. To "
+"inspect snapshots use: {tool}"
+msgstr ""
+"⚠  {fs} dosya sistemi — `du`/`df` snapshot'ların kullandığı gerçek alanı "
+"gizler. Snapshot'ları incelemek için: {tool}"
+
+#: ../disk_cleaner/_tasks.py:247
+#, python-brace-format
+msgid "⚠ ACTIVE project (last git {days} days ago) — {kind}"
+msgstr "⚠ AKTİF proje (son git {days} gün önce) — {kind}"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:101
+msgid "⛔ Cancel"
+msgstr "⛔ İptal"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:397
+#, python-brace-format
+msgid "✓ PNG saved: {target}\n"
+msgstr "✓ PNG kaydedildi: {target}\n"
+
+#: ../disk_cleaner/controllers/task_list.py:329
+msgid "✓ ok"
+msgstr "✓ tamam"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:462
+#, python-brace-format
+msgid "✓ {n} rows saved: {target}\n"
+msgstr "✓ {n} satır kaydedildi: {target}\n"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:466
+#, python-brace-format
+msgid "✗ Export error: {err}\n"
+msgstr "✗ Dışa aktarma hatası: {err}\n"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:399
+#, python-brace-format
+msgid "✗ PNG save error: {err}\n"
+msgstr "✗ PNG kaydetme hatası: {err}\n"
+
+#: ../disk_cleaner/controllers/task_list.py:329
+msgid "✗ error"
+msgstr "✗ hata"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:77
+msgid "⬆ Up"
+msgstr "⬆ Yukarı"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:90
+msgid "🌅 Sunburst"
+msgstr "🌅 Sunburst"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:52
+msgid "🎯  Smart scan"
+msgstr "🎯  Akıllı tara"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:182
+msgid "🎯  Suggestions"
+msgstr "🎯  Öneri"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:141
+msgid "👁  Preview"
+msgstr "👁  Önizleme"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:395
+msgid "👁 Watching"
+msgstr "👁 İzleniyor"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:398
+msgid "👁 Watching: Off"
+msgstr "👁 İzleme: Kapalı"
+
+#: ../disk_cleaner/watchdog/daemon.py:124
+msgid "💾 Disk almost full"
+msgstr "💾 Disk neredeyse dolu"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:322
+msgid "📊  Disk map"
+msgstr "📊  Disk haritası"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:330
+msgid "📜  Log"
+msgstr "📜  Log"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:198
+msgid "📤  Export"
+msgstr "📤  Dışa Aktar"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:82
+msgid "📤 PNG"
+msgstr "📤 PNG"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:69
+msgid "🔍  Scan"
+msgstr "🔍  Tara"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:73
+msgid "🔍 Scan"
+msgstr "🔍 Tara"
+
+#: ../disk_cleaner/ui/gtk/widgets.py:12
+msgid "🔴 High"
+msgstr "🔴 Yüksek"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:124
+msgid "🗑 Trash"
+msgstr "🗑 Çöpe at"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:406
+msgid "🚫  Don't suggest this path again"
+msgstr "🚫  Bu yolu bir daha önerme"
+
+#: ../disk_cleaner/controllers/suggestion.py:265
+#, python-brace-format
+msgid "🚫 Added to blacklist: {path}"
+msgstr "🚫 Kara listeye eklendi: {path}"
+
+#: ../disk_cleaner/ui/gtk/widgets.py:11
+msgid "🟡 Medium"
+msgstr "🟡 Orta"
+
+#: ../disk_cleaner/ui/gtk/widgets.py:10
+msgid "🟢 Low"
+msgstr "🟢 Düşük"
+
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:89
+msgid "🟦 Treemap"
+msgstr "🟦 Treemap"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:137
+msgid "🧪 Dry-run"
+msgstr "🧪 Dry-run"
+
+#: ../disk_cleaner/ui/gtk/task_panel.py:174
+msgid "🧹  Clean"
+msgstr "🧹  Temizle"
+
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:192
+msgid "🧹  Clean selected"
+msgstr "🧹  Seçilenleri temizle"
+
+#: ../disk_cleaner/ui/gtk/main_window.py:318
+msgid "🧹  Cleanup"
+msgstr "🧹  Temizlik"

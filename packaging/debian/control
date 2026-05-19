@@ -1,0 +1,39 @@
+Source: codechu-disk-cleaner
+Section: utils
+Priority: optional
+Maintainer: Codechu <info@codechu.com>
+Build-Depends: debhelper-compat (= 13),
+               dh-python,
+               python3-all,
+               python3-setuptools,
+               python3-pytest <!nocheck>
+Standards-Version: 4.7.0
+Homepage: https://github.com/codechu/disk-cleaner
+Vcs-Browser: https://github.com/codechu/disk-cleaner
+Vcs-Git: https://github.com/codechu/disk-cleaner.git
+Rules-Requires-Root: no
+
+Package: codechu-disk-cleaner
+Architecture: all
+Depends: ${python3:Depends},
+         ${misc:Depends},
+         python3-gi,
+         gir1.2-gtk-3.0,
+         python3-cairo,
+         gir1.2-ayatanaappindicator3-0.1 | gir1.2-appindicator3-0.1,
+         libglib2.0-bin,
+         util-linux,
+         lsof
+Recommends: gir1.2-notify-0.7,
+            python3-pil,
+            policykit-1
+Description: Safe disk cleaner with smart suggestions and treemap
+ Disk Cleaner is a Linux utility for safely reclaiming disk space.
+ .
+ Features:
+  * Smart, process-aware cleanup suggestions (won't touch a cache your
+    browser is using right now).
+  * Interactive treemap and sunburst visualization of any mount.
+  * Optional background watchdog with low-space notifications.
+  * Destructive operations default to the user's trash folder; the
+    control API blocks destructive paths — only the GUI can clean.

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.codechu.DiskCleaner</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Disk Cleaner</name>
+  <summary>Safe, transparent disk cleaner with smart suggestions</summary>
+  <summary xml:lang="tr">Akıllı önerili, güvenli, şeffaf disk temizleyici</summary>
+
+  <description>
+    <p>
+      Disk Cleaner is a Linux utility for safely reclaiming disk space.
+      It provides smart, process-aware suggestions (it won't touch a
+      cache your browser is using right now), an interactive treemap
+      and sunburst view of any mount, and an optional background
+      watchdog that notifies you when free space gets low.
+    </p>
+    <p xml:lang="tr">
+      Disk Cleaner, Linux'ta disk alanını güvenle geri kazandıran bir
+      araçtır. Süreç-farkındalıklı akıllı öneriler sunar (tarayıcınızın
+      şu an kullandığı önbelleğe dokunmaz), herhangi bir bağlama
+      noktasının interaktif treemap ve sunburst görünümünü gösterir,
+      ayrıca düşük disk alanı durumunda sizi uyaran opsiyonel bir arka
+      plan watchdog'u içerir.
+    </p>
+    <p>
+      Destructive operations default to your trash folder and can be
+      previewed with dry-run. The control API explicitly blocks the
+      destructive path — only the GUI can clean.
+    </p>
+    <p xml:lang="tr">
+      Yıkıcı işlemler varsayılan olarak çöp kutusuna gider ve dry-run
+      ile önceden incelenebilir. Kontrol API'si yıkıcı yolu açıkça
+      bloke eder — yalnızca GUI temizlik yapabilir.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">disk-cleaner.desktop</launchable>
+
+  <url type="homepage">https://github.com/codechu/disk-cleaner</url>
+  <url type="bugtracker">https://github.com/codechu/disk-cleaner/issues</url>
+  <url type="vcs-browser">https://github.com/codechu/disk-cleaner</url>
+
+  <developer_name>Codechu</developer_name>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Smart suggestion panel with reasons and scores</caption>
+      <caption xml:lang="tr">Akıllı öneri paneli — gerekçeler ve skorlar</caption>
+      <image>https://raw.githubusercontent.com/codechu/disk-cleaner/main/assets/screenshots/en/light/suggestion.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Interactive treemap</caption>
+      <caption xml:lang="tr">İnteraktif treemap</caption>
+      <image>https://raw.githubusercontent.com/codechu/disk-cleaner/main/assets/screenshots/en/light/treemap.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Sunburst visualization</caption>
+      <caption xml:lang="tr">Sunburst görselleştirme</caption>
+      <image>https://raw.githubusercontent.com/codechu/disk-cleaner/main/assets/screenshots/en/light/sunburst.png</image>
+    </screenshot>
+  </screenshots>
+
+  <provides>
+    <binary>disk-cleaner</binary>
+  </provides>
+
+  <content_rating type="oars-1.1" />
+
+  <releases>
+    <release version="0.1.0" date="2026-05-18">
+      <description>
+        <p>First open-source release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

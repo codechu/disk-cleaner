@@ -1,0 +1,20 @@
+# Otomatik LF normalize: tüm metin dosyaları depo'da LF, checkout'ta OS-default
+* text=auto eol=lf
+
+# Binary — diff/merge yapma
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mo binary
+*.db binary
+*.sqlite binary
+*.AppImage binary
+
+# Python: linguist-language
+*.py linguist-language=Python
+
+# Generated / vendored: GitHub'ın stats'ından dışla
+po/messages.pot linguist-generated=true
+disk_cleaner/locale/**/*.mo linguist-generated=true

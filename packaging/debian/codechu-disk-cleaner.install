@@ -1,0 +1,3 @@
+packaging/disk-cleaner.desktop          usr/share/applications/
+packaging/disk-cleaner.appdata.xml      usr/share/metainfo/
+packaging/icon.svg                      usr/share/icons/hicolor/scalable/apps/

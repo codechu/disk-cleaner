@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Stacked lockup: mark üstte, wordmark altta.
+     Mağaza ikonları, dikey banner, splash screen. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 380" width="400" height="380">
+  <defs>
+    <radialGradient id="dl" cx="0.32" cy="0.28" r="0.85">
+      <stop offset="0%"  stop-color="#34507a"/>
+      <stop offset="55%" stop-color="#1d2939"/>
+      <stop offset="100%" stop-color="#0f1928"/>
+    </radialGradient>
+  </defs>
+  <!-- Mark centered horizontally -->
+  <g transform="translate(200 140)">
+    <circle cx="0" cy="0" r="100" fill="url(#dl)"/>
+    <circle cx="0" cy="0" r="100" fill="none" stroke="#0a1320" stroke-width="1.8" stroke-opacity="0.5"/>
+    <path d="M -48 -54 H 10 Q 60 -54 60 0 Q 60 54 10 54 H -48 Z" fill="#fafaf7"/>
+    <circle cx="12" cy="0" r="32" fill="#1d2939"/>
+    <circle cx="12" cy="0" r="7.5" fill="#e0a020"/>
+  </g>
+  <!-- Wordmark centered horizontally below -->
+  <text x="200" y="330" font-family="Ubuntu Sans, Inter, system-ui" font-size="48" font-weight="600" letter-spacing="-1.5" fill="#1d2939" text-anchor="middle">Disk Cleaner</text>
+</svg>

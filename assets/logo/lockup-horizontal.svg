@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Horizontal lockup: mark + wordmark yan yana.
+     Header / README / web banner için primary kullanım. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" width="720" height="200">
+  <defs>
+    <radialGradient id="dl" cx="0.32" cy="0.28" r="0.85">
+      <stop offset="0%"  stop-color="#34507a"/>
+      <stop offset="55%" stop-color="#1d2939"/>
+      <stop offset="100%" stop-color="#0f1928"/>
+    </radialGradient>
+  </defs>
+  <!-- Mark (left, 160px tall, centered vertical) -->
+  <g transform="translate(160 100)">
+    <circle cx="0" cy="0" r="78" fill="url(#dl)"/>
+    <circle cx="0" cy="0" r="78" fill="none" stroke="#0a1320" stroke-width="1.5" stroke-opacity="0.5"/>
+    <path d="M -38 -42 H 6 Q 46 -42 46 0 Q 46 42 6 42 H -38 Z" fill="#fafaf7"/>
+    <circle cx="8" cy="0" r="24" fill="#1d2939"/>
+    <circle cx="8" cy="0" r="5.5" fill="#e0a020"/>
+  </g>
+  <!-- Wordmark (right) -->
+  <text x="280" y="116" font-family="Ubuntu Sans, Inter, system-ui" font-size="56" font-weight="600" letter-spacing="-1.5" fill="#1d2939">Disk Cleaner</text>
+</svg>

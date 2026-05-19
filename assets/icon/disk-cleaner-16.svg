@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Codechu Disk Cleaner — 16px favicon variant
+  Simplified for favicon / extreme small sizes: no gradient (flat navy),
+  no spindle hub (kayboluyor zaten). Sadece silüet: disk + D + counter.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges">
+  <!-- Solid navy disk (no gradient, sub-px loss yok) -->
+  <circle cx="8" cy="8" r="7.5" fill="#1d2939"/>
+  <!-- D harf, integer-pixel grid -->
+  <path d="M 3 3 H 8 Q 12 3 12 8 Q 12 13 8 13 H 3 Z" fill="#fafaf7"/>
+  <!-- Counter (gold dot yerine — daha okunur 16px'te) -->
+  <circle cx="8" cy="8" r="2" fill="#1d2939"/>
+  <!-- Optional single gold pixel hub (silinebilir test edilince) -->
+  <rect x="8" y="8" width="1" height="1" fill="#e0a020"/>
+</svg>

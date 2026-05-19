@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Disk Cleaner
+Name[tr]=Disk Temizleyici
+GenericName=Disk Cleaner
+GenericName[tr]=Disk Temizleyici
+Comment=Safe, transparent disk cleaner with smart suggestions
+Comment[tr]=Akıllı önerili, güvenli, şeffaf disk temizleyici
+Exec=disk-cleaner
+Icon=disk-cleaner
+Terminal=false
+Categories=System;Utility;FileTools;
+StartupNotify=true
+Keywords=disk;cleaner;treemap;sunburst;cache;
+Keywords[tr]=disk;temizleyici;treemap;sunburst;önbellek;cache;
+X-Vendor=Codechu

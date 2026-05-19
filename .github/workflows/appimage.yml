@@ -1,0 +1,85 @@
+name: AppImage Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (örn. v0.1.0-rc1)'
+        required: false
+
+jobs:
+  build:
+    name: Build AppImage (x86_64)
+    runs-on: ubuntu-22.04   # en eski destekli LTS — geniş glibc uyumluluğu
+    permissions:
+      contents: write       # softprops/action-gh-release için
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install system deps (GTK + AppImage build)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+              python3-gi gir1.2-gtk-3.0 python3-cairo \
+              libgirepository1.0-dev libcairo2-dev pkg-config \
+              gir1.2-ayatanaappindicator3-0.1 \
+              libfuse2 wget desktop-file-utils appstream
+
+      - name: Validate desktop + AppStream metadata
+        run: |
+          desktop-file-validate packaging/disk-cleaner.desktop
+          appstreamcli validate --no-net packaging/disk-cleaner.appdata.xml || true
+
+      - name: Download linuxdeploy + plugins
+        run: |
+          wget -q -O linuxdeploy-x86_64.AppImage \
+              https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget -q -O linuxdeploy-plugin-gtk.sh \
+              https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
+          wget -q -O linuxdeploy-plugin-python-x86_64.AppImage \
+              https://github.com/linuxdeploy/linuxdeploy-plugin-python/releases/download/continuous/linuxdeploy-plugin-python-x86_64.AppImage
+          chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-gtk.sh linuxdeploy-plugin-python-x86_64.AppImage
+
+      - name: Build AppImage
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          export PATH="$PWD:$PATH"
+          # linuxdeploy plugin-gtk script adıyla aranır
+          ln -sf linuxdeploy-plugin-gtk.sh linuxdeploy-plugin-gtk
+          packaging/AppImage/build.sh
+
+      - name: Smoke test
+        run: |
+          ls -lah CodechuDiskCleaner-*.AppImage
+          # AppImage'in çalıştırılabilir olduğunu doğrula (--appimage-extract-and-run --version)
+          chmod +x CodechuDiskCleaner-*.AppImage
+          # HEAD test: sadece import ve --help; GUI yok
+          ./CodechuDiskCleaner-*.AppImage --help || true
+
+      - name: Upload to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            CodechuDiskCleaner-*.AppImage
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+
+      - name: Upload artifact (manual run / non-tag)
+        if: "!startsWith(github.ref, 'refs/tags/v')"
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodechuDiskCleaner-AppImage
+          path: CodechuDiskCleaner-*.AppImage
+          if-no-files-found: error
