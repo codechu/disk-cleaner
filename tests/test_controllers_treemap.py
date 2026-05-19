@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from disk_cleaner.controllers import TreemapController
-from disk_cleaner.viz.tree_node import TreeNode
+from disk_cleaner.viz import TreeNode
 
 
 def _mk_node(path: str, size: int, children=None, is_dir=False) -> TreeNode:

@@ -67,6 +67,69 @@ def cached_dir_size(path: str | Path, ttl: float = DEFAULT_DU_CACHE_TTL_SEC) -> 
         return dir_size(p)
 
 
+def lookup_cached_dir_size(
+    path: str | Path, ttl: float = DEFAULT_DU_CACHE_TTL_SEC
+) -> int | None:
+    """Return cached size if fresh, else None — never walks the directory.
+
+    Suitable as a :class:`codechu_treeviz.SizeProvider` callback. Returning
+    None lets ``build_tree`` recurse normally.
+    """
+    p = Path(path).expanduser()
+    if not p.exists():
+        return None
+    try:
+        cur_mtime = p.stat().st_mtime
+    except OSError:
+        return None
+    pkey = str(p.resolve())
+    try:
+        conn = du_cache_connect()
+        try:
+            row = conn.execute(
+                "SELECT size, mtime, cached_at FROM du_cache WHERE path=?",
+                (pkey,),
+            ).fetchone()
+            if not row:
+                return None
+            size, mtime, cached_at = row
+            now = time.time()
+            if abs(mtime - cur_mtime) < 0.5 and (now - cached_at) < ttl:
+                return size
+            return None
+        finally:
+            conn.close()
+    except Exception:
+        return None
+
+
+def store_dir_size(path: str | Path, size: int) -> None:
+    """Write the (path, size, mtime, now) tuple into the du_cache table.
+
+    Called by the treemap controller after a fresh ``build_tree`` walk so
+    the next scan can short-circuit via :func:`lookup_cached_dir_size`.
+    """
+    p = Path(path).expanduser()
+    try:
+        cur_mtime = p.stat().st_mtime
+    except OSError:
+        return
+    pkey = str(p.resolve())
+    try:
+        conn = du_cache_connect()
+        try:
+            conn.execute(
+                "INSERT OR REPLACE INTO du_cache (path, size, mtime, cached_at)"
+                " VALUES (?, ?, ?, ?)",
+                (pkey, int(size), cur_mtime, time.time()),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        pass
+
+
 def du_cache_invalidate(path: str | None = None) -> None:
     """Clear a specific path (and everything below) or the whole cache."""
     try:
@@ -99,4 +162,11 @@ class DuCache:
         du_cache_invalidate(path)
 
 
-__all__ = ["DuCache", "cached_dir_size", "du_cache_connect", "du_cache_invalidate"]
+__all__ = [
+    "DuCache",
+    "cached_dir_size",
+    "du_cache_connect",
+    "du_cache_invalidate",
+    "lookup_cached_dir_size",
+    "store_dir_size",
+]

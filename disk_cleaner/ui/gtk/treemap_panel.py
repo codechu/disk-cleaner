@@ -26,11 +26,13 @@ from ...controllers import TreemapController
 from ...i18n import _, ngettext
 from ...theme import is_dark_theme
 from ...utils import human
-from ...viz.colors import node_color
-from ...viz.sunburst import layout_sunburst
-from ...viz.text import is_hash_like
-from ...viz.tree_node import TreeNode
-from ...viz.treemap import OTHER_MARKER, layout_treemap
+from ...viz import (
+    TreeNode,
+    is_hash_like,
+    layout_sunburst,
+    layout_treemap,
+    node_color,
+)
 
 
 def _node_color_themed(
@@ -503,7 +505,7 @@ class TreemapPanel(Gtk.Box):
         if span < 0.005:
             return
         is_hover = self._hover_node is node
-        is_other = node.path.startswith(OTHER_MARKER)
+        is_other = node.is_other
         r, g, b = _node_color_themed(top_idx, depth, is_other=is_other)
         if is_hover:
             mult = 1.18 if is_dark_theme() else 1.25
@@ -534,8 +536,10 @@ class TreemapPanel(Gtk.Box):
             self._draw_arc_label(cr, node, cx, cy, r_in, r_out, a0, a1)
 
     def _draw_arc_label(self, cr, node, cx, cy, r_in, r_out, a0, a1) -> None:
-        if node.path.startswith(OTHER_MARKER):
-            name = node.path.replace(OTHER_MARKER, _("Other")).strip()
+        if node.is_other:
+            name = _("Other") + " " + ngettext(
+                "({n} item)", "({n} items)", node.small_count
+            ).format(n=node.small_count)
         else:
             name = os.path.basename(node.path) or node.path
         if is_hash_like(name):
@@ -667,7 +671,7 @@ class TreemapPanel(Gtk.Box):
             return
         dark = is_dark_theme()
         is_hover = self._hover_node is node
-        is_other = node.path.startswith(OTHER_MARKER)
+        is_other = node.is_other
         if is_other:
             v = 0.38 if dark else 0.80
             if is_hover:
@@ -712,7 +716,9 @@ class TreemapPanel(Gtk.Box):
             cr.stroke()
         if w > 60 and h > 24:
             if is_other:
-                name = node.path.replace(OTHER_MARKER, _("Other")).strip()
+                name = _("Other") + " " + ngettext(
+                    "({n} item)", "({n} items)", node.small_count
+                ).format(n=node.small_count)
             else:
                 name = os.path.basename(node.path) or node.path
             size_str = human(node.size)

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: disk_cleaner\n"
 "Report-Msgid-Bugs-To: info@codechu.com\n"
-"POT-Creation-Date: 2026-05-19 12:25+0300\n"
+"POT-Creation-Date: 2026-05-19 20:29+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,19 +18,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:309
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:310
 #, python-brace-format
 msgid ""
 "\n"
 "📈 Largest growth over the last ~{days}d:"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:319
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:320
 #, python-brace-format
 msgid "  + {path} → {size} (grew by {delta}, {pct:.0f}%)"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:314
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:315
 #, python-brace-format
 msgid "  + {path} → {size} (new)"
 msgstr ""
@@ -44,42 +44,45 @@ msgstr ""
 msgid " + {n} folders ({size})"
 msgstr ""
 
-#: ../disk_cleaner/api/server.py:262
+#: ../disk_cleaner/api/server.py:267
 #, python-brace-format
 msgid ""
 "'{target}' blocked via API — destructive operations can only be triggered "
 "manually by the user"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:253
+#: ../disk_cleaner/ui/gtk/main_window.py:280
 msgid "(automatic)"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:450
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:453
 msgid "(empty folder)"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:373
+#: ../disk_cleaner/ui/gtk/task_panel.py:374
 #, python-brace-format
 msgid "(sparse, nominal: {size})"
 msgstr ""
 
-#: ../disk_cleaner/viz/sunburst.py:63 ../disk_cleaner/viz/treemap.py:49
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:541
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:720
 #, python-brace-format
-msgid "({n} items)"
-msgstr ""
+msgid "({n} item)"
+msgid_plural "({n} items)"
+msgstr[0] ""
+msgstr[1] ""
 
-#: ../disk_cleaner/controllers/task_list.py:334
+#: ../disk_cleaner/controllers/task_list.py:336
 msgid "...(truncated)"
 msgstr ""
 
-#: ../disk_cleaner/watchdog/daemon.py:126
+#: ../disk_cleaner/watchdog/daemon.py:127
 #, python-format, python-brace-format
 msgid ""
 "/ is {pct}% full. Would you like to open Disk Cleaner and free up space?"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:667
+#: ../disk_cleaner/_tasks.py:669
 msgid "/var/crash + /var/lib/systemd/coredump — requires root."
 msgstr ""
 
@@ -87,23 +90,23 @@ msgstr ""
 msgid "0-byte file"
 msgstr ""
 
-#: ../disk_cleaner/core/walker.py:317
+#: ../disk_cleaner/core/walker.py:318
 #, python-brace-format
 msgid "1/2 scanning files · {n} · {root}"
 msgstr ""
 
-#: ../disk_cleaner/core/walker.py:346
+#: ../disk_cleaner/core/walker.py:347
 #, python-brace-format
 msgid "2/2 hash · {i}/{n} · {name} ({size})"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:133
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:136
 msgid ""
 "<i>Each colored block is a child of the current folder. Size = disk size. "
 "<b>Click</b> a folder → drill in. <b>Right-click</b> or ⬆ Up → go up.</i>"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:113
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:114
 msgid ""
 "<span foreground='#888'>Press the <b>🎯 Smart scan</b> button above to view "
 "suggestions.\n"
@@ -114,25 +117,29 @@ msgstr ""
 msgid "APT cache + autoremove"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/old_files_panel.py:29
+#: ../disk_cleaner/ui/gtk/old_files_panel.py:30
 msgid "Age (days):"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:185
-#: ../disk_cleaner/ui/gtk/task_panel.py:166
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:186
+#: ../disk_cleaner/ui/gtk/task_panel.py:167
 msgid "All"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:74
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:75
 msgid "All (including active)"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:512
+#: ../disk_cleaner/_tasks.py:514
 msgid "Always PERMANENT deletion (trash mode ignored)."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:300
+#: ../disk_cleaner/ui/gtk/main_window.py:327
 msgid "App uninstaller (apt + cache)"
+msgstr ""
+
+#: ../disk_cleaner/ui/gtk/main_window.py:166
+msgid "Auto"
 msgstr ""
 
 #: ../disk_cleaner/_tasks.py:388
@@ -147,31 +154,31 @@ msgstr ""
 msgid "Bun package cache."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:431
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:361
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:432
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:364
 msgid "Cancel"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:74
+#: ../disk_cleaner/ui/gtk/task_panel.py:75
 msgid "Cancel ongoing operation"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:339
-#: ../disk_cleaner/controllers/task_list.py:292
+#: ../disk_cleaner/controllers/suggestion.py:340
+#: ../disk_cleaner/controllers/task_list.py:294
 msgid "Cancelled"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:551
+#: ../disk_cleaner/controllers/suggestion.py:552
 #, python-brace-format
 msgid "Cancelled: {done}/{total} done"
 msgstr ""
 
 #: ../disk_cleaner/controllers/suggestion.py:135
-#: ../disk_cleaner/controllers/task_list.py:137
+#: ../disk_cleaner/controllers/task_list.py:139
 msgid "Cancelling…"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:562
+#: ../disk_cleaner/_tasks.py:564
 msgid "Cargo registry + git"
 msgstr ""
 
@@ -179,46 +186,56 @@ msgstr ""
 msgid "Chrome cache"
 msgstr ""
 
-#: ../disk_cleaner/controllers/task_list.py:318
+#: ../disk_cleaner/controllers/task_list.py:320
 #, python-brace-format
 msgid "Cleanup cancelled ({done}/{total} completed)."
 msgstr ""
 
-#: ../disk_cleaner/controllers/task_list.py:357
+#: ../disk_cleaner/controllers/task_list.py:359
 msgid "Cleanup complete"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:574
+#: ../disk_cleaner/ui/gtk/main_window.py:171
+msgid ""
+"Color theme.\n"
+"Auto = follow system. Change takes effect after restart."
+msgstr ""
+
+#: ../disk_cleaner/_tasks.py:576
 msgid "Conda package cache"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:311
+#: ../disk_cleaner/ui/gtk/task_panel.py:312
 msgid "Confirm cleanup"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:368
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:369
 msgid "Confirm smart cleanup"
 msgstr ""
 
-#: ../disk_cleaner/api/server.py:52
+#: ../disk_cleaner/api/server.py:55
 #, python-brace-format
 msgid "Control socket: {path}\n"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:365
+#: ../disk_cleaner/ui/gtk/main_window.py:392
 #, python-brace-format
 msgid "Could not start control server: {err}\n"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:201
+#: ../disk_cleaner/cli.py:203
 msgid "DRY-RUN"
+msgstr ""
+
+#: ../disk_cleaner/ui/gtk/main_window.py:168
+msgid "Dark"
 msgstr ""
 
 #: ../disk_cleaner/_tasks.py:422
 msgid "Dependency and build cache."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:134
+#: ../disk_cleaner/ui/gtk/task_panel.py:135
 msgid "Description"
 msgstr ""
 
@@ -226,44 +243,50 @@ msgstr ""
 msgid "Detecting open files…"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:493
+#: ../disk_cleaner/_tasks.py:495
 msgid "Disabled snap revisions (root)."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:640
+#: ../disk_cleaner/_tasks.py:642
 msgid "Discord cache"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:80
-#: ../disk_cleaner/ui/gtk/main_window.py:93
-#: ../disk_cleaner/watchdog/daemon.py:43
+#: ../disk_cleaner/ui/gtk/main_window.py:81
+#: ../disk_cleaner/ui/gtk/main_window.py:94
+#: ../disk_cleaner/watchdog/daemon.py:44
 msgid "Disk Cleaner"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:105
+#: ../disk_cleaner/cli.py:107
 msgid "Disk Cleaner — GUI or CLI"
 msgstr ""
 
-#: ../disk_cleaner/controllers/treemap.py:189
+#: ../disk_cleaner/controllers/treemap.py:230
 msgid "Disk map cancelled/errored."
 msgstr ""
 
-#: ../disk_cleaner/controllers/treemap.py:181
+#: ../disk_cleaner/controllers/treemap.py:216
 #, python-brace-format
 msgid "Disk map error: {err}"
 msgstr ""
 
-#: ../disk_cleaner/controllers/treemap.py:198
+#: ../disk_cleaner/controllers/treemap.py:239
 #, python-brace-format
 msgid "Disk map ready: total {size}"
 msgstr ""
 
-#: ../disk_cleaner/controllers/treemap.py:82
+#: ../disk_cleaner/controllers/treemap.py:103
 #, python-brace-format
 msgid "Disk map: scanning {path}"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:112
+#: ../disk_cleaner/ui/gtk/main_window.py:184
+msgid ""
+"Display language.\n"
+"Change takes effect after restart."
+msgstr ""
+
+#: ../disk_cleaner/cli.py:114
 msgid "Do not delete anything, only show what would be done"
 msgstr ""
 
@@ -283,83 +306,83 @@ msgstr ""
 msgid "Dry-run: ON (nothing will be deleted)"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:297
+#: ../disk_cleaner/ui/gtk/main_window.py:324
 msgid "Duplicates"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:440
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:443
 msgid ""
 "Each folder is drawn as a block proportional to its size. Click to drill in."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:298
+#: ../disk_cleaner/ui/gtk/main_window.py:325
 msgid "Empty folders + 0-byte files"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:232
+#: ../disk_cleaner/ui/gtk/main_window.py:259
 msgid "Empty folders and 0-byte files — skeletal leftovers from projects."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:511
+#: ../disk_cleaner/_tasks.py:513
 msgid "Empty the trash"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:434
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:437
 msgid "Enter a path and press Scan"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:304
+#: ../disk_cleaner/ui/gtk/task_panel.py:305
 #, python-brace-format
 msgid "Estimated gain: {size}"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:219
+#: ../disk_cleaner/cli.py:221
 msgid "FAIL"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/old_files_panel.py:41
+#: ../disk_cleaner/ui/gtk/old_files_panel.py:42
 msgid ""
 "Files older than N days in the specified folder. High risk: these are your "
 "own files — select intentionally."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:223
+#: ../disk_cleaner/ui/gtk/main_window.py:250
 msgid ""
 "Finds files with identical content (≥1MB). The newest in each group is kept; "
 "extras are listed."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:245
+#: ../disk_cleaner/ui/gtk/main_window.py:272
 msgid ""
 "Finds visually similar photos (dHash + Hamming). Different shots of the same "
 "scene, compressed copies — the largest is kept. Requires Pillow."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:657
+#: ../disk_cleaner/_tasks.py:659
 msgid "Firefox cache2 (all profiles)"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:500
+#: ../disk_cleaner/_tasks.py:502
 msgid "Flatpak unused runtimes"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:295
+#: ../disk_cleaner/ui/gtk/main_window.py:322
 msgid "Folder explorer (look inside)"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:210
-#: ../disk_cleaner/ui/gtk/main_window.py:221
-#: ../disk_cleaner/ui/gtk/main_window.py:230
-#: ../disk_cleaner/ui/gtk/main_window.py:243
-#: ../disk_cleaner/ui/gtk/old_files_panel.py:21
+#: ../disk_cleaner/ui/gtk/main_window.py:237
+#: ../disk_cleaner/ui/gtk/main_window.py:248
+#: ../disk_cleaner/ui/gtk/main_window.py:257
+#: ../disk_cleaner/ui/gtk/main_window.py:270
+#: ../disk_cleaner/ui/gtk/old_files_panel.py:22
 msgid "Folder:"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:175
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:176
 msgid "GB"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:554
+#: ../disk_cleaner/_tasks.py:556
 msgid "Go module cache"
 msgstr ""
 
@@ -367,19 +390,19 @@ msgstr ""
 msgid "Gradle cache"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:108
+#: ../disk_cleaner/cli.py:110
 msgid "Headless scan, prints result (default: json)"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:585
+#: ../disk_cleaner/_tasks.py:587
 msgid "Hugging Face cache"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:73
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:74
 msgid "Including medium"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:133
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:134
 msgid "Item"
 msgstr ""
 
@@ -387,11 +410,20 @@ msgstr ""
 msgid "JARs will be re-downloaded."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:610
+#: ../disk_cleaner/_tasks.py:612
 msgid "JetBrains cache"
 msgstr ""
 
-#: ../disk_cleaner/controllers/task_list.py:231
+#: ../disk_cleaner/ui/gtk/main_window.py:453
+#, python-brace-format
+msgid "Language set to {lang}. Restart to apply.\n"
+msgstr ""
+
+#: ../disk_cleaner/ui/gtk/main_window.py:167
+msgid "Light"
+msgstr ""
+
+#: ../disk_cleaner/controllers/task_list.py:233
 #, python-brace-format
 msgid "List error: {err}"
 msgstr ""
@@ -400,15 +432,15 @@ msgstr ""
 msgid "Listing installed packages…"
 msgstr ""
 
-#: ../disk_cleaner/controllers/task_list.py:129
+#: ../disk_cleaner/controllers/task_list.py:131
 msgid "Listing items…"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:211
+#: ../disk_cleaner/ui/gtk/main_window.py:238
 msgid "Lists direct children of a folder with their sizes."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:255
+#: ../disk_cleaner/ui/gtk/main_window.py:282
 msgid ""
 "Lists installed applications (≥5MB) by size. The selected package is removed "
 "with apt purge + ~/.config/<x>, ~/.cache/<x>, ~/.local/share/<x> shared "
@@ -423,11 +455,11 @@ msgstr ""
 msgid "Mesa shader cache, fontconfig, etc."
 msgstr ""
 
-#: ../disk_cleaner/cli.py:124
+#: ../disk_cleaner/cli.py:126
 msgid "Minimum score threshold for auto cleanup (default 40)"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:152
+#: ../disk_cleaner/ui/gtk/main_window.py:153
 #, python-brace-format
 msgid ""
 "Monitor disk usage in the background.\n"
@@ -442,12 +474,12 @@ msgstr ""
 msgid "No old kernels"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:107
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:108
 msgid "No scan yet"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:188
-#: ../disk_cleaner/ui/gtk/task_panel.py:170
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:189
+#: ../disk_cleaner/ui/gtk/task_panel.py:171
 msgid "None"
 msgstr ""
 
@@ -455,41 +487,41 @@ msgstr ""
 msgid "NuGet cache"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:219
+#: ../disk_cleaner/cli.py:221
 msgid "OK"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:296
+#: ../disk_cleaner/ui/gtk/main_window.py:323
 msgid "Old files"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:679
+#: ../disk_cleaner/_tasks.py:683
 msgid "Old kernel packages"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:492
+#: ../disk_cleaner/_tasks.py:494
 msgid "Old snap versions"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:127
+#: ../disk_cleaner/ui/gtk/main_window.py:128
 msgid ""
 "On: items go to trash (reversible).\n"
 "Off: permanent deletion.\n"
 "Subprocess commands (npm, docker, apt) are always permanent."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:140
+#: ../disk_cleaner/ui/gtk/main_window.py:141
 msgid ""
 "On: nothing is deleted, only logs what would happen.\n"
 "For testing and risk analysis."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:54
+#: ../disk_cleaner/ui/gtk/main_window.py:55
 msgid "Open window"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:537
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:712
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:540
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:719
 msgid "Other"
 msgstr ""
 
@@ -497,37 +529,37 @@ msgstr ""
 msgid "Other ~/.cache contents"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:118
+#: ../disk_cleaner/cli.py:120
 msgid "Output format (with --scan)"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:205
+#: ../disk_cleaner/cli.py:207
 msgid "PERMANENT"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:121
+#: ../disk_cleaner/ui/gtk/task_panel.py:122
 msgid "Path"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:343
+#: ../disk_cleaner/ui/gtk/task_panel.py:344
 #, python-brace-format
 msgid "Path missing or abstract: {path}"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:66
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:69
 msgid "Path:"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:242
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:245
 #, python-brace-format
 msgid "Path: {path} (press Scan)\n"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:116
+#: ../disk_cleaner/cli.py:118
 msgid "Permanent delete"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:176
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:177
 msgid "Pick"
 msgstr ""
 
@@ -535,41 +567,41 @@ msgstr ""
 msgid "Pillow is not installed"
 msgstr ""
 
-#: ../disk_cleaner/core/walker.py:190
+#: ../disk_cleaner/core/walker.py:191
 msgid "Pillow not available — `pip install pillow` required"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:132
+#: ../disk_cleaner/cli.py:134
 msgid "Print watchdog status"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:294
+#: ../disk_cleaner/ui/gtk/main_window.py:321
 msgid "Project artifacts (node_modules, build…)"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:681
+#: ../disk_cleaner/_tasks.py:685
 msgid ""
 "Purges linux-image/headers/modules packages except the current and the "
 "previous one (apt purge, root)."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:593
+#: ../disk_cleaner/_tasks.py:595
 msgid "PyTorch hub cache"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:531
+#: ../disk_cleaner/_tasks.py:533
 msgid "Python pip wheel download cache."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:58
+#: ../disk_cleaner/ui/gtk/main_window.py:59
 msgid "Quit"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:357
+#: ../disk_cleaner/ui/gtk/main_window.py:384
 msgid "Ready. Trash mode ON — deleted items can be restored.\n"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:156
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:157
 msgid "Reason"
 msgstr ""
 
@@ -577,139 +609,139 @@ msgstr ""
 msgid "Removes containers; volumes and images remain."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:118
+#: ../disk_cleaner/ui/gtk/task_panel.py:119
 msgid "Risk"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:121
+#: ../disk_cleaner/cli.py:123
 msgid "Root path for artifact scan"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:122
+#: ../disk_cleaner/cli.py:124
 msgid "Root path for old-files scan"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:126
+#: ../disk_cleaner/cli.py:128
 msgid "Run in background watchdog mode (infinite loop)"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:72
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:73
 msgid "Safe only"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:432
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:362
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:433
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:365
 msgid "Save"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:83
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:86
 msgid "Save current visualization as PNG"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:426
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:427
 msgid "Save scan result"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:200
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:201
 msgid "Save scan results as JSON or CSV."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:356
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:359
 msgid "Save treemap as PNG"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:110
+#: ../disk_cleaner/cli.py:112
 msgid "Scan and clean low-risk + safe items"
 msgstr ""
 
-#: ../disk_cleaner/controllers/treemap.py:188
+#: ../disk_cleaner/controllers/treemap.py:229
 msgid "Scan cancelled or errored."
 msgstr ""
 
-#: ../disk_cleaner/controllers/task_list.py:296
+#: ../disk_cleaner/controllers/task_list.py:298
 msgid "Scan cancelled."
 msgstr ""
 
-#: ../disk_cleaner/controllers/task_list.py:302
+#: ../disk_cleaner/controllers/task_list.py:304
 msgid "Scan complete."
 msgstr ""
 
-#: ../disk_cleaner/controllers/task_list.py:299
+#: ../disk_cleaner/controllers/task_list.py:301
 msgid "Scan complete. Low-risk items >100MB auto-selected."
 msgstr ""
 
-#: ../disk_cleaner/controllers/task_list.py:131
+#: ../disk_cleaner/controllers/task_list.py:133
 msgid "Scan started"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:290
+#: ../disk_cleaner/ui/gtk/main_window.py:317
 msgid "Scan type:"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:439
+#: ../disk_cleaner/controllers/suggestion.py:440
 msgid "Scanning old files…"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:404
+#: ../disk_cleaner/controllers/suggestion.py:405
 msgid "Scanning system caches…"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:335
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:171
+#: ../disk_cleaner/ui/gtk/task_panel.py:336
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:174
 #, python-brace-format
 msgid "Scanning: {path}"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:148
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:149
 msgid "Score"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:460
+#: ../disk_cleaner/controllers/suggestion.py:461
 msgid "Scoring…"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:418
+#: ../disk_cleaner/controllers/suggestion.py:419
 msgid "Searching for project artifacts…"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:153
-#: ../disk_cleaner/ui/gtk/task_panel.py:263
+#: ../disk_cleaner/ui/gtk/task_panel.py:154
+#: ../disk_cleaner/ui/gtk/task_panel.py:264
 msgid "Select a row to see its contents here."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:231
+#: ../disk_cleaner/ui/gtk/task_panel.py:232
 #, python-brace-format
 msgid "Selected: {size}"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:178
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:179
 msgid ""
 "Selects low-risk, highest-scored items until the total target is reached "
 "(previous selection is reset)."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:78
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:79
 msgid "Show:"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:299
+#: ../disk_cleaner/ui/gtk/main_window.py:326
 msgid "Similar images (perceptual hash)"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:140
-#: ../disk_cleaner/ui/gtk/task_panel.py:128
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:141
+#: ../disk_cleaner/ui/gtk/task_panel.py:129
 msgid "Size"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:632
+#: ../disk_cleaner/_tasks.py:634
 msgid "Slack cache"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:570
+#: ../disk_cleaner/controllers/suggestion.py:571
 msgid "Smart cleanup complete"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:383
+#: ../disk_cleaner/controllers/suggestion.py:384
 #, python-brace-format
 msgid "Smart scan complete: {suggestions} ({groups})"
 msgstr ""
@@ -718,19 +750,19 @@ msgstr ""
 msgid "Smart scan started"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:120
+#: ../disk_cleaner/cli.py:122
 msgid "Sources (comma-separated): system,artifacts,oldfiles"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:648
+#: ../disk_cleaner/_tasks.py:650
 msgid "Spotify cache"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:128
+#: ../disk_cleaner/cli.py:130
 msgid "Start watchdog in the background (detach)"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:130
+#: ../disk_cleaner/cli.py:132
 msgid "Stop running watchdog"
 msgstr ""
 
@@ -738,46 +770,51 @@ msgstr ""
 msgid "Stopped Docker containers"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:293
+#: ../disk_cleaner/ui/gtk/main_window.py:320
 msgid "System cache & packages"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:193
+#: ../disk_cleaner/ui/gtk/main_window.py:220
 msgid ""
 "System caches, package caches, old snaps. Low-risk + >100MB items are auto-"
 "selected."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:666
+#: ../disk_cleaner/_tasks.py:668
 msgid "System crash dumps"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:482
+#: ../disk_cleaner/_tasks.py:484
 msgid "Systemd journal (older than 7 days)"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:170
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:171
 msgid "Target:"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:198
+#: ../disk_cleaner/controllers/suggestion.py:199
 #, python-brace-format
 msgid "Targeted selection: {picked} items, {total} (target: {target})"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:110
+#: ../disk_cleaner/ui/gtk/task_panel.py:111
 msgid "Task"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:601
+#: ../disk_cleaner/_tasks.py:603
 msgid "TensorFlow cache"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:521
+#: ../disk_cleaner/ui/gtk/main_window.py:467
+#, python-brace-format
+msgid "Theme set to {theme}. Restart to apply.\n"
+msgstr ""
+
+#: ../disk_cleaner/_tasks.py:523
 msgid "Thumbnail cache"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:114
+#: ../disk_cleaner/cli.py:116
 msgid "Trash mode (default on)"
 msgstr ""
 
@@ -789,7 +826,7 @@ msgstr ""
 msgid "Trash mode: ON (recoverable)"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:373
+#: ../disk_cleaner/ui/gtk/main_window.py:400
 msgid "Tray icon created.\n"
 msgstr ""
 
@@ -801,7 +838,7 @@ msgstr ""
 msgid "User-defined"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:618
+#: ../disk_cleaner/_tasks.py:620
 msgid "VS Code (config) cache"
 msgstr ""
 
@@ -818,19 +855,19 @@ msgstr ""
 msgid "Watchdog stopped."
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:91
+#: ../disk_cleaner/ui/gtk/task_panel.py:92
 msgid "What does this panel do?"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:200
+#: ../disk_cleaner/ui/gtk/main_window.py:227
 msgid "Workspace:"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:546
+#: ../disk_cleaner/_tasks.py:548
 msgid "Yarn (Berry) cache"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:538
+#: ../disk_cleaner/_tasks.py:540
 msgid "Yarn (v1) cache"
 msgstr ""
 
@@ -838,7 +875,7 @@ msgstr ""
 msgid "[DRY] snaps to remove:"
 msgstr ""
 
-#: ../disk_cleaner/core/safe_remove.py:74
+#: ../disk_cleaner/core/safe_remove.py:75
 #, python-brace-format
 msgid "[DRY] would have deleted: {p}"
 msgstr ""
@@ -856,7 +893,7 @@ msgstr ""
 msgid "`apt clean` + `apt autoremove --purge` (root)."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:575
+#: ../disk_cleaner/_tasks.py:577
 msgid "`conda clean --all` (if available)."
 msgstr ""
 
@@ -864,7 +901,7 @@ msgstr ""
 msgid "`docker builder prune -a -f`. Images/containers not affected."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:483
+#: ../disk_cleaner/_tasks.py:485
 msgid "`journalctl --vacuum-time=7d` (root)."
 msgstr ""
 
@@ -886,13 +923,13 @@ msgstr ""
 msgid "currently open: {names}"
 msgstr ""
 
-#: ../disk_cleaner/core/safe_remove.py:81
-#: ../disk_cleaner/core/safe_remove.py:108
+#: ../disk_cleaner/core/safe_remove.py:82
+#: ../disk_cleaner/core/safe_remove.py:109
 #: ../disk_cleaner/core/system_helpers.py:238
 msgid "deleted"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:253
+#: ../disk_cleaner/ui/gtk/main_window.py:280
 msgid "dpkg packages"
 msgstr ""
 
@@ -908,28 +945,28 @@ msgstr ""
 msgid "error"
 msgstr ""
 
-#: ../disk_cleaner/cleaners/safe_path.py:25 ../disk_cleaner/utils.py:88
+#: ../disk_cleaner/cleaners/safe_path.py:26 ../disk_cleaner/utils.py:90
 #, python-brace-format
 msgid "error: {e}"
 msgstr ""
 
-#: ../disk_cleaner/core/safe_remove.py:111
+#: ../disk_cleaner/core/safe_remove.py:112
 #: ../disk_cleaner/core/system_helpers.py:241
 msgid "errors:"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:564
-#: ../disk_cleaner/controllers/task_list.py:328
+#: ../disk_cleaner/controllers/suggestion.py:565
+#: ../disk_cleaner/controllers/task_list.py:330
 #, python-brace-format
 msgid "exception: {err}"
 msgstr ""
 
-#: ../disk_cleaner/core/safe_remove.py:79
+#: ../disk_cleaner/core/safe_remove.py:80
 #, python-brace-format
 msgid "gio trash error: {msg}"
 msgstr ""
 
-#: ../disk_cleaner/core/walker.py:220
+#: ../disk_cleaner/core/walker.py:221
 #, python-brace-format
 msgid "hash {i}/{n} · {name}"
 msgstr ""
@@ -947,57 +984,57 @@ msgstr ""
 msgid "modified {days} days ago"
 msgstr ""
 
-#: ../disk_cleaner/core/safe_remove.py:78
-#: ../disk_cleaner/core/safe_remove.py:108
+#: ../disk_cleaner/core/safe_remove.py:79
+#: ../disk_cleaner/core/safe_remove.py:109
 #: ../disk_cleaner/core/system_helpers.py:238
 msgid "moved to trash"
 msgstr ""
 
-#: ../disk_cleaner/api/server.py:279
+#: ../disk_cleaner/api/server.py:284
 #, python-brace-format
 msgid "no button or blocked: {target}"
 msgstr ""
 
-#: ../disk_cleaner/api/server.py:312
+#: ../disk_cleaner/api/server.py:317
 #, python-brace-format
 msgid "no checkbox: {name}"
 msgstr ""
 
-#: ../disk_cleaner/api/server.py:373
+#: ../disk_cleaner/api/server.py:378
 msgid "no current_node"
 msgstr ""
 
-#: ../disk_cleaner/api/server.py:301
+#: ../disk_cleaner/api/server.py:306
 #, python-brace-format
 msgid "no entry: {pid}"
 msgstr ""
 
-#: ../disk_cleaner/controllers/task_list.py:254
+#: ../disk_cleaner/controllers/task_list.py:256
 msgid "no items"
 msgstr ""
 
-#: ../disk_cleaner/api/server.py:213 ../disk_cleaner/api/server.py:225
+#: ../disk_cleaner/api/server.py:218 ../disk_cleaner/api/server.py:230
 msgid "no notebook"
 msgstr ""
 
-#: ../disk_cleaner/api/server.py:269
+#: ../disk_cleaner/api/server.py:274
 #, python-brace-format
 msgid "no panel: {pid}"
 msgstr ""
 
-#: ../disk_cleaner/api/server.py:322 ../disk_cleaner/api/server.py:337
+#: ../disk_cleaner/api/server.py:327 ../disk_cleaner/api/server.py:342
 #, python-brace-format
 msgid "no widget: {target}"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:202
+#: ../disk_cleaner/ui/gtk/main_window.py:229
 msgid ""
 "node_modules, target, build, dist, .next, .gradle, venv, __pycache__ etc. "
 "Projects modified in the last 14 days get a red ACTIVE label and are not "
 "auto-selected."
 msgstr ""
 
-#: ../disk_cleaner/core/safe_remove.py:71
+#: ../disk_cleaner/core/safe_remove.py:72
 msgid "not found, skipped"
 msgstr ""
 
@@ -1014,27 +1051,27 @@ msgstr ""
 msgid "old file"
 msgstr ""
 
-#: ../disk_cleaner/core/walker.py:193
+#: ../disk_cleaner/core/walker.py:194
 #, python-brace-format
 msgid "path not found: {p}"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:412
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:413
 #, python-brace-format
 msgid "path: {path}"
 msgstr ""
 
-#: ../disk_cleaner/core/safe_remove.py:81
-#: ../disk_cleaner/core/safe_remove.py:106
+#: ../disk_cleaner/core/safe_remove.py:82
+#: ../disk_cleaner/core/safe_remove.py:107
 msgid "permanently deleted"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:351
+#: ../disk_cleaner/ui/gtk/task_panel.py:352
 #, python-brace-format
 msgid "permission/access: {err}"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:530
+#: ../disk_cleaner/_tasks.py:532
 msgid "pip cache"
 msgstr ""
 
@@ -1065,65 +1102,65 @@ msgstr ""
 msgid "system: {name}"
 msgstr ""
 
-#: ../disk_cleaner/api/server.py:237
+#: ../disk_cleaner/api/server.py:242
 #, python-brace-format
 msgid "tab not found: {name}"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:203
+#: ../disk_cleaner/cli.py:205
 msgid "trash"
 msgstr ""
 
-#: ../disk_cleaner/api/server.py:182
+#: ../disk_cleaner/api/server.py:185
 #, python-brace-format
 msgid "unknown cmd: {cmd}"
 msgstr ""
 
-#: ../disk_cleaner/api/server.py:405
+#: ../disk_cleaner/api/server.py:410
 #, python-brace-format
 msgid "unknown target: {target}"
 msgstr ""
 
-#: ../disk_cleaner/controllers/task_list.py:280
-#: ../disk_cleaner/controllers/task_list.py:349
+#: ../disk_cleaner/controllers/task_list.py:282
+#: ../disk_cleaner/controllers/task_list.py:351
 msgid "unmeasurable"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:655
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:660
 msgid "up"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:171
+#: ../disk_cleaner/cli.py:173
 #, python-brace-format
 msgid "watchdog RUNNING (pid {pid})"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:173
+#: ../disk_cleaner/cli.py:175
 msgid "watchdog STOPPED"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:160
+#: ../disk_cleaner/cli.py:162
 msgid "watchdog is already running"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:166
+#: ../disk_cleaner/cli.py:168
 msgid "watchdog is not running"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:158
+#: ../disk_cleaner/cli.py:160
 msgid "watchdog started"
 msgstr ""
 
-#: ../disk_cleaner/cli.py:164
+#: ../disk_cleaner/cli.py:166
 msgid "watchdog stopped"
 msgstr ""
 
-#: ../disk_cleaner/core/walker.py:275
+#: ../disk_cleaner/core/walker.py:276
 #, python-brace-format
 msgid "{dirs} empty folders · {files} 0-byte files · {root}"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:489
+#: ../disk_cleaner/controllers/suggestion.py:490
 #, python-brace-format
 msgid "{items_part} · {inactive} old + {active} active"
 msgstr ""
@@ -1138,12 +1175,12 @@ msgstr ""
 msgid "{kind} folder • last git {days} days ago"
 msgstr ""
 
-#: ../disk_cleaner/controllers/task_list.py:271
+#: ../disk_cleaner/controllers/task_list.py:273
 #, python-brace-format
 msgid "{name}: error {err}"
 msgstr ""
 
-#: ../disk_cleaner/core/walker.py:68
+#: ../disk_cleaner/core/walker.py:69
 #, python-brace-format
 msgid "{n} artifacts · {path}"
 msgstr ""
@@ -1153,101 +1190,96 @@ msgstr ""
 msgid "{n} cache items cleaned"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:328
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:331
 #, python-brace-format
 msgid "{n} child"
 msgid_plural "{n} children"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:340
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:343
 #, python-brace-format
 msgid "{n} day ago"
 msgid_plural "{n} days ago"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../disk_cleaner/viz/tree_node.py:78
-#, python-brace-format
-msgid "{n} files · {p}"
-msgstr ""
-
 #: ../disk_cleaner/core/system_helpers.py:179
 #, python-brace-format
 msgid "{n} folders cleaned"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:380
+#: ../disk_cleaner/controllers/suggestion.py:381
 #, python-brace-format
 msgid "{n} group"
 msgid_plural "{n} groups"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../disk_cleaner/core/walker.py:213
+#: ../disk_cleaner/core/walker.py:214
 #, python-brace-format
 msgid "{n} images found, hashing…"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:486
-#: ../disk_cleaner/ui/gtk/task_panel.py:362
+#: ../disk_cleaner/controllers/suggestion.py:487
+#: ../disk_cleaner/ui/gtk/task_panel.py:363
 #, python-brace-format
 msgid "{n} item"
 msgid_plural "{n} items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:299
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:300
 #, python-brace-format
 msgid "{n} item selected — {size}"
 msgid_plural "{n} items selected — {size}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:298
+#: ../disk_cleaner/ui/gtk/task_panel.py:299
 #, python-brace-format
 msgid "{n} item will be deleted."
 msgid_plural "{n} items will be deleted."
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:371
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:372
 #, python-brace-format
 msgid "{n} item · estimated gain: {size}"
 msgid_plural "{n} items · estimated gain: {size}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../disk_cleaner/cli.py:207
+#: ../disk_cleaner/cli.py:209
 #, python-brace-format
 msgid "{n} item, ~{size} ({mode})"
 msgid_plural "{n} items, ~{size} ({mode})"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../disk_cleaner/core/safe_remove.py:109
+#: ../disk_cleaner/core/safe_remove.py:110
 #, python-brace-format
 msgid "{n} items {mode}"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:377
+#: ../disk_cleaner/controllers/suggestion.py:378
 #, python-brace-format
 msgid "{n} suggestion"
 msgid_plural "{n} suggestions"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../disk_cleaner/cli.py:224
+#: ../disk_cleaner/cli.py:226
 #, python-brace-format
 msgid "{ok}/{total} successful"
 msgstr ""
 
-#: ../disk_cleaner/core/safe_remove.py:92
+#: ../disk_cleaner/core/safe_remove.py:93
 #, python-brace-format
 msgid "{path} not found, skipped"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:108
+#: ../disk_cleaner/ui/gtk/main_window.py:109
 #, python-brace-format
 msgid "{target}  ({avail} free)"
 msgstr ""
@@ -1256,31 +1288,31 @@ msgstr ""
 msgid "~/.cache not found"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:611
+#: ../disk_cleaner/_tasks.py:613
 msgid "~/.cache/JetBrains — IntelliJ/PyCharm/WebStorm etc."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:586
+#: ../disk_cleaner/_tasks.py:588
 msgid "~/.cache/huggingface — downloaded models. Will be re-downloaded."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:649
+#: ../disk_cleaner/_tasks.py:651
 msgid "~/.cache/spotify — local media cache."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:602
+#: ../disk_cleaner/_tasks.py:604
 msgid "~/.cache/tensorflow — saved models."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:522
+#: ../disk_cleaner/_tasks.py:524
 msgid "~/.cache/thumbnails — regeneratable."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:594
+#: ../disk_cleaner/_tasks.py:596
 msgid "~/.cache/torch — model checkpoints."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:539
+#: ../disk_cleaner/_tasks.py:541
 msgid "~/.cache/yarn — package cache."
 msgstr ""
 
@@ -1289,33 +1321,33 @@ msgstr ""
 msgid "~/.cache: {n} items {mode} (chrome preserved)"
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:563
+#: ../disk_cleaner/_tasks.py:565
 msgid "~/.cargo/registry and ~/.cargo/git — Rust crate cache."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:619
+#: ../disk_cleaner/_tasks.py:621
 msgid "~/.config/Code/Cache + CachedData — extension/session cache."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:633
+#: ../disk_cleaner/_tasks.py:635
 msgid "~/.config/Slack/Cache — will be re-downloaded."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:658
+#: ../disk_cleaner/_tasks.py:660
 msgid "~/.mozilla/firefox/*/cache2 — disk cache."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:547
+#: ../disk_cleaner/_tasks.py:549
 msgid "~/.yarn/cache — package cache."
 msgstr ""
 
-#: ../disk_cleaner/_tasks.py:555
+#: ../disk_cleaner/_tasks.py:557
 msgid "~/go/pkg/mod — `go clean -modcache` (files are read-only)."
 msgstr ""
 
-#: ../disk_cleaner/cli.py:273 ../disk_cleaner/ui/gtk/suggestion_panel.py:360
-#: ../disk_cleaner/ui/gtk/task_panel.py:293
-#: ../disk_cleaner/ui/gtk/task_panel.py:384
+#: ../disk_cleaner/cli.py:275 ../disk_cleaner/ui/gtk/suggestion_panel.py:361
+#: ../disk_cleaner/ui/gtk/task_panel.py:294
+#: ../disk_cleaner/ui/gtk/task_panel.py:385
 #, python-brace-format
 msgid "… and {n} more item"
 msgid_plural "… and {n} more items"
@@ -1334,135 +1366,135 @@ msgstr ""
 msgid "⚠ ACTIVE project (last git {days} days ago) — {kind}"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:101
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:104
 msgid "⛔ Cancel"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:397
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:400
 #, python-brace-format
 msgid "✓ PNG saved: {target}\n"
 msgstr ""
 
-#: ../disk_cleaner/controllers/task_list.py:329
+#: ../disk_cleaner/controllers/task_list.py:331
 msgid "✓ ok"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:462
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:463
 #, python-brace-format
 msgid "✓ {n} rows saved: {target}\n"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:466
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:467
 #, python-brace-format
 msgid "✗ Export error: {err}\n"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:399
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:402
 #, python-brace-format
 msgid "✗ PNG save error: {err}\n"
 msgstr ""
 
-#: ../disk_cleaner/controllers/task_list.py:329
+#: ../disk_cleaner/controllers/task_list.py:331
 msgid "✗ error"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:77
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:80
 msgid "⬆ Up"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:90
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:93
 msgid "🌅 Sunburst"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:52
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:53
 msgid "🎯  Smart scan"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:182
+#: ../disk_cleaner/ui/gtk/main_window.py:209
 msgid "🎯  Suggestions"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:141
+#: ../disk_cleaner/ui/gtk/task_panel.py:142
 msgid "👁  Preview"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:395
+#: ../disk_cleaner/ui/gtk/main_window.py:422
 msgid "👁 Watching"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:398
+#: ../disk_cleaner/ui/gtk/main_window.py:425
 msgid "👁 Watching: Off"
 msgstr ""
 
-#: ../disk_cleaner/watchdog/daemon.py:124
+#: ../disk_cleaner/watchdog/daemon.py:125
 msgid "💾 Disk almost full"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:322
+#: ../disk_cleaner/ui/gtk/main_window.py:349
 msgid "📊  Disk map"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:330
+#: ../disk_cleaner/ui/gtk/main_window.py:357
 msgid "📜  Log"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:198
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:199
 msgid "📤  Export"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:82
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:85
 msgid "📤 PNG"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:69
+#: ../disk_cleaner/ui/gtk/task_panel.py:70
 msgid "🔍  Scan"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:73
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:76
 msgid "🔍 Scan"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/widgets.py:12
+#: ../disk_cleaner/ui/gtk/widgets.py:13
 msgid "🔴 High"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:124
+#: ../disk_cleaner/ui/gtk/main_window.py:125
 msgid "🗑 Trash"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:406
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:407
 msgid "🚫  Don't suggest this path again"
 msgstr ""
 
-#: ../disk_cleaner/controllers/suggestion.py:265
+#: ../disk_cleaner/controllers/suggestion.py:266
 #, python-brace-format
 msgid "🚫 Added to blacklist: {path}"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/widgets.py:11
+#: ../disk_cleaner/ui/gtk/widgets.py:12
 msgid "🟡 Medium"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/widgets.py:10
+#: ../disk_cleaner/ui/gtk/widgets.py:11
 msgid "🟢 Low"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/treemap_panel.py:89
+#: ../disk_cleaner/ui/gtk/treemap_panel.py:92
 msgid "🟦 Treemap"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:137
+#: ../disk_cleaner/ui/gtk/main_window.py:138
 msgid "🧪 Dry-run"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/task_panel.py:174
+#: ../disk_cleaner/ui/gtk/task_panel.py:175
 msgid "🧹  Clean"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/suggestion_panel.py:192
+#: ../disk_cleaner/ui/gtk/suggestion_panel.py:193
 msgid "🧹  Clean selected"
 msgstr ""
 
-#: ../disk_cleaner/ui/gtk/main_window.py:318
+#: ../disk_cleaner/ui/gtk/main_window.py:345
 msgid "🧹  Cleanup"
 msgstr ""

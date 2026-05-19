@@ -15,16 +15,36 @@ events, calls ``hit_test`` to find the node, and calls
 from __future__ import annotations
 
 import threading
+from pathlib import Path
 from typing import Callable, Optional
 
 from .. import events
 from ..config import HOME
 from ..i18n import _
 from ..settings import SETTINGS, save_settings
+from ..storage.du_cache import lookup_cached_dir_size, store_dir_size
 from ..utils import ThrottledProgress, human
-from ..viz.sunburst import sunburst_hit_test
-from ..viz.tree_node import TreeNode, build_tree
-from ..viz.treemap import hit_test
+from ..viz import TreeNode, build_tree, hit_test, sunburst_hit_test
+
+# Reuse du-cache entries for at most 6h before a fresh re-walk.
+_DU_CACHE_TTL_SEC = 6 * 3600
+
+
+def _disk_cache_provider(p: Path) -> int | None:
+    """:class:`SizeProvider` — return cached dir size if fresh, else None."""
+    return lookup_cached_dir_size(p, ttl=_DU_CACHE_TTL_SEC)
+
+
+def _persist_dir_sizes(node: TreeNode) -> None:
+    """DFS-walk a built tree and write every directory's size back to du_cache.
+
+    Lets the next scan short-circuit via the size_provider.
+    """
+    if not node.is_dir or node.is_other:
+        return
+    store_dir_size(node.path, node.size)
+    for c in node.children:
+        _persist_dir_sizes(c)
 
 
 class TreemapController:
@@ -108,7 +128,12 @@ class TreemapController:
         )
 
     def drill_up(self) -> None:
-        """Go up one level (pop from history)."""
+        """Go up one level (pop from history).
+
+        If the node we land on has never had its children loaded
+        (``children`` is empty but ``is_dir`` is True) a fresh scan is
+        kicked off automatically — otherwise the cached subtree is kept.
+        """
         if not self.history or not self.current_node:
             return
         prev_path = self.current_node.path
@@ -119,6 +144,12 @@ class TreemapController:
             "treemap.drill", direction="up",
             from_path=prev_path, to_path=self.current_node.path,
         )
+        if (
+            self.current_node.is_dir
+            and not self.current_node.children
+            and not self._busy
+        ):
+            self.start_scan()
 
     def drill_to(self, target: TreeNode) -> None:
         """Breadcrumb click — pop history down to ``target``."""
@@ -176,11 +207,20 @@ class TreemapController:
         progress = ThrottledProgress(self.on_progress)
         try:
             node = build_tree(
-                path, cancel=self._cancel_event, progress=progress
+                path,
+                cancel=self._cancel_event,
+                progress=progress,
+                size_provider=_disk_cache_provider,
             )
         except Exception as e:
             self.on_error(_("Disk map error: {err}").format(err=e))
             node = None
+        if node is not None and not self._cancel_event.is_set():
+            try:
+                _persist_dir_sizes(node)
+            except Exception:
+                # Caching is opportunistic — never let it break a scan.
+                pass
         self._scan_done(node, path)
 
     def _scan_done(self, node: Optional[TreeNode], path: str) -> None:
