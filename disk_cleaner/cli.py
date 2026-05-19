@@ -55,27 +55,52 @@ def cli_collect_tasks(
 
     show_progress = progress and sys.stderr.isatty()
 
+    # All progress output goes through a single stderr line that is
+    # overwritten with each task. State for that line lives here so
+    # _sized() can render running totals.
+    state = {"done": 0, "total": 0, "bytes": 0, "last_width": 0}
+
+    def _redraw(label: str) -> None:
+        if not show_progress:
+            return
+        msg = "  [{done}/{total}] {bytes} · {label}".format(
+            done=state["done"],
+            total=state["total"],
+            bytes=human(state["bytes"]),
+            label=label,
+        )
+        # Pad with spaces to clear any residue from a previous longer
+        # message; then \r to reset the cursor for the next overwrite.
+        pad = " " * max(0, state["last_width"] - len(msg))
+        sys.stderr.write(f"\r{msg}{pad}")
+        sys.stderr.flush()
+        state["last_width"] = len(msg)
+
+    def _clear_progress() -> None:
+        if not show_progress or state["last_width"] == 0:
+            return
+        sys.stderr.write("\r" + " " * state["last_width"] + "\r")
+        sys.stderr.flush()
+        state["last_width"] = 0
+
     def _sized(t: dict, kind: str) -> tuple[dict, int] | None:
-        if show_progress:
-            label = t.get("name") or t.get("path") or "?"
-            t0 = time.monotonic()
-            print(f"  scanning [{kind}] {label}…", end="", file=sys.stderr, flush=True)
+        label = t.get("name") or t.get("path") or "?"
+        _redraw(_("scanning {kind} · {label}…").format(kind=kind, label=label))
         try:
             size = t["size_fn"]() or 0
         except Exception:
             size = 0
-        if show_progress:
-            elapsed_ms = int((time.monotonic() - t0) * 1000)
-            # Overwrite the in-progress line with the final result.
-            print(f"\r  scanned  [{kind}] {label} — {human(size)} ({elapsed_ms}ms)",
-                  file=sys.stderr, flush=True)
+        state["done"] += 1
+        state["bytes"] += size
+        _redraw(_("scanned {kind} · {label} — {size}").format(
+            kind=kind, label=label, size=human(size),
+        ))
         return (t, size) if size > 0 else None
 
     open_paths = get_open_paths()
     results: list[tuple[dict, int, str]] = []
     if "system" in sources:
-        if show_progress:
-            print(f"# {len(SYSTEM_TASKS)} system tasks", file=sys.stderr, flush=True)
+        state["total"] += len(SYSTEM_TASKS)
         for t in SYSTEM_TASKS:
             r = _sized(t, "system")
             if r:
@@ -86,8 +111,7 @@ def cli_collect_tasks(
         ws = Path(workspace or (HOME / "workspace"))
         if ws.exists():
             tasks = list(make_artifact_tasks(str(ws)))
-            if show_progress:
-                print(f"# {len(tasks)} artifact tasks under {ws}", file=sys.stderr, flush=True)
+            state["total"] += len(tasks)
             for t in tasks:
                 r = _sized(t, "artifact")
                 if r:
@@ -100,12 +124,15 @@ def cli_collect_tasks(
             d = HOME / "Downloads"
         if d.exists():
             tasks = list(make_old_files_tasks(str(d), 90))
-            if show_progress:
-                print(f"# {len(tasks)} old-file tasks under {d}", file=sys.stderr, flush=True)
+            state["total"] += len(tasks)
             for t in tasks:
                 r = _sized(t, "oldfile")
                 if r:
                     results.append((r[0], r[1], "oldfile"))
+
+    # Clear the in-progress line so subsequent stdout (table/json) starts
+    # on a clean column.
+    _clear_progress()
     enriched: list[dict] = []
     for t, size, kind in results:
         score, reason = compute_score_and_reason(t, size, kind, open_paths)
@@ -233,7 +260,9 @@ def cli_main(argv: list[str]) -> int:
         return 0
 
     sources = {s.strip() for s in args.sources.split(",") if s.strip()}
+    scan_t0 = time.monotonic()
     enriched = cli_collect_tasks(sources, workspace=args.workspace, downloads=args.downloads)
+    scan_elapsed = time.monotonic() - scan_t0
 
     if args.clean:
         # Low risk + above score threshold + not active + not currently open
@@ -325,27 +354,63 @@ def cli_main(argv: list[str]) -> int:
         # available via --format json.
         TABLE_LIMIT = 20
         n_total = len(output_items)
-        print(
-            _("Found {n} item(s), {total} total. Top {shown} by score:").format(
-                n=n_total, total=total_human, shown=min(TABLE_LIMIT, n_total)
-            )
-        )
-        print()
-        for r in output_items[:TABLE_LIMIT]:
+
+        # Color is enabled when stdout is a TTY and the user hasn't
+        # opted out via the conventional NO_COLOR env var.
+        use_color = sys.stdout.isatty() and not os.environ.get("NO_COLOR")
+        ANSI = {
+            "reset": "\033[0m",
+            "dim": "\033[2m",
+            "bold": "\033[1m",
+            "low": "\033[32m",       # green
+            "medium": "\033[33m",    # yellow
+            "high": "\033[31m",      # red
+        }
+
+        def c(code: str, text: str) -> str:
+            return f"{ANSI[code]}{text}{ANSI['reset']}" if use_color else text
+
+        if n_total == 0:
+            print(_("No items found in the selected sources. Nothing to do."))
+        else:
             print(
-                f"{r['score']:>3}  {r['size_human']:>8}  "
-                f"{r['risk']:<7}  {r['name']}   ── {r['reason']}"
+                _("Found {n} item(s), {total} total. Top {shown} by score:").format(
+                    n=c("bold", str(n_total)),
+                    total=c("bold", total_human),
+                    shown=min(TABLE_LIMIT, n_total),
+                )
             )
-        if n_total > TABLE_LIMIT:
-            extra = n_total - TABLE_LIMIT
             print()
-            print(
-                ngettext(
-                    "… and {n} more item. Run with --format json for the full list.",
-                    "… and {n} more items. Run with --format json for the full list.",
-                    extra,
-                ).format(n=extra)
-            )
+            for r in output_items[:TABLE_LIMIT]:
+                risk_color = r["risk"] if r["risk"] in ("low", "medium", "high") else "dim"
+                print(
+                    f"{r['score']:>3}  {r['size_human']:>8}  "
+                    f"{c(risk_color, r['risk']):<16}  {r['name']}   "
+                    f"{c('dim', '──')} {c('dim', r['reason'])}"
+                )
+            if n_total > TABLE_LIMIT:
+                extra = n_total - TABLE_LIMIT
+                print()
+                print(
+                    c(
+                        "dim",
+                        ngettext(
+                            "… and {n} more item. Run with --format json for the full list.",
+                            "… and {n} more items. Run with --format json for the full list.",
+                            extra,
+                        ).format(n=extra),
+                    )
+                )
+
+    # Final summary on stderr when interactive — gives users elapsed
+    # time and total without polluting machine-consumed stdout.
+    if sys.stderr.isatty():
+        print(
+            _("Scan complete: {n} items, {total} total, {secs:.1f}s.").format(
+                n=len(output_items), total=total_human, secs=scan_elapsed,
+            ),
+            file=sys.stderr,
+        )
     return 0
 
 
