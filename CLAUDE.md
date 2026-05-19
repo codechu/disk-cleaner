@@ -3,7 +3,12 @@
 If you are an AI agent invoked in this repo, **bootstrap first** per
 the org rules:
 
-1. Read [`codechu-org/ai/AGENTS.md`](https://github.com/codechu/codechu-org/blob/main/ai/AGENTS.md) §0 (Bootstrap) and §1–§7.
+1. Read `codechu-org/ai/AGENTS.md` §0 (Bootstrap) and §1–§7. Prefer
+   the local clone at `$org_home/codechu-org/ai/AGENTS.md` if
+   `~/.config/codechu/config.toml` has `org_home` set (employee
+   setup); otherwise WebFetch the raw URL
+   <https://raw.githubusercontent.com/codechu/codechu-org/main/ai/AGENTS.md>
+   (public; works for external contributors).
 2. Read this file (product-local overrides below).
 3. If you have a clone of `codechu/codechu-internal` on this machine,
    read `ai/AGENTS.internal.md` — extends, never weakens, public
