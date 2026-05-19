@@ -335,7 +335,20 @@ def main() -> None:
 
     cli_args = [a for a in sys.argv[1:] if a.startswith("-")]
     if cli_args:
-        sys.exit(cli_main(sys.argv[1:]))
+        try:
+            sys.exit(cli_main(sys.argv[1:]))
+        except KeyboardInterrupt:
+            # Standard SIGINT exit code; no traceback.
+            print(file=sys.stderr)  # newline after ^C
+            sys.exit(130)
+
+    # GUI path — make Ctrl-C in the launching terminal close the window
+    # cleanly instead of dumping a Python traceback. SIGINT default
+    # behavior is restored so Gtk.main_quit runs on the next iteration.
+    import signal
+
+    signal.signal(signal.SIGINT, lambda *_: Gtk.main_quit())
+
     from .theme import apply_user_preference
     from .ui import MainWindow
 
@@ -343,7 +356,11 @@ def main() -> None:
     win = MainWindow()
     win.connect("destroy", Gtk.main_quit)
     win.show_all()
-    Gtk.main()
+    try:
+        Gtk.main()
+    except KeyboardInterrupt:
+        print(file=sys.stderr)
+        sys.exit(130)
 
 
 def cli_entry() -> None:

@@ -71,7 +71,10 @@ parts:
     source: packaging
     organize:
       disk-cleaner.desktop: usr/share/applications/codechu-disk-cleaner.desktop
-      icon.svg: usr/share/icons/hicolor/scalable/apps/codechu-disk-cleaner.svg
+      # Icon filename must match the desktop file's `Icon=disk-cleaner`
+      # entry — snapd looks the name up in standard icon paths inside
+      # the snap and on the host.
+      icon.svg: usr/share/icons/hicolor/scalable/apps/disk-cleaner.svg
       disk-cleaner.appdata.xml: usr/share/metainfo/io.github.codechu.disk-cleaner.metainfo.xml
     stage:
       - usr/share/applications
