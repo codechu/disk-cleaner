@@ -34,6 +34,18 @@ interactive treemap and sunburst, and a quiet background watchdog.
 
 Real captures from the GUI via the [control API](docs/API.md) on an Xvfb virtual display, in light and dark themes. Turkish locale captures: [`assets/screenshots/tr/`](assets/screenshots/tr/). Reproducible playbook: [`assets/screenshots/README.md`](assets/screenshots/README.md).
 
+### CLI
+
+| Smart scan with summary | Help |
+|---|---|
+| ![Interactive scan with colored risk and final summary](assets/screenshots/cli/scan-system.png) | ![CLI help](assets/screenshots/cli/help.png) |
+
+| Dry-run cleanup | Watchdog lifecycle | JSON output (pipe) |
+|---|---|---|
+| ![Dry-run shows what would be cleaned](assets/screenshots/cli/clean-dry-run.png) | ![Watchdog start, status, stop](assets/screenshots/cli/watchdog.png) | ![JSON output when stdout is a pipe](assets/screenshots/cli/scan-json.png) |
+
+Output format auto-switches: human-readable table with ANSI colors when stdout is a terminal, JSON when piped or redirected to a file. Progress streams on a single overwriting line on stderr.
+
 ---
 
 ## Features
