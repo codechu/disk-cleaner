@@ -1,0 +1,79 @@
+name: codechu-disk-cleaner
+base: core22
+version: '0.1.0'
+summary: Safe, transparent disk cleaner for Linux
+description: |
+  Disk Cleaner provides smart cleanup suggestions with process-aware
+  scoring, an interactive treemap and sunburst over any mount, and
+  an opt-in background watchdog that notifies when free space drops
+  below a threshold.
+
+  Trash mode is on by default and active projects are protected via
+  git mtime. Headless CLI is included for scripts. Custom cleaner
+  rules can be dropped into the user config dir.
+
+  GTK 3 + Python 3.10+. Bilingual UI (English + Turkish).
+
+grade: stable
+confinement: classic
+license: MIT
+
+icon: packaging/icon.svg
+
+apps:
+  codechu-disk-cleaner:
+    command: bin/disk-cleaner
+    common-id: io.github.codechu.disk-cleaner
+    desktop: usr/share/applications/codechu-disk-cleaner.desktop
+    environment:
+      PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages
+      GI_TYPELIB_PATH: $SNAP/usr/lib/x86_64-linux-gnu/girepository-1.0
+      LD_LIBRARY_PATH: $SNAP/usr/lib/x86_64-linux-gnu:$SNAP/usr/lib
+      XDG_DATA_DIRS: $SNAP/usr/share:/usr/local/share:/usr/share
+
+parts:
+  disk-cleaner:
+    plugin: python
+    source: .
+    python-packages:
+      - pip
+      - setuptools
+      - wheel
+    build-packages:
+      - python3-dev
+      - libgirepository1.0-dev
+      - libcairo2-dev
+      - pkg-config
+      - gettext
+    stage-packages:
+      - python3.10
+      - python3.10-minimal
+      - python3.10-venv
+      - libpython3.10-stdlib
+      - python3-gi
+      - gir1.2-gtk-3.0
+      - python3-cairo
+      - libgirepository-1.0-1
+      - libcairo2
+      - libglib2.0-bin
+      - shared-mime-info
+      - gettext
+    override-build: |
+      craftctl default
+      # Compile .po -> .mo
+      cd ${CRAFT_PART_SRC}/po && make compile
+      mkdir -p ${CRAFT_PART_INSTALL}/usr/share/locale
+      cp -r ${CRAFT_PART_SRC}/disk_cleaner/locale/* \
+            ${CRAFT_PART_INSTALL}/usr/share/locale/ 2>/dev/null || true
+
+  desktop-integration:
+    plugin: dump
+    source: packaging
+    organize:
+      disk-cleaner.desktop: usr/share/applications/codechu-disk-cleaner.desktop
+      icon.svg: usr/share/icons/hicolor/scalable/apps/codechu-disk-cleaner.svg
+      disk-cleaner.appdata.xml: usr/share/metainfo/io.github.codechu.disk-cleaner.metainfo.xml
+    stage:
+      - usr/share/applications
+      - usr/share/icons
+      - usr/share/metainfo

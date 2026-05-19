@@ -69,3 +69,4 @@ linuxdeploy-plugin-*
 /codechu-disk-cleaner_*.tar.*
 /codechu-disk-cleaner_*.buildinfo
 /codechu-disk-cleaner_*.dsc
+*.snap
