@@ -50,7 +50,7 @@ Source = "https://github.com/codechu/disk-cleaner"
 Issues = "https://github.com/codechu/disk-cleaner/issues"
 
 [project.scripts]
-disk-cleaner = "disk_cleaner.cli:cli_entry"
+disk-cleaner = "disk_cleaner.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["disk_cleaner*"]
