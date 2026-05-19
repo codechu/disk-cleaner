@@ -22,10 +22,7 @@ icon: packaging/icon.svg
 
 apps:
   codechu-disk-cleaner:
-    # Use the snap-bundled python3.10 explicitly so `/usr/bin/env python3`
-    # from the script shebang doesn't resolve to the host's python (which
-    # has the wrong version and no access to our staged site-packages).
-    command: usr/bin/python3.10 -m disk_cleaner
+    command: bin/disk-cleaner
     common-id: io.github.codechu.disk-cleaner
     desktop: usr/share/applications/codechu-disk-cleaner.desktop
     environment:
