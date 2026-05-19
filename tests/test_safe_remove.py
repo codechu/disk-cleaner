@@ -4,11 +4,10 @@ To avoid polluting the real trash, ``rm_path`` (permanent delete) is
 tested. ``safe_remove`` selects trash mode; the test exercises the
 fallback when gio is missing on CI.
 """
+
 from __future__ import annotations
 
-from pathlib import Path
-
-from disk_cleaner.core.safe_remove import rm_path, safe_remove
+from disk_cleaner.core.safe_remove import rm_path
 
 
 def test_rm_path_file(tmp_path):

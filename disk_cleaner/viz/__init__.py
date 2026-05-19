@@ -5,6 +5,7 @@ The actual implementation lives in the published library
 module exposes the same names disk-cleaner historically imported from
 ``disk_cleaner.viz`` so existing imports keep working.
 """
+
 from __future__ import annotations
 
 from codechu_treeviz import (

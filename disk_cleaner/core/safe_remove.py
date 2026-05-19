@@ -5,6 +5,7 @@ checkboxes change them. They live in :mod:`disk_cleaner.runtime`; the
 functions in this module read them **at call time** (late binding) to
 avoid import-order issues.
 """
+
 from __future__ import annotations
 
 import os

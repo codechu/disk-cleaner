@@ -5,13 +5,15 @@ The state machine is owned by
 responsible only for widget glue + filter/sort + dialogs + right-click
 menu + JSON/CSV file export.
 """
+
 from __future__ import annotations
 
 import csv
 import json
 import os
 import time
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from ..._gtk import GLib, Gtk, Pango
 from ...controllers import (
@@ -27,6 +29,7 @@ from ...utils import human
 def _idle(fn: Callable) -> Callable:
     def wrapper(*args, **kwargs):
         GLib.idle_add(lambda: (fn(*args, **kwargs), False)[1])
+
     return wrapper
 
 
@@ -34,8 +37,19 @@ class SuggestionPanel(Gtk.Box):
     """View for the controller that runs all scanners in the background."""
 
     # TreeStore column indices
-    C_CHECK, C_NAME, C_SCORE_TXT, C_SCORE, C_SIZE_TXT, C_SIZE, \
-        C_REASON, C_RISK_COLOR, C_KIND, C_IS_GROUP, C_TASK_ID = range(11)
+    (
+        C_CHECK,
+        C_NAME,
+        C_SCORE_TXT,
+        C_SCORE,
+        C_SIZE_TXT,
+        C_SIZE,
+        C_REASON,
+        C_RISK_COLOR,
+        C_KIND,
+        C_IS_GROUP,
+        C_TASK_ID,
+    ) = range(11)
 
     def __init__(
         self,
@@ -80,8 +94,17 @@ class SuggestionPanel(Gtk.Box):
 
         # ---- Store + filter + sort ----
         self.store = Gtk.TreeStore(
-            bool, str, str, int, str, "guint64",
-            str, str, str, bool, int,
+            bool,
+            str,
+            str,
+            int,
+            str,
+            "guint64",
+            str,
+            str,
+            str,
+            bool,
+            int,
         )
         self.filter = self.store.filter_new()
         self.filter.set_visible_func(self._row_visible)
@@ -110,12 +133,14 @@ class SuggestionPanel(Gtk.Box):
         )
         empty_box.pack_start(title_lbl, False, False, 0)
         sub_lbl = Gtk.Label()
-        sub_lbl.set_markup(_(
-            "<span foreground='#888'>Press the <b>🎯 Smart scan</b> button "
-            "above to view suggestions.\n"
-            "System caches, old projects and large files are scored "
-            "automatically.</span>"
-        ))
+        sub_lbl.set_markup(
+            _(
+                "<span foreground='#888'>Press the <b>🎯 Smart scan</b> button "
+                "above to view suggestions.\n"
+                "System caches, old projects and large files are scored "
+                "automatically.</span>"
+            )
+        )
         sub_lbl.set_justify(Gtk.Justification.CENTER)
         empty_box.pack_start(sub_lbl, False, False, 0)
         self.content_stack.add_named(empty_box, "empty")
@@ -146,15 +171,19 @@ class SuggestionPanel(Gtk.Box):
         score_r = Gtk.CellRendererText()
         score_r.set_property("xalign", 1.0)
         col_score = Gtk.TreeViewColumn(
-            _("Score"), score_r,
-            text=self.C_SCORE_TXT, foreground=self.C_RISK_COLOR,
+            _("Score"),
+            score_r,
+            text=self.C_SCORE_TXT,
+            foreground=self.C_RISK_COLOR,
         )
         col_score.set_sort_column_id(self.C_SCORE)
         col_score.set_min_width(60)
         self.tree.append_column(col_score)
 
         col_reason = Gtk.TreeViewColumn(
-            _("Reason"), Gtk.CellRendererText(), text=self.C_REASON,
+            _("Reason"),
+            Gtk.CellRendererText(),
+            text=self.C_REASON,
         )
         col_reason.set_min_width(280)
         self.tree.append_column(col_reason)
@@ -175,10 +204,12 @@ class SuggestionPanel(Gtk.Box):
         target_box.pack_start(self.target_spin, False, False, 0)
         target_box.pack_start(Gtk.Label(label=_("GB"), xalign=0), False, False, 0)
         pick_btn = Gtk.Button(label=_("Pick"))
-        pick_btn.set_tooltip_text(_(
-            "Selects low-risk, highest-scored items until the total target "
-            "is reached (previous selection is reset)."
-        ))
+        pick_btn.set_tooltip_text(
+            _(
+                "Selects low-risk, highest-scored items until the total target "
+                "is reached (previous selection is reset)."
+            )
+        )
         pick_btn.connect("clicked", lambda *_: self._on_pick_target())
         target_box.pack_start(pick_btn, False, False, 0)
         action_bar.pack_start(target_box, False, False, 0)
@@ -197,9 +228,7 @@ class SuggestionPanel(Gtk.Box):
         action_bar.pack_start(self.clean_btn, False, False, 0)
 
         self.export_btn = Gtk.Button(label=_("📤  Export"))
-        self.export_btn.set_tooltip_text(_(
-            "Save scan results as JSON or CSV."
-        ))
+        self.export_btn.set_tooltip_text(_("Save scan results as JSON or CSV."))
         self.export_btn.connect("clicked", self.on_export)
         action_bar.pack_start(self.export_btn, False, False, 0)
 
@@ -243,13 +272,13 @@ class SuggestionPanel(Gtk.Box):
             self.spinner.hide()
             self.cancel_btn.hide()
             self.scan_btn.set_sensitive(True)
-            self._on_total_changed(
-                self.controller.selected_count, self.controller.total_bytes
-            )
+            self._on_total_changed(self.controller.selected_count, self.controller.total_bytes)
         self.progress_label.set_text(progress)
 
     def _on_rows_replaced(
-        self, rows: list[SuggestionRow], growth: GrowthInfo | None,
+        self,
+        rows: list[SuggestionRow],
+        growth: GrowthInfo | None,
     ) -> None:
         if growth and growth.items:
             self._log_growth(growth)
@@ -267,12 +296,13 @@ class SuggestionPanel(Gtk.Box):
                 self._iter_map[(gi, -1)] = row_iter
         self.tree.expand_all()
         total = self.controller.total_items
-        self.content_stack.set_visible_child_name(
-            "results" if total > 0 else "empty"
-        )
+        self.content_stack.set_visible_child_name("results" if total > 0 else "empty")
 
     def _on_row_updated(
-        self, gi: int, ci: int, row: SuggestionRow,
+        self,
+        gi: int,
+        ci: int,
+        row: SuggestionRow,
     ) -> None:
         key = (gi, -1) if ci < 0 else (gi, ci)
         it = self._iter_map.get(key)
@@ -306,24 +336,22 @@ class SuggestionPanel(Gtk.Box):
 
     def _log_growth(self, growth: GrowthInfo) -> None:
         ago = (time.time() - growth.prev_scanned_at) / 86400
-        lines = [
-            _("\n📈 Largest growth over the last ~{days}d:").format(days=int(ago))
-        ]
+        lines = [_("\n📈 Largest growth over the last ~{days}d:").format(days=int(ago))]
         for g in growth.items[:5]:
             if g.prev_size == 0:
-                lines.append(_(
-                    "  + {path} → {size} (new)"
-                ).format(path=g.path, size=human(g.current_size)))
+                lines.append(
+                    _("  + {path} → {size} (new)").format(path=g.path, size=human(g.current_size))
+                )
             else:
                 pct = g.delta / g.prev_size * 100
-                lines.append(_(
-                    "  + {path} → {size} (grew by {delta}, {pct:.0f}%)"
-                ).format(
-                    path=g.path,
-                    size=human(g.current_size),
-                    delta=human(g.delta),
-                    pct=pct,
-                ))
+                lines.append(
+                    _("  + {path} → {size} (grew by {delta}, {pct:.0f}%)").format(
+                        path=g.path,
+                        size=human(g.current_size),
+                        delta=human(g.delta),
+                        pct=pct,
+                    )
+                )
         self.win.log("\n".join(lines) + "\n")
 
     # ---- Widget event handlers ----
@@ -347,7 +375,7 @@ class SuggestionPanel(Gtk.Box):
         return None, None
 
     def _on_pick_target(self) -> None:
-        target_bytes = int(self.target_spin.get_value()) * (1024 ** 3)
+        target_bytes = int(self.target_spin.get_value()) * (1024**3)
         self.controller.select_target(target_bytes)
 
     def _trigger_clean(self) -> None:
@@ -363,7 +391,8 @@ class SuggestionPanel(Gtk.Box):
                 remaining,
             ).format(n=remaining)
         dlg = Gtk.MessageDialog(
-            transient_for=self.win, modal=True,
+            transient_for=self.win,
+            modal=True,
             message_type=Gtk.MessageType.QUESTION,
             buttons=Gtk.ButtonsType.YES_NO,
             text=_("Confirm smart cleanup"),
@@ -429,8 +458,10 @@ class SuggestionPanel(Gtk.Box):
             action=Gtk.FileChooserAction.SAVE,
         )
         dlg.add_buttons(
-            _("Cancel"), Gtk.ResponseType.CANCEL,
-            _("Save"), Gtk.ResponseType.ACCEPT,
+            _("Cancel"),
+            Gtk.ResponseType.CANCEL,
+            _("Save"),
+            Gtk.ResponseType.ACCEPT,
         )
         dlg.set_do_overwrite_confirmation(True)
         ts = time.strftime("%Y-%m-%d_%H-%M")
@@ -458,11 +489,16 @@ class SuggestionPanel(Gtk.Box):
                             "host": os.uname().nodename,
                             "items": [_export_dict(r) for r in rows],
                         },
-                        f, indent=2, ensure_ascii=False,
+                        f,
+                        indent=2,
+                        ensure_ascii=False,
                     )
-            self.win.log(_("✓ {n} rows saved: {target}\n").format(
-                n=len(rows), target=target,
-            ))
+            self.win.log(
+                _("✓ {n} rows saved: {target}\n").format(
+                    n=len(rows),
+                    target=target,
+                )
+            )
         except Exception as e:
             self.win.log(_("✗ Export error: {err}\n").format(err=e))
 
@@ -499,9 +535,14 @@ def _row_to_columns(row: SuggestionRow) -> list[Any]:
 
 def _export_dict(r) -> dict:
     return {
-        "name": r.name, "path": r.path, "kind": r.kind,
-        "size_bytes": r.size_bytes, "size_human": r.size_human,
-        "score": r.score, "reason": r.reason, "risk": r.risk,
+        "name": r.name,
+        "path": r.path,
+        "kind": r.kind,
+        "size_bytes": r.size_bytes,
+        "size_human": r.size_human,
+        "score": r.score,
+        "reason": r.reason,
+        "risk": r.risk,
         "selected": r.selected,
     }
 
@@ -511,8 +552,15 @@ def _write_csv(target: str, rows) -> None:
         w = csv.DictWriter(
             f,
             fieldnames=[
-                "name", "path", "kind", "size_bytes", "size_human",
-                "score", "reason", "risk", "selected",
+                "name",
+                "path",
+                "kind",
+                "size_bytes",
+                "size_human",
+                "score",
+                "reason",
+                "risk",
+                "selected",
             ],
         )
         w.writeheader()

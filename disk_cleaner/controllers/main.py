@@ -12,10 +12,11 @@ Owned state:
 View responsibilities: header bar widgets, panel construction + wiring,
 infobar/tray icon. This class does not touch the View.
 """
+
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from .. import events, runtime
 from ..i18n import _
@@ -43,11 +44,11 @@ class Mount:
 class DiskUsage:
     """Ready-to-render disk usage summary."""
 
-    total: str     # "468G"
-    used: str      # "338G"
-    avail: str     # "105G"
-    percent: int   # 0..100
-    color: str     # "#cf222e" / "#bf8700" / "#1a7f37"
+    total: str  # "468G"
+    used: str  # "338G"
+    avail: str  # "105G"
+    percent: int  # 0..100
+    color: str  # "#cf222e" / "#bf8700" / "#1a7f37"
 
     @property
     def label_markup(self) -> str:
@@ -94,10 +95,7 @@ class MainController:
         # Active mount — read from settings, otherwise "/" or first mount
         default = SETTINGS.get("mount", "/")
         if not any(m.target == default for m in self.mounts):
-            default = (
-                "/" if any(m.target == "/" for m in self.mounts)
-                else self.mounts[0].target
-            )
+            default = "/" if any(m.target == "/" for m in self.mounts) else self.mounts[0].target
         self.current_mount: str = default
 
         # Initial trash/dry state from settings
@@ -189,9 +187,7 @@ class MainController:
         else:
             if watchdog_start_background():
                 self.on_log(
-                    _(
-                        "Watchdog started (threshold {pct}%, every {interval}s)."
-                    ).format(
+                    _("Watchdog started (threshold {pct}%, every {interval}s).").format(
                         pct=SETTINGS.get("watchdog_threshold", 85),
                         interval=SETTINGS.get("watchdog_interval", 600),
                     )
@@ -234,8 +230,11 @@ def read_disk_usage(mount: str) -> DiskUsage | None:
     else:
         color = _COLOR_GREEN
     return DiskUsage(
-        total=parts[0], used=parts[1], avail=parts[2],
-        percent=pcent, color=color,
+        total=parts[0],
+        used=parts[1],
+        avail=parts[2],
+        percent=pcent,
+        color=color,
     )
 
 

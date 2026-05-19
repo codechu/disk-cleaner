@@ -9,6 +9,7 @@
 - :func:`list_real_mounts` — real mount points via ``findmnt``
   (snap loop, tmpfs, fuse.portal, etc. are excluded).
 """
+
 from __future__ import annotations
 
 import glob as _glob
@@ -17,7 +18,8 @@ import os
 import shutil
 import subprocess
 import time
-from typing import Any, Callable, Iterable, Optional
+from collections.abc import Callable
+from typing import Any
 
 from .config import HOME
 from .i18n import _
@@ -110,9 +112,9 @@ def parse_size(s: str) -> int:
         "B": 1,
         "kB": 1024,
         "KB": 1024,
-        "MB": 1024 ** 2,
-        "GB": 1024 ** 3,
-        "TB": 1024 ** 4,
+        "MB": 1024**2,
+        "GB": 1024**3,
+        "TB": 1024**4,
     }
     for u, mult in sorted(units.items(), key=lambda x: -len(x[0])):
         if s.endswith(u):
@@ -134,7 +136,7 @@ class ThrottledProgress:
     conveniently.
     """
 
-    def __init__(self, sink: Optional[Callable[[str], None]], hz: float = 5) -> None:
+    def __init__(self, sink: Callable[[str], None] | None, hz: float = 5) -> None:
         self.sink = sink
         self.min_interval = 1.0 / hz
         self.last = 0.0
@@ -153,14 +155,33 @@ class ThrottledProgress:
 
 
 # Filesystems and path prefixes excluded when listing mounts.
-_SKIP_MOUNT_FS: frozenset[str] = frozenset({
-    "squashfs", "tmpfs", "devtmpfs", "overlay", "overlayfs",
-    "fuse.portal", "sysfs", "proc", "cgroup", "cgroup2",
-    "autofs", "binfmt_misc", "ramfs", "fusectl",
-})
+_SKIP_MOUNT_FS: frozenset[str] = frozenset(
+    {
+        "squashfs",
+        "tmpfs",
+        "devtmpfs",
+        "overlay",
+        "overlayfs",
+        "fuse.portal",
+        "sysfs",
+        "proc",
+        "cgroup",
+        "cgroup2",
+        "autofs",
+        "binfmt_misc",
+        "ramfs",
+        "fusectl",
+    }
+)
 _SKIP_MOUNT_PREFIX: tuple[str, ...] = (
-    "/snap/", "/var/snap/", "/proc", "/sys", "/dev",
-    "/run/user/", "/run/snapd", "/run/credentials",
+    "/snap/",
+    "/var/snap/",
+    "/proc",
+    "/sys",
+    "/dev",
+    "/run/user/",
+    "/run/snapd",
+    "/run/credentials",
 )
 
 
@@ -171,10 +192,15 @@ def list_real_mounts() -> list[dict[str, str]]:
     are filtered. Each item is a dict of strings with the schema
     ``{target, source, fstype, size, used, avail, pcent}``.
     """
-    rc, out = run([
-        "findmnt", "--real", "--json",
-        "-o", "TARGET,SOURCE,FSTYPE,SIZE,USED,AVAIL,USE%",
-    ])
+    rc, out = run(
+        [
+            "findmnt",
+            "--real",
+            "--json",
+            "-o",
+            "TARGET,SOURCE,FSTYPE,SIZE,USED,AVAIL,USE%",
+        ]
+    )
     if rc != 0:
         return []
     try:
@@ -191,15 +217,17 @@ def list_real_mounts() -> list[dict[str, str]]:
             and not any(target.startswith(p) for p in _SKIP_MOUNT_PREFIX)
             and item.get("size")
         ):
-            result.append({
-                "target": target,
-                "source": item.get("source") or "",
-                "fstype": fst,
-                "size": item.get("size") or "",
-                "used": item.get("used") or "",
-                "avail": item.get("avail") or "",
-                "pcent": item.get("use%") or "",
-            })
+            result.append(
+                {
+                    "target": target,
+                    "source": item.get("source") or "",
+                    "fstype": fst,
+                    "size": item.get("size") or "",
+                    "used": item.get("used") or "",
+                    "avail": item.get("avail") or "",
+                    "pcent": item.get("use%") or "",
+                }
+            )
         for child in item.get("children", []) or []:
             walk(child)
 

@@ -1,4 +1,5 @@
 """TreemapController — headless state machine testleri."""
+
 from __future__ import annotations
 
 from disk_cleaner.controllers import TreemapController
@@ -121,9 +122,7 @@ def test_observer_fires_on_drill():
     c.current_node = root
 
     seen: list[tuple[str, list[str]]] = []
-    c.on_current_changed = lambda cur, hist: seen.append(
-        (cur.path, [h.path for h in hist])
-    )
+    c.on_current_changed = lambda cur, hist: seen.append((cur.path, [h.path for h in hist]))
     c.drill_in(a)
     c.drill_up()
     assert seen == [

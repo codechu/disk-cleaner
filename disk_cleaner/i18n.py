@@ -10,6 +10,7 @@ Usage:
     print(_("Smart scan"))            # → "Akıllı tara" (tr), "Smart scan" (en)
     print(_("{n} items").format(n=3)) # markup placeholder, format after translation
 """
+
 from __future__ import annotations
 
 import gettext as _gettext
@@ -46,8 +47,10 @@ def _resolve_language() -> str | None:
     # Read settings.json raw — importing settings.py could cause a cycle
     try:
         from .config import SETTINGS_FILE
+
         if SETTINGS_FILE.exists():
             import json
+
             with open(SETTINGS_FILE, encoding="utf-8") as f:
                 data = json.load(f)
             if lang := data.get("language"):
@@ -63,8 +66,9 @@ def _build_translation() -> _gettext.NullTranslations:
     lang = _resolve_language()
     languages = [lang] if lang else None
     try:
-        return _gettext.translation(_DOMAIN, localedir=str(localedir),
-                                     languages=languages, fallback=True)
+        return _gettext.translation(
+            _DOMAIN, localedir=str(localedir), languages=languages, fallback=True
+        )
     except Exception:
         return _gettext.NullTranslations()
 

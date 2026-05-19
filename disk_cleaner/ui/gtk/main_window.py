@@ -13,6 +13,7 @@ responsible for:
 Mount listing, disk-usage parsing, watchdog start/stop, and settings
 persistence all live on the controller.
 """
+
 from __future__ import annotations
 
 import os
@@ -70,6 +71,7 @@ def try_init_tray(on_open, on_quit):
 def _idle(fn):
     def wrapper(*args, **kwargs):
         GLib.idle_add(lambda: (fn(*args, **kwargs), False)[1])
+
     return wrapper
 
 
@@ -124,11 +126,13 @@ class MainWindow(Gtk.Window):
 
         self.trash_chk = Gtk.CheckButton(label=_("🗑 Trash"))
         self.trash_chk.set_active(runtime.TRASH_MODE)
-        self.trash_chk.set_tooltip_text(_(
-            "On: items go to trash (reversible).\n"
-            "Off: permanent deletion.\n"
-            "Subprocess commands (npm, docker, apt) are always permanent."
-        ))
+        self.trash_chk.set_tooltip_text(
+            _(
+                "On: items go to trash (reversible).\n"
+                "Off: permanent deletion.\n"
+                "Subprocess commands (npm, docker, apt) are always permanent."
+            )
+        )
         self.trash_chk.connect(
             "toggled",
             lambda c: self.controller.set_trash_mode(c.get_active()),
@@ -137,10 +141,12 @@ class MainWindow(Gtk.Window):
 
         self.dry_chk = Gtk.CheckButton(label=_("🧪 Dry-run"))
         self.dry_chk.set_active(runtime.DRY_RUN)
-        self.dry_chk.set_tooltip_text(_(
-            "On: nothing is deleted, only logs what would happen.\n"
-            "For testing and risk analysis."
-        ))
+        self.dry_chk.set_tooltip_text(
+            _(
+                "On: nothing is deleted, only logs what would happen.\n"
+                "For testing and risk analysis."
+            )
+        )
         self.dry_chk.connect(
             "toggled",
             lambda c: self.controller.set_dry_run(c.get_active()),
@@ -149,16 +155,16 @@ class MainWindow(Gtk.Window):
 
         self.watchdog_btn = Gtk.Button()
         self._refresh_watchdog_btn(self.controller.watchdog_status())
-        self.watchdog_btn.set_tooltip_text(_(
-            "Monitor disk usage in the background.\n"
-            "Threshold: {threshold}% — interval {interval}s"
-        ).format(
-            threshold=SETTINGS.get('watchdog_threshold', 85),
-            interval=SETTINGS.get('watchdog_interval', 600),
-        ))
-        self.watchdog_btn.connect(
-            "clicked", lambda *_: self.controller.toggle_watchdog()
+        self.watchdog_btn.set_tooltip_text(
+            _(
+                "Monitor disk usage in the background.\n"
+                "Threshold: {threshold}% — interval {interval}s"
+            ).format(
+                threshold=SETTINGS.get("watchdog_threshold", 85),
+                interval=SETTINGS.get("watchdog_interval", 600),
+            )
         )
+        self.watchdog_btn.connect("clicked", lambda *_: self.controller.toggle_watchdog())
         header.pack_end(self.watchdog_btn, False, False, 0)
 
         # ---- Theme selector (settings-stored, takes effect on restart) ----
@@ -167,10 +173,9 @@ class MainWindow(Gtk.Window):
         self.theme_combo.append("light", _("Light"))
         self.theme_combo.append("dark", _("Dark"))
         self.theme_combo.set_active_id(SETTINGS.get("theme", "auto"))
-        self.theme_combo.set_tooltip_text(_(
-            "Color theme.\n"
-            "Auto = follow system. Change takes effect after restart."
-        ))
+        self.theme_combo.set_tooltip_text(
+            _("Color theme.\nAuto = follow system. Change takes effect after restart.")
+        )
         self.theme_combo.connect("changed", self._on_theme_changed)
         header.pack_end(self.theme_combo, False, False, 0)
 
@@ -180,10 +185,7 @@ class MainWindow(Gtk.Window):
         self.lang_combo.append("tr", "Türkçe")
         current_lang = SETTINGS.get("language", "")
         self.lang_combo.set_active_id(current_lang or "en")
-        self.lang_combo.set_tooltip_text(_(
-            "Display language.\n"
-            "Change takes effect after restart."
-        ))
+        self.lang_combo.set_tooltip_text(_("Display language.\nChange takes effect after restart."))
         self.lang_combo.connect("changed", self._on_lang_changed)
         header.pack_end(self.lang_combo, False, False, 0)
 
@@ -202,12 +204,8 @@ class MainWindow(Gtk.Window):
         outer.pack_start(notebook, True, True, 0)
 
         # Tab 0: Smart suggestions
-        self.suggestion_panel = SuggestionPanel(
-            self, controller=SuggestionController()
-        )
-        notebook.append_page(
-            self.suggestion_panel, Gtk.Label(label=_("🎯  Suggestions"))
-        )
+        self.suggestion_panel = SuggestionPanel(self, controller=SuggestionController())
+        notebook.append_page(self.suggestion_panel, Gtk.Label(label=_("🎯  Suggestions")))
 
         # Tab 1: Cleanup
         from ... import _tasks
@@ -223,8 +221,10 @@ class MainWindow(Gtk.Window):
             name="system",
         )
         proj_panel = DynamicPanel(
-            self, build_tasks_from_input=_tasks.make_artifact_tasks,
-            default_input=str(HOME / "workspace"), input_label=_("Workspace:"),
+            self,
+            build_tasks_from_input=_tasks.make_artifact_tasks,
+            default_input=str(HOME / "workspace"),
+            input_label=_("Workspace:"),
             hint=_(
                 "node_modules, target, build, dist, .next, .gradle, venv, "
                 "__pycache__ etc. Projects modified in the last 14 days get a "
@@ -233,17 +233,19 @@ class MainWindow(Gtk.Window):
             name="artifacts",
         )
         explorer = DynamicPanel(
-            self, build_tasks_from_input=_tasks.make_folder_explorer_tasks,
-            default_input=str(HOME / ".opencode"), input_label=_("Folder:"),
+            self,
+            build_tasks_from_input=_tasks.make_folder_explorer_tasks,
+            default_input=str(HOME / ".opencode"),
+            input_label=_("Folder:"),
             hint=_("Lists direct children of a folder with their sizes."),
             name="explorer",
         )
         old_panel = OldFilesPanel(self)
         dup_panel = DynamicPanel(
-            self, build_tasks_from_input=_tasks.make_duplicate_tasks,
+            self,
+            build_tasks_from_input=_tasks.make_duplicate_tasks,
             default_input=str(
-                HOME / "İndirilenler"
-                if (HOME / "İndirilenler").exists() else HOME / "Downloads"
+                HOME / "İndirilenler" if (HOME / "İndirilenler").exists() else HOME / "Downloads"
             ),
             input_label=_("Folder:"),
             hint=_(
@@ -253,19 +255,18 @@ class MainWindow(Gtk.Window):
             name="duplicates",
         )
         empty_panel = DynamicPanel(
-            self, build_tasks_from_input=_tasks.make_empty_tasks,
-            default_input=str(HOME / "workspace"), input_label=_("Folder:"),
-            hint=_(
-                "Empty folders and 0-byte files — skeletal leftovers from "
-                "projects."
-            ),
+            self,
+            build_tasks_from_input=_tasks.make_empty_tasks,
+            default_input=str(HOME / "workspace"),
+            input_label=_("Folder:"),
+            hint=_("Empty folders and 0-byte files — skeletal leftovers from projects."),
             name="empty",
         )
         sim_panel = DynamicPanel(
-            self, build_tasks_from_input=_tasks.make_similar_image_tasks,
+            self,
+            build_tasks_from_input=_tasks.make_similar_image_tasks,
             default_input=str(
-                HOME / "Resimler"
-                if (HOME / "Resimler").exists() else HOME / "Pictures"
+                HOME / "Resimler" if (HOME / "Resimler").exists() else HOME / "Pictures"
             ),
             input_label=_("Folder:"),
             hint=_(
@@ -276,8 +277,10 @@ class MainWindow(Gtk.Window):
             name="similar",
         )
         apps_panel = DynamicPanel(
-            self, build_tasks_from_input=_tasks.make_app_uninstall_tasks,
-            default_input=_("dpkg packages"), input_label=_("(automatic)"),
+            self,
+            build_tasks_from_input=_tasks.make_app_uninstall_tasks,
+            default_input=_("dpkg packages"),
+            input_label=_("(automatic)"),
             hint=_(
                 "Lists installed applications (≥5MB) by size. The selected "
                 "package is removed with apt purge + ~/.config/<x>, "
@@ -289,8 +292,13 @@ class MainWindow(Gtk.Window):
 
         self.sys_panel = sys_panel
         self.dynamic_panels = [
-            proj_panel, explorer, old_panel, dup_panel,
-            empty_panel, sim_panel, apps_panel,
+            proj_panel,
+            explorer,
+            old_panel,
+            dup_panel,
+            empty_panel,
+            sim_panel,
+            apps_panel,
         ]
         self._panels_by_key = {
             "artifacts": proj_panel,
@@ -306,16 +314,12 @@ class MainWindow(Gtk.Window):
             if key in saved_entries:
                 panel.entry.set_text(saved_entries[key])
         for panel in self._panels_by_key.values():
-            panel.entry.connect(
-                "changed", lambda *_: GLib.idle_add(self._save_settings)
-            )
+            panel.entry.connect("changed", lambda *_: GLib.idle_add(self._save_settings))
 
         cleanup_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         cleanup_box.set_border_width(6)
         selector_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        selector_row.pack_start(
-            Gtk.Label(label=_("Scan type:"), xalign=0), False, False, 0
-        )
+        selector_row.pack_start(Gtk.Label(label=_("Scan type:"), xalign=0), False, False, 0)
         self.cleanup_combo = Gtk.ComboBoxText()
         self.cleanup_combo.append("sys", _("System cache & packages"))
         self.cleanup_combo.append("proj", _("Project artifacts (node_modules, build…)"))
@@ -349,9 +353,7 @@ class MainWindow(Gtk.Window):
         notebook.append_page(treemap_panel, Gtk.Label(label=_("📊  Disk map")))
         self.treemap_panel = treemap_panel
         self._panels_by_key["treemap"] = treemap_panel
-        treemap_panel.entry.connect(
-            "changed", lambda *_: GLib.idle_add(self._save_settings)
-        )
+        treemap_panel.entry.connect("changed", lambda *_: GLib.idle_add(self._save_settings))
 
         # ---- Log expander ----
         log_exp = Gtk.Expander(label=_("📜  Log"))
@@ -378,9 +380,7 @@ class MainWindow(Gtk.Window):
 
         # Initial state
         self.controller.refresh_disk_usage()
-        self._on_fs_warning_changed(
-            self.controller.fs_warning_for(self.controller.current_mount)
-        )
+        self._on_fs_warning_changed(self.controller.fs_warning_for(self.controller.current_mount))
         self.log(_("Ready. Trash mode ON — deleted items can be restored.\n"))
 
         # Control API
@@ -443,13 +443,18 @@ class MainWindow(Gtk.Window):
         if old_lang == new_lang:
             return
         SETTINGS["language"] = new_lang
-        from ...settings import save_settings
         from ... import events
+        from ...settings import save_settings
+
         save_settings(SETTINGS)
         # User-initiated preference change → publish on its own channel
-        events.emit("prefs.language.changed",
-                    source="user", channel="prefs",
-                    old=old_lang or None, new=new_lang)
+        events.emit(
+            "prefs.language.changed",
+            source="user",
+            channel="prefs",
+            old=old_lang or None,
+            new=new_lang,
+        )
         self.log(_("Language set to {lang}. Restart to apply.\n").format(lang=new_lang))
 
     def _on_theme_changed(self, combo) -> None:
@@ -458,12 +463,13 @@ class MainWindow(Gtk.Window):
         if old_theme == new_theme:
             return
         SETTINGS["theme"] = new_theme
-        from ...settings import save_settings
         from ... import events
+        from ...settings import save_settings
+
         save_settings(SETTINGS)
-        events.emit("prefs.theme.changed",
-                    source="user", channel="prefs",
-                    old=old_theme, new=new_theme)
+        events.emit(
+            "prefs.theme.changed", source="user", channel="prefs", old=old_theme, new=new_theme
+        )
         self.log(_("Theme set to {theme}. Restart to apply.\n").format(theme=new_theme))
 
     def _save_settings(self) -> None:
@@ -488,8 +494,12 @@ class MainWindow(Gtk.Window):
     def mounts(self) -> list[dict]:
         return [
             {
-                "target": m.target, "source": m.source, "fstype": m.fstype,
-                "size": m.size, "used": m.used, "avail": m.avail,
+                "target": m.target,
+                "source": m.source,
+                "fstype": m.fstype,
+                "size": m.size,
+                "used": m.used,
+                "avail": m.avail,
                 "pcent": m.pcent,
             }
             for m in self.controller.mounts

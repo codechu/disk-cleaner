@@ -8,50 +8,88 @@ All functions:
 - perform I/O but their results are pure computations — tests can call
   them directly with tmp_path.
 """
+
 from __future__ import annotations
 
 import hashlib
 import os
 import stat as statmod
 import time
+from collections.abc import Callable
 from pathlib import Path
 from threading import Event
-from typing import Any, Callable, Optional
+from typing import Any
 
 from ..i18n import _
 from ..utils import human
 from .sizing import dir_size
 
 # Build artifact directory names — find_project_artifacts looks for these.
-ARTIFACT_DIRS: frozenset[str] = frozenset({
-    "node_modules", "target", "build", "dist", ".next", ".nuxt",
-    "out", "bin", "obj", "__pycache__", ".pytest_cache",
-    "venv", ".venv", ".gradle", ".cargo-target",
-})
+ARTIFACT_DIRS: frozenset[str] = frozenset(
+    {
+        "node_modules",
+        "target",
+        "build",
+        "dist",
+        ".next",
+        ".nuxt",
+        "out",
+        "bin",
+        "obj",
+        "__pycache__",
+        ".pytest_cache",
+        "venv",
+        ".venv",
+        ".gradle",
+        ".cargo-target",
+    }
+)
 
 # Default risk level keyed by artifact name.
 ARTIFACT_RISK: dict[str, str] = {
-    "node_modules": "low", "target": "low", "build": "low", "dist": "low",
-    ".next": "low", ".nuxt": "low", "out": "medium",
-    "bin": "medium", "obj": "low", "__pycache__": "low",
-    ".pytest_cache": "low", "venv": "medium", ".venv": "medium",
-    ".gradle": "low", ".cargo-target": "low",
+    "node_modules": "low",
+    "target": "low",
+    "build": "low",
+    "dist": "low",
+    ".next": "low",
+    ".nuxt": "low",
+    "out": "medium",
+    "bin": "medium",
+    "obj": "low",
+    "__pycache__": "low",
+    ".pytest_cache": "low",
+    "venv": "medium",
+    ".venv": "medium",
+    ".gradle": "low",
+    ".cargo-target": "low",
 }
 
-_IMAGE_EXTS: frozenset[str] = frozenset({
-    ".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif",
-})
+_IMAGE_EXTS: frozenset[str] = frozenset(
+    {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".webp",
+        ".bmp",
+        ".gif",
+    }
+)
 
 # Directory names that os.walk should never descend into.
-_SKIP_WALK_DIRS: frozenset[str] = frozenset({
-    ".git", "node_modules", "__pycache__", ".cache",
-})
+_SKIP_WALK_DIRS: frozenset[str] = frozenset(
+    {
+        ".git",
+        "node_modules",
+        "__pycache__",
+        ".cache",
+    }
+)
 
 
 def find_project_artifacts(
     root: str | Path,
-    cancel: Optional[Event] = None,
-    progress: Optional[Callable[[str], None]] = None,
+    cancel: Event | None = None,
+    progress: Callable[[str], None] | None = None,
 ) -> list[str]:
     """Find build / cache artifact folders under ``root``.
 
@@ -62,7 +100,7 @@ def find_project_artifacts(
     if not root.exists():
         return []
     found: list[str] = []
-    for dirpath, dirnames, _ in os.walk(root, followlinks=False):
+    for dirpath, dirnames, _files in os.walk(root, followlinks=False):
         if cancel is not None and cancel.is_set():
             break
         if progress is not None:
@@ -174,8 +212,8 @@ def _hamming(a: int, b: int) -> int:
 
 def find_similar_images(
     folder: str | Path,
-    cancel: Optional[Event] = None,
-    progress: Optional[Callable[[str], None]] = None,
+    cancel: Event | None = None,
+    progress: Callable[[str], None] | None = None,
     threshold: int = 5,
     min_size: int = 20 * 1024,
 ) -> dict[str, Any]:
@@ -218,9 +256,11 @@ def find_similar_images(
         if cancel is not None and cancel.is_set():
             return {"groups": [], "scanned": idx}
         if progress is not None and idx % 20 == 0:
-            progress(_("hash {i}/{n} · {name}").format(
-                i=idx, n=len(candidates), name=os.path.basename(p)
-            ))
+            progress(
+                _("hash {i}/{n} · {name}").format(
+                    i=idx, n=len(candidates), name=os.path.basename(p)
+                )
+            )
         h = _dhash(p)
         if h is not None:
             hashes.append((p, h))
@@ -251,8 +291,8 @@ def find_similar_images(
 
 def find_empty_items(
     folder: str | Path,
-    cancel: Optional[Event] = None,
-    progress: Optional[Callable[[str], None]] = None,
+    cancel: Event | None = None,
+    progress: Callable[[str], None] | None = None,
     include_zero_byte: bool = True,
 ) -> tuple[list[str], list[str]]:
     """Find empty directories and 0-byte files.
@@ -272,9 +312,11 @@ def find_empty_items(
         dirs[:] = [d for d in dirs if d not in _SKIP_WALK_DIRS]
         scanned += 1
         if progress is not None and scanned % 50 == 0:
-            progress(_(
-                "{dirs} empty folders · {files} 0-byte files · {root}"
-            ).format(dirs=len(empty_dirs), files=len(zero_files), root=root))
+            progress(
+                _("{dirs} empty folders · {files} 0-byte files · {root}").format(
+                    dirs=len(empty_dirs), files=len(zero_files), root=root
+                )
+            )
         if include_zero_byte:
             for f in files:
                 full = os.path.join(root, f)
@@ -294,8 +336,8 @@ def find_empty_items(
 
 def find_duplicates(
     folder: str | Path,
-    cancel: Optional[Event] = None,
-    progress: Optional[Callable[[str], None]] = None,
+    cancel: Event | None = None,
+    progress: Callable[[str], None] | None = None,
     min_size: int = 1024 * 1024,
 ) -> list[tuple[int, list[str]]]:
     """Find groups of files with identical content.
@@ -315,9 +357,7 @@ def find_duplicates(
             return []
         dirs[:] = [d for d in dirs if d not in _SKIP_WALK_DIRS]
         if progress is not None:
-            progress(_("1/2 scanning files · {n} · {root}").format(
-                n=file_count, root=root
-            ))
+            progress(_("1/2 scanning files · {n} · {root}").format(n=file_count, root=root))
         for f in files:
             full = os.path.join(root, f)
             try:
@@ -343,12 +383,14 @@ def find_duplicates(
             if cancel is not None and cancel.is_set():
                 break
             if progress is not None:
-                progress(_(
-                    "2/2 hash · {i}/{n} · {name} ({size})"
-                ).format(
-                    i=hashed, n=total_to_hash,
-                    name=os.path.basename(p), size=human(size),
-                ))
+                progress(
+                    _("2/2 hash · {i}/{n} · {name} ({size})").format(
+                        i=hashed,
+                        n=total_to_hash,
+                        name=os.path.basename(p),
+                        size=human(size),
+                    )
+                )
             try:
                 h = hashlib.blake2b(digest_size=16)
                 with open(p, "rb") as f:
@@ -361,7 +403,7 @@ def find_duplicates(
             except OSError:
                 pass
             hashed += 1
-        for _, group in by_hash.items():
+        for group in by_hash.values():
             if len(group) >= 2:
                 group.sort(key=lambda x: -os.path.getmtime(x))
                 groups.append((size, group))

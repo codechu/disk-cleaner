@@ -4,6 +4,7 @@ Used in the Duplicate / Empty / Similar / Explorer tabs: a "Folder"
 entry on top, a :class:`TaskPanel` below. When the entry changes, the
 provider callback is invoked with the fresh input.
 """
+
 from __future__ import annotations
 
 from ..._gtk import Gtk
@@ -52,9 +53,7 @@ class DynamicPanel(Gtk.Box):
                 self.entry.get_text(), cancel=cancel, progress=progress
             )
         except TypeError:
-            return self.build_tasks_from_input(
-                self.entry.get_text(), cancel=cancel
-            )
+            return self.build_tasks_from_input(self.entry.get_text(), cancel=cancel)
 
     def set_default_path(self, path: str) -> None:
         """Called when the mount changes — updates the entry."""

@@ -7,6 +7,7 @@ Schema (kept bit-for-bit compatible with the legacy version):
 
 The most recent 20 snapshots are kept; older ones are pruned on write.
 """
+
 from __future__ import annotations
 
 import sqlite3
@@ -55,8 +56,7 @@ def save_snapshot(items: list[dict[str, Any]], mount: str = "/") -> int | None:
     conn = db_connect()
     try:
         cur = conn.execute(
-            "INSERT INTO snapshots (scanned_at, mount, item_count, total_size) "
-            "VALUES (?, ?, ?, ?)",
+            "INSERT INTO snapshots (scanned_at, mount, item_count, total_size) VALUES (?, ?, ?, ?)",
             (
                 time.time(),
                 mount,
@@ -154,14 +154,16 @@ def compute_growth(
             prev_size == 0 and cur_size > _GROWTH_NEW_SIZE_THRESHOLD
         ):
             ratio = (cur_size / prev_size) if prev_size > 0 else float("inf")
-            growth.append({
-                "path": path,
-                "name": it.get("name", ""),
-                "current_size": cur_size,
-                "prev_size": prev_size,
-                "delta": delta,
-                "ratio": ratio,
-            })
+            growth.append(
+                {
+                    "path": path,
+                    "name": it.get("name", ""),
+                    "current_size": cur_size,
+                    "prev_size": prev_size,
+                    "delta": delta,
+                    "ratio": ratio,
+                }
+            )
     growth.sort(key=lambda x: -x["delta"])
     return {"prev_scanned_at": prev["scanned_at"], "growth": growth}
 
@@ -175,9 +177,7 @@ class SnapshotStore:
     def save(self, items: list[dict[str, Any]], mount: str = "/") -> int | None:
         return save_snapshot(items, mount=mount)
 
-    def latest_before(
-        self, seconds_ago: float, mount: str = "/"
-    ) -> dict[str, Any] | None:
+    def latest_before(self, seconds_ago: float, mount: str = "/") -> dict[str, Any] | None:
         return latest_snapshot_before(seconds_ago, mount=mount)
 
     def items(self, snapshot_id: int) -> dict[str, int]:

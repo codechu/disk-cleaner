@@ -10,16 +10,16 @@ BLOCKED from the API. Only the user can trigger them manually via the
 GUI. To extend ``_DESTRUCTIVE_TARGETS``: add a target whose user data
 cannot be recovered.
 """
+
 from __future__ import annotations
 
 import json
-import os
 import socket
 import threading
 from pathlib import Path
 
-from .._gtk import Gdk, GLib, Gtk
 from .. import events
+from .._gtk import Gdk, GLib, Gtk
 from ..config import CONTROL_SOCKET as _CONTROL_SOCKET_PATH
 from ..i18n import _
 from ..settings import SETTINGS
@@ -60,9 +60,7 @@ class ControlServer:
                 conn, _ = self._server.accept()
             except Exception:
                 break
-            threading.Thread(
-                target=self._handle, args=(conn,), daemon=True
-            ).start()
+            threading.Thread(target=self._handle, args=(conn,), daemon=True).start()
 
     def _handle(self, conn) -> None:
         try:
@@ -87,7 +85,9 @@ class ControlServer:
                 result_holder: dict = {}
                 done = threading.Event()
 
-                def runner() -> bool:
+                def runner(
+                    msg=msg, result_holder=result_holder, done=done
+                ) -> bool:
                     try:
                         result_holder["v"] = self._dispatch(msg)
                     except Exception as e:
@@ -130,11 +130,14 @@ class ControlServer:
             self._send(f, {"ok": False, "error": f"limit: {e}"})
             return
         # Welcome event: subscription ack + filter echo
-        self._send(f, {
-            "ok": True,
-            "subscribed": types,
-            "heartbeat_sec": hb,
-        })
+        self._send(
+            f,
+            {
+                "ok": True,
+                "subscribed": types,
+                "heartbeat_sec": hb,
+            },
+        )
         try:
             for event in sub.iter(heartbeat=hb > 0):
                 self._send(f, event)
@@ -186,6 +189,7 @@ class ControlServer:
 
     def _cmd_screenshot(self, msg: dict) -> dict:
         from ..config import RUNTIME_DIR
+
         default_path = str(RUNTIME_DIR / "screenshot.png")
         path = msg.get("path", default_path)
         try:
@@ -273,9 +277,13 @@ class ControlServer:
         if panel is None:
             return {"ok": False, "error": _("no panel: {pid}").format(pid=panel_id)}
         btn_map = {
-            "scan": "scan_btn", "cancel": "cancel_btn",
-            "select_all": "all_btn", "select_none": "none_btn",
-            "export": "export_btn", "png": "png_btn", "up": "up_btn",
+            "scan": "scan_btn",
+            "cancel": "cancel_btn",
+            "select_all": "all_btn",
+            "select_none": "none_btn",
+            "export": "export_btn",
+            "png": "png_btn",
+            "up": "up_btn",
         }
         attr = btn_map.get(target)
         if attr and hasattr(panel, attr):
@@ -387,9 +395,7 @@ class ControlServer:
                     "rect": list(n.rect) if n.rect else None,
                     "children_count": len(n.children),
                     "children": [
-                        dump(c, d + 1)
-                        for c in n.children[:30]
-                        if dump(c, d + 1) is not None
+                        dump(c, d + 1) for c in n.children[:30] if dump(c, d + 1) is not None
                     ],
                 }
 

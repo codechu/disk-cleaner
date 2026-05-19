@@ -6,6 +6,7 @@ Uses dpkg-query to guess packages installed manually by the user
 ``~/.local/share`` subfolders for a package name — so they can be
 removed after apt purge.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -14,16 +15,42 @@ from ..config import HOME
 from ..utils import run
 
 _SKIP_PREFIX: tuple[str, ...] = (
-    "lib", "linux-", "python3-", "gcc-", "perl-", "ruby-",
-    "fonts-", "language-",
+    "lib",
+    "linux-",
+    "python3-",
+    "gcc-",
+    "perl-",
+    "ruby-",
+    "fonts-",
+    "language-",
 )
-_SKIP_EXACT: frozenset[str] = frozenset({
-    "base-files", "base-passwd", "bash", "coreutils",
-    "dash", "debconf", "diffutils", "dpkg", "findutils",
-    "grep", "gzip", "hostname", "init", "login", "mount",
-    "ncurses-base", "passwd", "sed", "sysvinit-utils",
-    "tar", "util-linux", "systemd", "udev",
-})
+_SKIP_EXACT: frozenset[str] = frozenset(
+    {
+        "base-files",
+        "base-passwd",
+        "bash",
+        "coreutils",
+        "dash",
+        "debconf",
+        "diffutils",
+        "dpkg",
+        "findutils",
+        "grep",
+        "gzip",
+        "hostname",
+        "init",
+        "login",
+        "mount",
+        "ncurses-base",
+        "passwd",
+        "sed",
+        "sysvinit-utils",
+        "tar",
+        "util-linux",
+        "systemd",
+        "udev",
+    }
+)
 
 
 def list_installed_apps(min_size_kb: int = 1024) -> list[dict[str, Any]]:
@@ -33,9 +60,7 @@ def list_installed_apps(min_size_kb: int = 1024) -> list[dict[str, Any]]:
     packs. Packages below ``min_size_kb`` are skipped. The result is
     sorted by byte size descending.
     """
-    rc, out = run(
-        ["dpkg-query", "-W", "-f", "${Package}\\t${Installed-Size}\\t${Description}\\n"]
-    )
+    rc, out = run(["dpkg-query", "-W", "-f", "${Package}\\t${Installed-Size}\\t${Description}\\n"])
     if rc != 0:
         return []
     pkgs: list[dict[str, Any]] = []

@@ -31,14 +31,16 @@ Design decisions:
   ``_keepalive`` events on idle queues every N seconds (dead connection
   detection).
 """
+
 from __future__ import annotations
 
 import fnmatch
 import queue
 import threading
 import time
+from collections.abc import AsyncIterator, Iterator
 from contextlib import contextmanager
-from typing import Any, AsyncIterator, Iterator
+from typing import Any
 
 #: Maximum events that can be held in a single subscription's queue.
 QUEUE_MAX: int = 200
@@ -62,8 +64,13 @@ class Subscription:
     """
 
     __slots__ = (
-        "types", "queue", "dropped", "received",
-        "created_at", "heartbeat_sec", "_closed",
+        "types",
+        "queue",
+        "dropped",
+        "received",
+        "created_at",
+        "heartbeat_sec",
+        "_closed",
     )
 
     def __init__(self, types: list[str], heartbeat_sec: float) -> None:
@@ -117,9 +124,7 @@ class Subscription:
         if timeout is not None:
             deadline = time.monotonic() + timeout
 
-        hb_interval = (
-            self.heartbeat_sec if heartbeat and self.heartbeat_sec > 0 else None
-        )
+        hb_interval = self.heartbeat_sec if heartbeat and self.heartbeat_sec > 0 else None
 
         while True:
             # Effective get timeout: min of heartbeat and deadline
@@ -128,9 +133,7 @@ class Subscription:
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     return
-                get_timeout = (
-                    min(get_timeout, remaining) if get_timeout else remaining
-                )
+                get_timeout = min(get_timeout, remaining) if get_timeout else remaining
             try:
                 event = self.queue.get(timeout=get_timeout)
             except queue.Empty:
@@ -163,9 +166,7 @@ class Subscription:
         loop = asyncio.get_event_loop()
         get_timeout = self.heartbeat_sec if heartbeat and self.heartbeat_sec > 0 else None
         while not self._closed:
-            event = await loop.run_in_executor(
-                None, _blocking_get, self.queue, get_timeout
-            )
+            event = await loop.run_in_executor(None, _blocking_get, self.queue, get_timeout)
             if event is _EMPTY_SENTINEL:
                 if heartbeat and self.heartbeat_sec > 0:
                     yield {"event": "_keepalive", "ts": time.time()}

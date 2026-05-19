@@ -16,9 +16,8 @@ To add a new source: write a :class:`Scanner` subclass and either
 register it on the registry or wire it directly through
 :class:`~disk_cleaner.app.AppContext`.
 """
-from __future__ import annotations
 
-from typing import Dict
+from __future__ import annotations
 
 from .apps import AppUninstallScanner
 from .artifacts import ArtifactScanner
@@ -36,7 +35,7 @@ class ScannerRegistry:
     """Name → Scanner instance mapping (plugin-style extension)."""
 
     def __init__(self) -> None:
-        self._scanners: Dict[str, Scanner] = {}
+        self._scanners: dict[str, Scanner] = {}
 
     def register(self, name: str, scanner: Scanner) -> None:
         self._scanners[name] = scanner

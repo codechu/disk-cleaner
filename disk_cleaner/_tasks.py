@@ -11,19 +11,22 @@ they are the stateless "configuration" layer of Scanner classes.
 ``DRY_RUN`` and ``TRASH_MODE`` are read at call time via
 :mod:`disk_cleaner.runtime` (runtime is mutable; the UI may change it).
 """
+
 from __future__ import annotations
 
 import json
 import os
 import sys
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from .cleaners.command import CommandCleaner
 from .cleaners.contents import ContentsCleaner
 from .cleaners.safe_path import SafePathCleaner
-from .config import HOME, USER_CLEANERS_DIR as CLEANERS_DIR
+from .config import HOME
+from .config import USER_CLEANERS_DIR as CLEANERS_DIR
 from .core.apps import app_related_paths, list_installed_apps
 from .core.kernels import clean_old_kernels, size_old_kernels
 from .core.safe_remove import rm_contents
@@ -55,7 +58,6 @@ from .core.walker import (
 from .i18n import _
 from .storage.du_cache import cached_dir_size
 from .utils import human, run
-
 
 # ---------- Cleaner factories (bound to Cleaner.execute) ----------
 
@@ -112,8 +114,7 @@ def load_user_cleaners() -> list[dict[str, Any]]:
         paths = rule.get("paths") or []
         cmd = rule.get("command")
         display_path = (
-            " ".join(paths) if paths
-            else (" ".join(cmd) if isinstance(cmd, list) else (cmd or "?"))
+            " ".join(paths) if paths else (" ".join(cmd) if isinstance(cmd, list) else (cmd or "?"))
         )
 
         def make_size_fn(paths=paths):
@@ -139,14 +140,16 @@ def load_user_cleaners() -> list[dict[str, Any]]:
 
             return _do
 
-        out.append({
-            "name": "👤 " + name,
-            "desc": desc + _(" (user rule)"),
-            "risk": risk,
-            "path": display_path,
-            "size_fn": make_size_fn(),
-            "clean_fn": make_clean_fn(),
-        })
+        out.append(
+            {
+                "name": "👤 " + name,
+                "desc": desc + _(" (user rule)"),
+                "risk": risk,
+                "path": display_path,
+                "size_fn": make_size_fn(),
+                "clean_fn": make_clean_fn(),
+            }
+        )
     return out
 
 
@@ -154,7 +157,9 @@ def load_user_cleaners() -> list[dict[str, Any]]:
 
 
 def make_app_uninstall_tasks(
-    _unused_arg=None, cancel=None, progress=None,
+    _unused_arg=None,
+    cancel=None,
+    progress=None,
 ) -> list[dict[str, Any]]:
     """Produce tasks for installed apps (and their related user folders).
 
@@ -174,7 +179,8 @@ def make_app_uninstall_tasks(
         total = app["size"] + rel_size
         rel_note = (
             _(" + {n} folders ({size})").format(n=len(related), size=human(rel_size))
-            if related else ""
+            if related
+            else ""
         )
 
         def make_clean(name=name, related=related):
@@ -187,12 +193,9 @@ def make_app_uninstall_tasks(
                     for p in related:
                         msgs.append(f"[DRY] {p} would be deleted")
                     return 0, "\n".join(msgs)
-                rc, out = run(
-                    ["pkexec", "apt", "purge", "-y", name], timeout=600
-                )
+                rc, out = run(["pkexec", "apt", "purge", "-y", name], timeout=600)
                 msgs.append(
-                    f"apt purge {name}: "
-                    f"{'ok' if rc == 0 else 'error'}\n{out.strip()[:300]}"
+                    f"apt purge {name}: {'ok' if rc == 0 else 'error'}\n{out.strip()[:300]}"
                 )
                 purge_rc = rc
                 for p in related:
@@ -209,14 +212,16 @@ def make_app_uninstall_tasks(
 
             return _do
 
-        tasks.append({
-            "name": name,
-            "desc": f"{app['desc']}{rel_note}",
-            "risk": "high",  # user must remove deliberately
-            "path": f"apt:{name}",
-            "size_fn": (lambda total=total: total),
-            "clean_fn": make_clean(),
-        })
+        tasks.append(
+            {
+                "name": name,
+                "desc": f"{app['desc']}{rel_note}",
+                "risk": "high",  # user must remove deliberately
+                "path": f"apt:{name}",
+                "size_fn": (lambda total=total: total),
+                "clean_fn": make_clean(),
+            }
+        )
     return tasks
 
 
@@ -229,9 +234,7 @@ def make_artifact_tasks(
     progress=None,
     active_threshold_days: int = 14,
 ) -> list[dict[str, Any]]:
-    paths = find_project_artifacts(
-        workspace_root, cancel=cancel, progress=progress
-    )
+    paths = find_project_artifacts(workspace_root, cancel=cancel, progress=progress)
     tasks: list[dict[str, Any]] = []
     root = Path(workspace_root).expanduser()
     for p in paths:
@@ -243,21 +246,23 @@ def make_artifact_tasks(
         if age is not None:
             if age < active_threshold_days:
                 risk = "high"
-                desc = _(
-                    "⚠ ACTIVE project (last git {days} days ago) — {kind}"
-                ).format(days=int(age), kind=kind)
+                desc = _("⚠ ACTIVE project (last git {days} days ago) — {kind}").format(
+                    days=int(age), kind=kind
+                )
             else:
-                desc = _(
-                    "{kind} folder • last git {days} days ago"
-                ).format(kind=kind, days=int(age))
-        tasks.append({
-            "name": rel,
-            "desc": desc,
-            "risk": risk,
-            "path": p,
-            "size_fn": (lambda pp=p: cached_dir_size(pp)),
-            "clean_fn": make_rm_path_clean(p),
-        })
+                desc = _("{kind} folder • last git {days} days ago").format(
+                    kind=kind, days=int(age)
+                )
+        tasks.append(
+            {
+                "name": rel,
+                "desc": desc,
+                "risk": risk,
+                "path": p,
+                "size_fn": (lambda pp=p: cached_dir_size(pp)),
+                "clean_fn": make_rm_path_clean(p),
+            }
+        )
     return tasks
 
 
@@ -272,34 +277,38 @@ def make_folder_explorer_tasks(folder, cancel=None) -> list[dict[str, Any]]:
             desc = _("sparse file (nominal: {size})").format(size=human(nominal))
 
         def make_size(cc=c):
-            return lambda: (
-                cached_dir_size(cc) if Path(cc).is_dir() else path_size(cc)
-            )
+            return lambda: cached_dir_size(cc) if Path(cc).is_dir() else path_size(cc)
 
-        tasks.append({
-            "name": name,
-            "desc": desc,
-            "risk": "medium",
-            "path": c,
-            "size_fn": make_size(),
-            "clean_fn": make_rm_path_clean(c),
-        })
+        tasks.append(
+            {
+                "name": name,
+                "desc": desc,
+                "risk": "medium",
+                "path": c,
+                "size_fn": make_size(),
+                "clean_fn": make_rm_path_clean(c),
+            }
+        )
     return tasks
 
 
 def make_similar_image_tasks(
-    folder, cancel=None, progress=None,
+    folder,
+    cancel=None,
+    progress=None,
 ) -> list[dict[str, Any]]:
     result = find_similar_images(folder, cancel=cancel, progress=progress)
     if "error" in result:
-        return [{
-            "name": result["error"],
-            "desc": _("installation error"),
-            "risk": "high",
-            "path": "",
-            "size_fn": lambda: 0,
-            "clean_fn": lambda: (1, _("Pillow is not installed")),
-        }]
+        return [
+            {
+                "name": result["error"],
+                "desc": _("installation error"),
+                "risk": "high",
+                "path": "",
+                "size_fn": lambda: 0,
+                "clean_fn": lambda: (1, _("Pillow is not installed")),
+            }
+        ]
     tasks: list[dict[str, Any]] = []
     for group in result["groups"]:
         keep = group[0]
@@ -309,40 +318,44 @@ def make_similar_image_tasks(
                 size = os.path.getsize(dup)
             except OSError:
                 size = 0
-            tasks.append({
-                "name": os.path.basename(dup),
-                "desc": _("similar to: {path}").format(path=keep_rel),
-                "risk": "medium",
-                "path": dup,
-                "size_fn": (lambda s=size: s),
-                "clean_fn": make_rm_path_clean(dup),
-            })
+            tasks.append(
+                {
+                    "name": os.path.basename(dup),
+                    "desc": _("similar to: {path}").format(path=keep_rel),
+                    "risk": "medium",
+                    "path": dup,
+                    "size_fn": (lambda s=size: s),
+                    "clean_fn": make_rm_path_clean(dup),
+                }
+            )
     return tasks
 
 
 def make_empty_tasks(folder, cancel=None, progress=None) -> list[dict[str, Any]]:
-    empty_dirs, zero_files = find_empty_items(
-        folder, cancel=cancel, progress=progress
-    )
+    empty_dirs, zero_files = find_empty_items(folder, cancel=cancel, progress=progress)
     tasks: list[dict[str, Any]] = []
     for d in empty_dirs:
-        tasks.append({
-            "name": "📁 " + os.path.basename(d) + "/",
-            "desc": _("empty folder"),
-            "risk": "low",
-            "path": d,
-            "size_fn": (lambda: 4096),  # a directory inode is ~4KB
-            "clean_fn": make_rm_path_clean(d),
-        })
+        tasks.append(
+            {
+                "name": "📁 " + os.path.basename(d) + "/",
+                "desc": _("empty folder"),
+                "risk": "low",
+                "path": d,
+                "size_fn": (lambda: 4096),  # a directory inode is ~4KB
+                "clean_fn": make_rm_path_clean(d),
+            }
+        )
     for f in zero_files:
-        tasks.append({
-            "name": "📄 " + os.path.basename(f),
-            "desc": _("0-byte file"),
-            "risk": "low",
-            "path": f,
-            "size_fn": (lambda: 0),
-            "clean_fn": make_rm_path_clean(f),
-        })
+        tasks.append(
+            {
+                "name": "📄 " + os.path.basename(f),
+                "desc": _("0-byte file"),
+                "risk": "low",
+                "path": f,
+                "size_fn": (lambda: 0),
+                "clean_fn": make_rm_path_clean(f),
+            }
+        )
     return tasks
 
 
@@ -353,14 +366,16 @@ def make_duplicate_tasks(folder, cancel=None, progress=None) -> list[dict[str, A
         keep = group[0]
         for dup in group[1:]:
             rel_keep = keep.replace(str(HOME), "~")
-            tasks.append({
-                "name": os.path.basename(dup),
-                "desc": _("copy of: {path}").format(path=rel_keep),
-                "risk": "medium",
-                "path": dup,
-                "size_fn": (lambda s=size: s),
-                "clean_fn": make_rm_path_clean(dup),
-            })
+            tasks.append(
+                {
+                    "name": os.path.basename(dup),
+                    "desc": _("copy of: {path}").format(path=rel_keep),
+                    "risk": "medium",
+                    "path": dup,
+                    "size_fn": (lambda s=size: s),
+                    "clean_fn": make_rm_path_clean(dup),
+                }
+            )
     return tasks
 
 
@@ -369,14 +384,16 @@ def make_old_files_tasks(folder, days: int, cancel=None) -> list[dict[str, Any]]
     tasks: list[dict[str, Any]] = []
     for path, size, mtime in items:
         age_days = int((time.time() - mtime) / 86400)
-        tasks.append({
-            "name": os.path.basename(path),
-            "desc": _("modified {days} days ago").format(days=age_days),
-            "risk": "high",
-            "path": path,
-            "size_fn": (lambda s=size: s),
-            "clean_fn": make_rm_path_clean(path),
-        })
+        tasks.append(
+            {
+                "name": os.path.basename(path),
+                "desc": _("modified {days} days ago").format(days=age_days),
+                "risk": "high",
+                "path": path,
+                "size_fn": (lambda s=size: s),
+                "clean_fn": make_rm_path_clean(path),
+            }
+        )
     return tasks
 
 
@@ -396,9 +413,7 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
         "desc": _("Mesa shader cache, fontconfig, etc."),
         "risk": "low",
         "path": "~/.cache (chrome excluded)",
-        "size_fn": lambda: max(
-            0, dir_size("~/.cache") - dir_size("~/.cache/google-chrome")
-        ),
+        "size_fn": lambda: max(0, dir_size("~/.cache") - dir_size("~/.cache/google-chrome")),
         "clean_fn": lambda: clean_cache_except_chrome(),
     },
     {
@@ -439,9 +454,7 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
         "risk": "low",
         "path": "~/.nuget",
         "size_fn": lambda: dir_size("~/.nuget"),
-        "clean_fn": make_cmd_clean(
-            ["dotnet", "nuget", "locals", "all", "--clear"]
-        ),
+        "clean_fn": make_cmd_clean(["dotnet", "nuget", "locals", "all", "--clear"]),
     },
     {
         "name": _("Docker build cache"),
@@ -477,7 +490,8 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
             # Static command string — no user-controlled input. shell=True
             # required to chain apt clean + autoremove atomically under pkexec.
             "apt clean && apt autoremove --purge -y",
-            shell=True, need_root=True,  # nosec B602: vetted static command
+            shell=True,
+            need_root=True,  # nosec B602: vetted static command
         ),
     },
     {
@@ -486,9 +500,7 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
         "risk": "low",
         "path": "/var/log/journal",
         "size_fn": size_journal,
-        "clean_fn": make_cmd_clean(
-            ["journalctl", "--vacuum-time=7d"], need_root=True
-        ),
+        "clean_fn": make_cmd_clean(["journalctl", "--vacuum-time=7d"], need_root=True),
     },
     {
         "name": _("Old snap versions"),
@@ -505,8 +517,7 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
         "path": "/var/lib/flatpak",
         "size_fn": size_flatpak_unused,
         "clean_fn": make_cmd_clean(
-            ["flatpak", "uninstall", "--unused", "--noninteractive",
-             "--assumeyes"]
+            ["flatpak", "uninstall", "--unused", "--noninteractive", "--assumeyes"]
         ),
     },
     {
@@ -515,9 +526,7 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
         "risk": "medium",
         "path": "~/.local/share/Trash",
         "size_fn": lambda: dir_size("~/.local/share/Trash"),
-        "clean_fn": make_rm_contents_clean(
-            "~/.local/share/Trash", force_permanent=True
-        ),
+        "clean_fn": make_rm_contents_clean("~/.local/share/Trash", force_permanent=True),
     },
     {
         "name": _("Thumbnail cache"),
@@ -565,21 +574,15 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
         "desc": _("~/.cargo/registry and ~/.cargo/git — Rust crate cache."),
         "risk": "low",
         "path": "~/.cargo/{registry,git}",
-        "size_fn": lambda: (
-            dir_size("~/.cargo/registry") + dir_size("~/.cargo/git")
-        ),
-        "clean_fn": lambda: _clean_multi(
-            ["~/.cargo/registry", "~/.cargo/git"]
-        ),
+        "size_fn": lambda: dir_size("~/.cargo/registry") + dir_size("~/.cargo/git"),
+        "clean_fn": lambda: _clean_multi(["~/.cargo/registry", "~/.cargo/git"]),
     },
     {
         "name": _("Conda package cache"),
         "desc": _("`conda clean --all` (if available)."),
         "risk": "low",
         "path": "Conda pkgs",
-        "size_fn": lambda: (
-            dir_size("~/miniconda3/pkgs") + dir_size("~/anaconda3/pkgs")
-        ),
+        "size_fn": lambda: dir_size("~/miniconda3/pkgs") + dir_size("~/anaconda3/pkgs"),
         "clean_fn": make_cmd_clean(["conda", "clean", "--all", "-y"]),
     },
     # --- ML / model caches (medium — expensive to re-download) ---
@@ -621,13 +624,8 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
         "desc": _("~/.config/Code/Cache + CachedData — extension/session cache."),
         "risk": "low",
         "path": "~/.config/Code/Cache*",
-        "size_fn": lambda: (
-            dir_size("~/.config/Code/Cache")
-            + dir_size("~/.config/Code/CachedData")
-        ),
-        "clean_fn": lambda: _clean_multi(
-            ["~/.config/Code/Cache", "~/.config/Code/CachedData"]
-        ),
+        "size_fn": lambda: dir_size("~/.config/Code/Cache") + dir_size("~/.config/Code/CachedData"),
+        "clean_fn": lambda: _clean_multi(["~/.config/Code/Cache", "~/.config/Code/CachedData"]),
     },
     # --- Messaging/media caches ---
     {
@@ -669,14 +667,13 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
         "desc": _("/var/crash + /var/lib/systemd/coredump — requires root."),
         "risk": "low",
         "path": "/var/crash, /var/lib/systemd/coredump",
-        "size_fn": lambda: (
-            dir_size("/var/crash") + dir_size("/var/lib/systemd/coredump")
-        ),
+        "size_fn": lambda: dir_size("/var/crash") + dir_size("/var/lib/systemd/coredump"),
         "clean_fn": make_cmd_clean(
             # Static glob expansion — no user input. shell=True required for
             # wildcard expansion under pkexec.
             "rm -rf /var/crash/* /var/lib/systemd/coredump/*",
-            shell=True, need_root=True,  # nosec B602: vetted static command
+            shell=True,
+            need_root=True,  # nosec B602: vetted static command
         ),
     },
     {

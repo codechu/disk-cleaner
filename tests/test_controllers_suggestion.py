@@ -1,4 +1,5 @@
 """SuggestionController — headless state machine testleri."""
+
 from __future__ import annotations
 
 from disk_cleaner.controllers import (
@@ -6,10 +7,9 @@ from disk_cleaner.controllers import (
     SuggestionRow,
 )
 from disk_cleaner.controllers.suggestion import (
+    _LOW_COLOR,
     _compute_auto_select,
     _group_enriched,
-    _HIGH_COLOR,
-    _LOW_COLOR,
 )
 
 
@@ -76,7 +76,13 @@ def test_auto_select_skips_high_risk():
 
 def test_auto_select_skips_active_project():
     enriched = [
-        (_t("a", desc="⚠ ACTIVE project (last git commit 3 days ago)"), 200 * 1024 * 1024, "artifact", 90, ""),
+        (
+            _t("a", desc="⚠ ACTIVE project (last git commit 3 days ago)"),
+            200 * 1024 * 1024,
+            "artifact",
+            90,
+            "",
+        ),
         (_t("b"), 200 * 1024 * 1024, "system", 80, ""),
     ]
     groups, singles = _group_enriched(enriched)
@@ -99,10 +105,7 @@ def test_auto_select_cumulative_cap():
     """5GB cap — must stop once the cumulative total would exceed it."""
     # Her biri 1.5 GB, 5 tane = 7.5 GB, ama cap 5 GB
     one_gb_half = int(1.5 * 1024 * 1024 * 1024)
-    enriched = [
-        (_t(f"t{i}"), one_gb_half, "system", 90 - i, "")
-        for i in range(5)
-    ]
+    enriched = [(_t(f"t{i}"), one_gb_half, "system", 90 - i, "") for i in range(5)]
     groups, singles = _group_enriched(enriched)
     auto = _compute_auto_select(groups, singles)
     # 3 items (4.5 GB) should be selected; the 4th overflows
@@ -113,20 +116,51 @@ def test_controller_select_all_none():
     c = SuggestionController()
     c.rows = [
         SuggestionRow(
-            tid=-1, name="grp", score=10, size_bytes=0, size_text="0 B",
-            reason="", risk_color=_LOW_COLOR, kind="group", is_group=True,
+            tid=-1,
+            name="grp",
+            score=10,
+            size_bytes=0,
+            size_text="0 B",
+            reason="",
+            risk_color=_LOW_COLOR,
+            kind="group",
+            is_group=True,
             children=[
-                SuggestionRow(tid=0, name="c1", score=10, size_bytes=100,
-                              size_text="100 B", reason="", risk_color=_LOW_COLOR,
-                              kind="system", is_group=False),
-                SuggestionRow(tid=1, name="c2", score=20, size_bytes=200,
-                              size_text="200 B", reason="", risk_color=_LOW_COLOR,
-                              kind="system", is_group=False),
+                SuggestionRow(
+                    tid=0,
+                    name="c1",
+                    score=10,
+                    size_bytes=100,
+                    size_text="100 B",
+                    reason="",
+                    risk_color=_LOW_COLOR,
+                    kind="system",
+                    is_group=False,
+                ),
+                SuggestionRow(
+                    tid=1,
+                    name="c2",
+                    score=20,
+                    size_bytes=200,
+                    size_text="200 B",
+                    reason="",
+                    risk_color=_LOW_COLOR,
+                    kind="system",
+                    is_group=False,
+                ),
             ],
         ),
-        SuggestionRow(tid=2, name="s", score=30, size_bytes=300,
-                      size_text="300 B", reason="", risk_color=_LOW_COLOR,
-                      kind="system", is_group=False),
+        SuggestionRow(
+            tid=2,
+            name="s",
+            score=30,
+            size_bytes=300,
+            size_text="300 B",
+            reason="",
+            risk_color=_LOW_COLOR,
+            kind="system",
+            is_group=False,
+        ),
     ]
     c.tasks = {0: _t("c1", 100), 1: _t("c2", 200), 2: _t("s", 300)}
     c.select_all()
@@ -140,15 +174,38 @@ def test_controller_toggle_group_propagates_to_children():
     c = SuggestionController()
     c.rows = [
         SuggestionRow(
-            tid=-1, name="grp", score=10, size_bytes=300, size_text="300 B",
-            reason="", risk_color=_LOW_COLOR, kind="group", is_group=True,
+            tid=-1,
+            name="grp",
+            score=10,
+            size_bytes=300,
+            size_text="300 B",
+            reason="",
+            risk_color=_LOW_COLOR,
+            kind="group",
+            is_group=True,
             children=[
-                SuggestionRow(tid=0, name="c1", score=10, size_bytes=100,
-                              size_text="", reason="", risk_color=_LOW_COLOR,
-                              kind="system", is_group=False),
-                SuggestionRow(tid=1, name="c2", score=20, size_bytes=200,
-                              size_text="", reason="", risk_color=_LOW_COLOR,
-                              kind="system", is_group=False),
+                SuggestionRow(
+                    tid=0,
+                    name="c1",
+                    score=10,
+                    size_bytes=100,
+                    size_text="",
+                    reason="",
+                    risk_color=_LOW_COLOR,
+                    kind="system",
+                    is_group=False,
+                ),
+                SuggestionRow(
+                    tid=1,
+                    name="c2",
+                    score=20,
+                    size_bytes=200,
+                    size_text="",
+                    reason="",
+                    risk_color=_LOW_COLOR,
+                    kind="system",
+                    is_group=False,
+                ),
             ],
         ),
     ]
@@ -163,15 +220,25 @@ def test_controller_toggle_group_propagates_to_children():
 def test_select_target_picks_by_score():
     c = SuggestionController()
     c.rows = [
-        SuggestionRow(tid=i, name=f"t{i}", score=score, size_bytes=size,
-                      size_text="", reason="", risk_color=_LOW_COLOR,
-                      kind="system", is_group=False)
-        for i, (score, size) in enumerate([
-            (90, 200 * 1024 * 1024),     # 200 MB
-            (80, 300 * 1024 * 1024),     # 300 MB
-            (70, 100 * 1024 * 1024),     # 100 MB
-            (60, 500 * 1024 * 1024),     # 500 MB
-        ])
+        SuggestionRow(
+            tid=i,
+            name=f"t{i}",
+            score=score,
+            size_bytes=size,
+            size_text="",
+            reason="",
+            risk_color=_LOW_COLOR,
+            kind="system",
+            is_group=False,
+        )
+        for i, (score, size) in enumerate(
+            [
+                (90, 200 * 1024 * 1024),  # 200 MB
+                (80, 300 * 1024 * 1024),  # 300 MB
+                (70, 100 * 1024 * 1024),  # 100 MB
+                (60, 500 * 1024 * 1024),  # 500 MB
+            ]
+        )
     ]
     c.tasks = {i: _t(f"t{i}", 0) for i in range(4)}
     picked = c.select_target(500 * 1024 * 1024)
@@ -183,9 +250,18 @@ def test_select_target_picks_by_score():
 def test_export_rows():
     c = SuggestionController()
     c.rows = [
-        SuggestionRow(tid=0, name="a", score=10, size_bytes=100,
-                      size_text="100 B", reason="r1", risk_color=_LOW_COLOR,
-                      kind="system", is_group=False, checked=True),
+        SuggestionRow(
+            tid=0,
+            name="a",
+            score=10,
+            size_bytes=100,
+            size_text="100 B",
+            reason="r1",
+            risk_color=_LOW_COLOR,
+            kind="system",
+            is_group=False,
+            checked=True,
+        ),
     ]
     c.tasks = {0: _t("a", 100, risk="low")}
     rows = c.export_rows()

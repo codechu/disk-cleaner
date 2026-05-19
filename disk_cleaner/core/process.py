@@ -3,6 +3,7 @@
 Uses a low-frequency cache so the scorer can answer "is this path
 currently open?" without spawning lsof on every call.
 """
+
 from __future__ import annotations
 
 import os

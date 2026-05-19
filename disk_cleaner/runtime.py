@@ -17,6 +17,7 @@ late binding).
 They can later be moved onto a typed accessor on
 :class:`~disk_cleaner.settings.SettingsStore`.
 """
+
 from __future__ import annotations
 
 #: Trash mode (True → ``gio trash``, False → permanent deletion).

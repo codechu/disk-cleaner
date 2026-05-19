@@ -1,4 +1,5 @@
 """Event bus tests — multichannel, resource management, thread-safety."""
+
 from __future__ import annotations
 
 import threading
@@ -65,8 +66,8 @@ def test_subscriber_limit():
     events.MAX_SUBSCRIBERS = 3
     try:
         s1 = events.subscribe()
-        s2 = events.subscribe()
-        s3 = events.subscribe()
+        events.subscribe()
+        events.subscribe()
         with pytest.raises(events.SubscriberLimitExceeded):
             events.subscribe()
         events.unsubscribe(s1)
@@ -91,8 +92,8 @@ def test_backpressure_drops_when_queue_full():
 
 
 def test_stats_reports_subscribers():
-    s1 = events.subscribe(["scan.*"])
-    s2 = events.subscribe(["*"])
+    events.subscribe(["scan.*"])
+    events.subscribe(["*"])
     events.emit("scan.started")
     events.emit("mount.changed")
 

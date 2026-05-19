@@ -14,6 +14,7 @@ Public API:
   :mod:`~disk_cleaner.watchdog` — UI / control socket / background
 - :mod:`~disk_cleaner.cli` — CLI dispatch + ``main()``
 """
+
 from __future__ import annotations
 
 __version__ = "0.1.0"

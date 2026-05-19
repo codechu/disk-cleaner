@@ -1,7 +1,6 @@
 """Real du / path_size behavior over temporary directories."""
-from __future__ import annotations
 
-from pathlib import Path
+from __future__ import annotations
 
 from disk_cleaner.core.sizing import dir_size, path_size
 

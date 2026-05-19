@@ -1,4 +1,5 @@
 """Viz layer — TreeNode, treemap layout, sunburst layout, hit_test, colors."""
+
 from __future__ import annotations
 
 import math
@@ -17,7 +18,6 @@ from disk_cleaner.viz import (
     node_color,
     sunburst_hit_test,
 )
-
 
 # ---------- helpers ----------
 
@@ -41,7 +41,7 @@ def test_build_tree_simple(tmp_path):
     assert tree.size > 0
     # Children sorted by size descending
     if len(tree.children) >= 2:
-        for a, b in zip(tree.children, tree.children[1:]):
+        for a, b in zip(tree.children, tree.children[1:], strict=False):
             assert a.size >= b.size
 
 

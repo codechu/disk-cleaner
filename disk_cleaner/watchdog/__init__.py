@@ -1,4 +1,5 @@
 """Watchdog alt paketi — arka plan disk doluluk izleyici."""
+
 from __future__ import annotations
 
 from .daemon import (

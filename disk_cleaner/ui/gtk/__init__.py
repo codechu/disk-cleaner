@@ -12,6 +12,7 @@ Public classes (used by CLI ``main()`` and the API):
 - :class:`OldFilesPanel`
 - :class:`TreemapPanel`
 """
+
 from __future__ import annotations
 
 from .dynamic_panel import DynamicPanel

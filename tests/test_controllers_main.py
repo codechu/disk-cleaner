@@ -1,4 +1,5 @@
 """MainController — headless state machine testleri."""
+
 from __future__ import annotations
 
 import pytest
@@ -14,8 +15,7 @@ from disk_cleaner.controllers.main import (
 
 
 def test_disk_usage_label_markup():
-    u = DiskUsage(total="468G", used="338G", avail="105G",
-                  percent=77, color=_COLOR_YELLOW)
+    u = DiskUsage(total="468G", used="338G", avail="105G", percent=77, color=_COLOR_YELLOW)
     markup = u.label_markup
     assert "77% full" in markup
     assert "#bf8700" in markup
@@ -109,8 +109,17 @@ def test_btrfs_fs_warning_text():
     """fs_warning_for emits help text for a synthetic BTRFS mount."""
     c = MainController()
     # Inject fake mount
-    c.mounts = [Mount(target="/btrfs", source="/dev/x", fstype="btrfs",
-                      size="1T", used="0", avail="1T", pcent="0")]
+    c.mounts = [
+        Mount(
+            target="/btrfs",
+            source="/dev/x",
+            fstype="btrfs",
+            size="1T",
+            used="0",
+            avail="1T",
+            pcent="0",
+        )
+    ]
     msg = c.fs_warning_for("/btrfs")
     assert msg is not None
     assert "btrfs" in msg.lower()
@@ -119,8 +128,17 @@ def test_btrfs_fs_warning_text():
 
 def test_zfs_fs_warning_text():
     c = MainController()
-    c.mounts = [Mount(target="/zfs", source="zpool/x", fstype="zfs",
-                      size="1T", used="0", avail="1T", pcent="0")]
+    c.mounts = [
+        Mount(
+            target="/zfs",
+            source="zpool/x",
+            fstype="zfs",
+            size="1T",
+            used="0",
+            avail="1T",
+            pcent="0",
+        )
+    ]
     msg = c.fs_warning_for("/zfs")
     assert msg is not None
     assert "zfs" in msg.lower()
@@ -129,8 +147,17 @@ def test_zfs_fs_warning_text():
 
 def test_no_fs_warning_for_ext4():
     c = MainController()
-    c.mounts = [Mount(target="/ext4", source="/dev/x", fstype="ext4",
-                      size="1T", used="0", avail="1T", pcent="0")]
+    c.mounts = [
+        Mount(
+            target="/ext4",
+            source="/dev/x",
+            fstype="ext4",
+            size="1T",
+            used="0",
+            avail="1T",
+            pcent="0",
+        )
+    ]
     assert c.fs_warning_for("/ext4") is None
 
 
@@ -139,6 +166,7 @@ def test_save_panel_entries():
     c = MainController()
     c.save_panel_entries({"artifacts": "/foo", "explorer": "/bar"})
     from disk_cleaner.settings import SETTINGS
+
     assert SETTINGS.get("entries", {}).get("artifacts") == "/foo"
 
 

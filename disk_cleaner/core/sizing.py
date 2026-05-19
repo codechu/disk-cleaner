@@ -4,6 +4,7 @@ Previously used ``du -sb`` (apparent size); for sparse files like
 Docker.raw it overreported by 10×. We now base sizes on ``du -sB1``
 (block-based), i.e. real disk usage.
 """
+
 from __future__ import annotations
 
 import stat as statmod

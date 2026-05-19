@@ -15,6 +15,7 @@ XDG layout:
     data   (persistent, no regen)   → $XDG_DATA_HOME/codechu/disk-cleaner/
     runtime (pid, socket, lock)     → $XDG_RUNTIME_DIR/codechu/disk-cleaner/
 """
+
 from __future__ import annotations
 
 import os
@@ -24,30 +25,28 @@ HOME: Path = Path.home()
 
 # ---- XDG roots ----
 XDG_CONFIG_HOME: Path = Path(os.environ.get("XDG_CONFIG_HOME", str(HOME / ".config")))
-XDG_CACHE_HOME:  Path = Path(os.environ.get("XDG_CACHE_HOME",  str(HOME / ".cache")))
-XDG_DATA_HOME:   Path = Path(os.environ.get("XDG_DATA_HOME",   str(HOME / ".local" / "share")))
-XDG_RUNTIME_DIR: Path = Path(
-    os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}"
-)
+XDG_CACHE_HOME: Path = Path(os.environ.get("XDG_CACHE_HOME", str(HOME / ".cache")))
+XDG_DATA_HOME: Path = Path(os.environ.get("XDG_DATA_HOME", str(HOME / ".local" / "share")))
+XDG_RUNTIME_DIR: Path = Path(os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}")
 
 # ---- Vendor + product namespace ----
 VENDOR = "codechu"
 PRODUCT = "disk-cleaner"
 
-SETTINGS_DIR: Path = XDG_CONFIG_HOME / VENDOR / PRODUCT   # config (settings, rules)
-CACHE_DIR:    Path = XDG_CACHE_HOME  / VENDOR / PRODUCT   # regeneratable
-DATA_DIR:     Path = XDG_DATA_HOME   / VENDOR / PRODUCT   # persistent data
-RUNTIME_DIR:  Path = XDG_RUNTIME_DIR / VENDOR / PRODUCT   # pid, socket, lock
+SETTINGS_DIR: Path = XDG_CONFIG_HOME / VENDOR / PRODUCT  # config (settings, rules)
+CACHE_DIR: Path = XDG_CACHE_HOME / VENDOR / PRODUCT  # regeneratable
+DATA_DIR: Path = XDG_DATA_HOME / VENDOR / PRODUCT  # persistent data
+RUNTIME_DIR: Path = XDG_RUNTIME_DIR / VENDOR / PRODUCT  # pid, socket, lock
 
 # ---- Concrete files ----
-SETTINGS_FILE:     Path = SETTINGS_DIR / "settings.json"
+SETTINGS_FILE: Path = SETTINGS_DIR / "settings.json"
 USER_CLEANERS_DIR: Path = SETTINGS_DIR / "cleaners"
 
-DU_CACHE_DB:  Path = CACHE_DIR / "du_cache.db"    # disk usage cache — recomputed if lost
-SNAPSHOTS_DB: Path = DATA_DIR  / "snapshots.db"   # 7-day growth — user data, lost = gone
+DU_CACHE_DB: Path = CACHE_DIR / "du_cache.db"  # disk usage cache — recomputed if lost
+SNAPSHOTS_DB: Path = DATA_DIR / "snapshots.db"  # 7-day growth — user data, lost = gone
 
-WATCHDOG_PID:    Path = RUNTIME_DIR / "watchdog.pid"
-CONTROL_SOCKET:  str  = str(RUNTIME_DIR / "control.sock")
+WATCHDOG_PID: Path = RUNTIME_DIR / "watchdog.pid"
+CONTROL_SOCKET: str = str(RUNTIME_DIR / "control.sock")
 
 
 def ensure_dirs() -> None:
@@ -70,21 +69,21 @@ def migrate_pre_xdg_layout() -> None:
 
     # Dual source: legacy + v0.1-XDG (both use the "disk_cleaner" directory name)
     legacy_config = XDG_CONFIG_HOME / "disk_cleaner"
-    legacy_cache  = XDG_CACHE_HOME  / "disk_cleaner"
-    legacy_data   = XDG_DATA_HOME   / "disk_cleaner"
+    legacy_cache = XDG_CACHE_HOME / "disk_cleaner"
+    legacy_data = XDG_DATA_HOME / "disk_cleaner"
     legacy_runtime = XDG_RUNTIME_DIR / "disk_cleaner"
 
     migrations = {
         # pre-v0.1 (everything in config) + v0.1-XDG (config split)
         legacy_config / "settings.json": SETTINGS_FILE,
-        legacy_config / "cleaners":      USER_CLEANERS_DIR,
-        legacy_config / "du_cache.db":   DU_CACHE_DB,    # pre-v0.1
-        legacy_config / "snapshots.db":  SNAPSHOTS_DB,
-        legacy_config / "watchdog.pid":  WATCHDOG_PID,
+        legacy_config / "cleaners": USER_CLEANERS_DIR,
+        legacy_config / "du_cache.db": DU_CACHE_DB,  # pre-v0.1
+        legacy_config / "snapshots.db": SNAPSHOTS_DB,
+        legacy_config / "watchdog.pid": WATCHDOG_PID,
         # v0.1-XDG paths
-        legacy_cache   / "du_cache.db":  DU_CACHE_DB,
-        legacy_data    / "snapshots.db": SNAPSHOTS_DB,
-        legacy_data    / "watchdog.log": DATA_DIR / "watchdog.log",
+        legacy_cache / "du_cache.db": DU_CACHE_DB,
+        legacy_data / "snapshots.db": SNAPSHOTS_DB,
+        legacy_data / "watchdog.log": DATA_DIR / "watchdog.log",
         legacy_runtime / "watchdog.pid": WATCHDOG_PID,
         legacy_runtime / "control.sock": Path(CONTROL_SOCKET),
     }
@@ -125,16 +124,24 @@ USER_DATA_PATHS: tuple[str, ...] = (
 
 __all__ = [
     "HOME",
-    "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME", "XDG_RUNTIME_DIR",
-    "VENDOR", "PRODUCT",
-    "SETTINGS_DIR", "CACHE_DIR", "DATA_DIR", "RUNTIME_DIR",
+    "XDG_CONFIG_HOME",
+    "XDG_CACHE_HOME",
+    "XDG_DATA_HOME",
+    "XDG_RUNTIME_DIR",
+    "VENDOR",
+    "PRODUCT",
+    "SETTINGS_DIR",
+    "CACHE_DIR",
+    "DATA_DIR",
+    "RUNTIME_DIR",
     "SETTINGS_FILE",
     "DU_CACHE_DB",
     "SNAPSHOTS_DB",
     "WATCHDOG_PID",
     "USER_CLEANERS_DIR",
     "CONTROL_SOCKET",
-    "ensure_dirs", "migrate_pre_xdg_layout",
+    "ensure_dirs",
+    "migrate_pre_xdg_layout",
     "TREEMAP_MAX_DEPTH",
     "DEFAULT_DU_CACHE_TTL_SEC",
     "DEFAULT_MIN_SCORE",

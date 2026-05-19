@@ -1,4 +1,5 @@
 """Behavior tests for Cleaner classes."""
+
 from __future__ import annotations
 
 from disk_cleaner.cleaners import (

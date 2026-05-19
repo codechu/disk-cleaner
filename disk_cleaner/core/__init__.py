@@ -4,6 +4,7 @@ Submodules: ``sizing``, ``safe_remove``, ``process``, ``score``,
 ``kernels``, ``walker``, ``system_helpers``, ``apps``. The public
 surface is pinned via ``__all__``.
 """
+
 from __future__ import annotations
 
 from .apps import app_related_paths, list_installed_apps
@@ -51,6 +52,10 @@ __all__ = [
     "ARTIFACT_DIRS",
     "ARTIFACT_RISK",
     "OpenPathsCache",
+    "_clean_multi",
+    "_firefox_profile_dirs",
+    "_list_kernel_pkgs",
+    "_old_kernel_pkgs",
     "app_related_paths",
     "apparent_size",
     "clean_cache_except_chrome",
@@ -73,6 +78,7 @@ __all__ = [
     "list_old_kernels",
     "path_holders",
     "path_size",
+    "project_activity_days",
     "rm_contents",
     "rm_path",
     "safe_remove",

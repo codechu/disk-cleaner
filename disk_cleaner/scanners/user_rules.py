@@ -1,8 +1,9 @@
 """UserRulesScanner — emit rules from ``~/.config/disk_cleaner/cleaners/*.json``."""
+
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from threading import Event
-from typing import Callable, Iterable, Optional
 
 from .base import Scanner, Task
 from .system import _CallableCleaner
@@ -16,8 +17,8 @@ class UserRulesScanner(Scanner):
     def list_tasks(
         self,
         *,
-        cancel: Optional[Event] = None,
-        progress: Optional[Callable[[str], None]] = None,
+        cancel: Event | None = None,
+        progress: Callable[[str], None] | None = None,
     ) -> Iterable[Task]:
         from .. import _tasks
 

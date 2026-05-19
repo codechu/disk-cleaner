@@ -5,6 +5,7 @@ Three baseline implementations are provided: :class:`SafePathCleaner`
 :class:`CommandCleaner` (shell/argv). To add a new cleanup type,
 implement the :class:`Cleaner` ABC.
 """
+
 from __future__ import annotations
 
 from .base import Cleaner

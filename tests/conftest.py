@@ -5,6 +5,7 @@ X11/Wayland when importing ``Gtk`` from :mod:`disk_cleaner._gtk` — only
 when instantiated. Here we default the GDK backend to X11 so imports
 work in headless environments.
 """
+
 from __future__ import annotations
 
 import os

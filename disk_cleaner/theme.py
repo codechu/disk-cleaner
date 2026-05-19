@@ -5,6 +5,7 @@ Three layers (highest priority first):
 2. GTK ``Gtk.Settings`` property ``gtk-application-prefer-dark-theme``
 3. If the GTK theme name contains ``dark``, dark mode is assumed
 """
+
 from __future__ import annotations
 
 from ._gtk import Gtk
@@ -14,6 +15,7 @@ def _user_theme_pref() -> str:
     """User preference from settings.json — default ``"auto"``."""
     try:
         from .settings import SETTINGS
+
         return SETTINGS.get("theme", "auto")
     except Exception:
         return "auto"

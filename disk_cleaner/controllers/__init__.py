@@ -25,9 +25,11 @@ Current controllers:
   smart scan + score + group + auto-select (the backing for
   SuggestionPanel)
 """
+
 from __future__ import annotations
 
 from .main import DiskUsage, MainController, Mount, read_disk_usage
+from .suggestion import CleanPreview as SuggestionCleanPreview
 from .suggestion import (
     ExportRow,
     GrowthInfo,
@@ -35,7 +37,6 @@ from .suggestion import (
     SuggestionController,
     SuggestionRow,
 )
-from .suggestion import CleanPreview as SuggestionCleanPreview
 from .task_list import (
     CleanPreview,
     PreviewItem,

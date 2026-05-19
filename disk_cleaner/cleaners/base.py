@@ -4,6 +4,7 @@ A :class:`Cleaner` performs the cleanup operation via ``execute()``.
 Destructive operations go **to trash by default**; permanent deletion
 happens only when the user requests it explicitly.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

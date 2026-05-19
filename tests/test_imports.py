@@ -2,6 +2,7 @@
 
 Quickly catch what a refactor breaks whenever the package structure changes.
 """
+
 from __future__ import annotations
 
 

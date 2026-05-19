@@ -5,12 +5,14 @@ add a new scan type: write a ``Scanner`` subclass, return tasks from
 ``list_tasks``, and register it. UI and API speak to this ABC — a new
 scanner works without UI changes.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from threading import Event
-from typing import TYPE_CHECKING, Callable, Iterable, Literal, Optional
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from ..cleaners.base import Cleaner
@@ -32,7 +34,7 @@ class Task:
     path: str
     kind: str  # "system" | "artifact" | "duplicate" | "oldfile" | "empty" | ...
     size_fn: Callable[[], int]
-    cleaner: "Cleaner"
+    cleaner: Cleaner
 
 
 class Scanner(ABC):
@@ -44,8 +46,8 @@ class Scanner(ABC):
     def list_tasks(
         self,
         *,
-        cancel: Optional[Event] = None,
-        progress: Optional[Callable[[str], None]] = None,
+        cancel: Event | None = None,
+        progress: Callable[[str], None] | None = None,
     ) -> Iterable[Task]:
         """Return all candidate Tasks for this source.
 

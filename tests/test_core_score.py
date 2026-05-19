@@ -3,13 +3,14 @@
 Covers the scoring/reason engine that drives smart-scan suggestions.
 Pure logic: no I/O, no GUI. High-leverage test surface.
 """
+
 from __future__ import annotations
 
 from disk_cleaner.core.score import compute_score_and_reason
 
 KB = 1024
-MB = 1024 ** 2
-GB = 1024 ** 3
+MB = 1024**2
+GB = 1024**3
 
 
 def _task(path: str = "/nonexistent/path/123", risk: str = "low", desc: str = "") -> dict:
@@ -75,10 +76,16 @@ def test_unknown_kind_no_bonus():
 def test_open_path_drops_score_significantly():
     open_paths = {("/tmp/cache.bin", "chrome")}
     s_open, reason_open = compute_score_and_reason(
-        _task(path="/tmp/cache.bin"), 1 * GB, "system", open_paths,
+        _task(path="/tmp/cache.bin"),
+        1 * GB,
+        "system",
+        open_paths,
     )
     s_closed, _ = compute_score_and_reason(
-        _task(path="/tmp/cache.bin"), 1 * GB, "system", set(),
+        _task(path="/tmp/cache.bin"),
+        1 * GB,
+        "system",
+        set(),
     )
     assert s_open < s_closed - 30  # process awareness penalty kicks in
 
@@ -86,7 +93,10 @@ def test_open_path_drops_score_significantly():
 def test_open_path_reason_mentions_process():
     open_paths = {("/tmp/holdme", "firefox")}
     _score, reason = compute_score_and_reason(
-        _task(path="/tmp/holdme"), 100 * MB, "system", open_paths,
+        _task(path="/tmp/holdme"),
+        100 * MB,
+        "system",
+        open_paths,
     )
     assert "firefox" in reason
 
@@ -100,7 +110,9 @@ def test_active_marker_drops_score_heavily():
     base_score, _ = compute_score_and_reason(_task(risk="low"), 100 * GB, "artifact", set())
     active_score, reason = compute_score_and_reason(
         _task(risk="low", desc="ACTIVE project (last commit 2 days ago)"),
-        100 * GB, "artifact", set(),
+        100 * GB,
+        "artifact",
+        set(),
     )
     assert active_score < base_score
     # Reason mentions keep
@@ -110,7 +122,10 @@ def test_active_marker_drops_score_heavily():
 def test_legacy_turkish_marker_still_works():
     """Backward-compat: data with old 'AKTİF' marker still suppresses score."""
     _, reason = compute_score_and_reason(
-        _task(desc="AKTİF proje"), 1 * GB, "artifact", set(),
+        _task(desc="AKTİF proje"),
+        1 * GB,
+        "artifact",
+        set(),
     )
     # Should produce a "keep" reason regardless of which marker was used
     assert "KEEP" in reason.upper() or "active" in reason.lower()
@@ -144,6 +159,9 @@ def test_score_never_negative():
     """Even with all penalties, score floor is 0."""
     open_paths = {("/path", "browser")}
     s, _ = compute_score_and_reason(
-        _task(path="/path", risk="high", desc="ACTIVE"), 1 * MB, "weird", open_paths,
+        _task(path="/path", risk="high", desc="ACTIVE"),
+        1 * MB,
+        "weird",
+        open_paths,
     )
     assert s >= 0

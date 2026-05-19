@@ -1,4 +1,5 @@
 """SettingsStore behavior (in a temp dir, don't touch production settings.json)."""
+
 from __future__ import annotations
 
 # Note: SettingsStore.load reads from the global SETTINGS_FILE path; these

@@ -4,6 +4,7 @@ Converts a Task + size + kind + open-process information into a score
 in the 0..100+ range and a one-line reason. Pure logic — UI-independent
 and testable.
 """
+
 from __future__ import annotations
 
 import math
@@ -17,7 +18,7 @@ from .process import path_holders
 
 _RISK_FACTOR: dict[str, float] = {"low": 1.0, "medium": 0.6, "high": 0.15}
 _KIND_BONUS: dict[str, int] = {
-    "system": 10,    # usually safe, regenerated automatically
+    "system": 10,  # usually safe, regenerated automatically
     "artifact": 8,
     "duplicate": 12,
     "oldfile": 5,
@@ -49,7 +50,7 @@ def compute_score_and_reason(
     score = 0.0
 
     # Size component: log scale (each 10× ≈ +30 points)
-    size_gb = max(size, 1) / (1024 ** 3)
+    size_gb = max(size, 1) / (1024**3)
     score += min(60, 30 * math.log10(max(size_gb, 0.001) + 1) + 30)
 
     score *= _RISK_FACTOR.get(risk, 0.5)

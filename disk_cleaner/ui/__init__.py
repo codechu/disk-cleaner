@@ -10,13 +10,14 @@ module as well (the legacy
 ``from disk_cleaner.ui.main_window import MainWindow`` is replaced by
 ``from disk_cleaner.ui.gtk import MainWindow``).
 """
+
 from __future__ import annotations
 
 from .gtk import (
+    RISK_COLORS,
     DynamicPanel,
     MainWindow,
     OldFilesPanel,
-    RISK_COLORS,
     SuggestionPanel,
     TaskPanel,
     TreemapPanel,

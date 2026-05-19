@@ -1,4 +1,5 @@
 """``core.apps`` saf logic testleri."""
+
 from __future__ import annotations
 
 from disk_cleaner.core.apps import app_related_paths, list_installed_apps
@@ -24,7 +25,7 @@ def test_list_installed_apps_filters_libs():
 def test_list_installed_apps_sorted_descending():
     pkgs = list_installed_apps(min_size_kb=1024)
     if len(pkgs) >= 2:
-        for a, b in zip(pkgs, pkgs[1:]):
+        for a, b in zip(pkgs, pkgs[1:], strict=False):
             assert a["size"] >= b["size"]
 
 

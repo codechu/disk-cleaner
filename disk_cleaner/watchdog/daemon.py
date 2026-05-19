@@ -8,6 +8,7 @@ The legacy entry (``disk_cleaner.py --watchdog``) is preserved; the
 fork opens a new session via ``start_new_session=True`` so the daemon
 survives the GUI closing.
 """
+
 from __future__ import annotations
 
 import os
@@ -16,13 +17,13 @@ import sys
 import time
 from pathlib import Path
 
-from ..config import DATA_DIR, RUNTIME_DIR, WATCHDOG_PID
+from ..config import DATA_DIR, WATCHDOG_PID
 from ..i18n import _
 from ..settings import SETTINGS
 from ..utils import run
 
-WATCHDOG_PID_FILE: Path = WATCHDOG_PID            # $XDG_RUNTIME_DIR/disk_cleaner/watchdog.pid
-WATCHDOG_LOG: Path = DATA_DIR / "watchdog.log"   # $XDG_DATA_HOME/disk_cleaner/watchdog.log
+WATCHDOG_PID_FILE: Path = WATCHDOG_PID  # $XDG_RUNTIME_DIR/disk_cleaner/watchdog.pid
+WATCHDOG_LOG: Path = DATA_DIR / "watchdog.log"  # $XDG_DATA_HOME/disk_cleaner/watchdog.log
 
 
 def disk_percent(target: str = "/") -> int | None:
@@ -104,9 +105,7 @@ def watchdog_loop() -> None:
     cooldown = int(SETTINGS.get("watchdog_cooldown", 3600))
     last_notify_at: float = 0
     last_pct = -1
-    sys.stdout.write(
-        f"watchdog up: threshold={threshold}% interval={interval}s\n"
-    )
+    sys.stdout.write(f"watchdog up: threshold={threshold}% interval={interval}s\n")
     sys.stdout.flush()
     while True:
         try:
@@ -116,16 +115,11 @@ def watchdog_loop() -> None:
                 sys.stdout.flush()
                 last_pct = pct
             now = time.time()
-            if (
-                pct is not None
-                and pct >= threshold
-                and (now - last_notify_at) >= cooldown
-            ):
+            if pct is not None and pct >= threshold and (now - last_notify_at) >= cooldown:
                 notify(
                     _("💾 Disk almost full"),
                     _(
-                        "/ is {pct}% full. Would you like to open Disk "
-                        "Cleaner and free up space?"
+                        "/ is {pct}% full. Would you like to open Disk Cleaner and free up space?"
                     ).format(pct=pct),
                     urgency="critical",
                 )

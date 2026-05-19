@@ -3,6 +3,7 @@
 ``RISK_COLORS`` gives a consistent risk indicator (color + label)
 across panels.
 """
+
 from __future__ import annotations
 
 from ...i18n import _

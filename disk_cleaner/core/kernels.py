@@ -4,6 +4,7 @@ Lists every linux-image / headers / modules package except the current
 kernel and the closest fallback. ``clean_old_kernels`` runs apt purge
 via ``pkexec``; when DRY_RUN is on, it only returns the names.
 """
+
 from __future__ import annotations
 
 import re
@@ -17,9 +18,7 @@ def _list_kernel_pkgs() -> list[tuple[str, str, int]]:
 
     Returns ``[(package_name, version_string, size_bytes), ...]``.
     """
-    rc, out = run(
-        ["dpkg-query", "-W", "-f", "${Status}\\t${Package}\\t${Installed-Size}\\n"]
-    )
+    rc, out = run(["dpkg-query", "-W", "-f", "${Status}\\t${Package}\\t${Installed-Size}\\n"])
     if rc != 0:
         return []
     pkgs: list[tuple[str, str, int]] = []

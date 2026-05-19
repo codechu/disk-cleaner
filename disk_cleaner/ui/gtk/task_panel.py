@@ -12,9 +12,11 @@ responsible for:
 
 No scan/clean business logic lives in the View.
 """
+
 from __future__ import annotations
 
-from typing import Any, Callable, Iterable
+from collections.abc import Callable, Iterable
+from typing import Any
 
 from ..._gtk import GLib, Gtk, Pango
 from ...controllers import (
@@ -31,6 +33,7 @@ from .widgets import RISK_COLORS
 def _idle(fn: Callable) -> Callable:
     def wrapper(*args, **kwargs):
         GLib.idle_add(lambda: (fn(*args, **kwargs), False)[1])
+
     return wrapper
 
 
@@ -38,8 +41,9 @@ class TaskPanel(Gtk.Box):
     """Scan/select/clean panel — thin View bound to a controller."""
 
     # ListStore column indices
-    C_CHECK, C_NAME, C_RISK_LABEL, C_RISK_COLOR, C_PATH, C_SIZE_TEXT, \
-        C_SIZE_BYTES, C_DESC = range(8)
+    C_CHECK, C_NAME, C_RISK_LABEL, C_RISK_COLOR, C_PATH, C_SIZE_TEXT, C_SIZE_BYTES, C_DESC = range(
+        8
+    )
 
     def __init__(
         self,
@@ -56,7 +60,9 @@ class TaskPanel(Gtk.Box):
         self.win = win
         self.name = name
         self.controller: TaskListController = controller or TaskListController(
-            provider=tasks_provider, auto_select=auto_select, name=name,
+            provider=tasks_provider,
+            auto_select=auto_select,
+            name=name,
         )
 
         # ---- Toolbar ----
@@ -94,9 +100,7 @@ class TaskPanel(Gtk.Box):
             bar.pack_end(help_btn, False, False, 0)
 
         # ---- TreeView ----
-        self.store = Gtk.ListStore(
-            bool, str, str, str, str, str, "guint64", str
-        )
+        self.store = Gtk.ListStore(bool, str, str, str, str, str, "guint64", str)
         scroll = Gtk.ScrolledWindow()
         scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scroll.set_vexpand(True)
@@ -115,9 +119,14 @@ class TaskPanel(Gtk.Box):
 
         risk_renderer = Gtk.CellRendererText()
         risk_renderer.set_property("weight", Pango.Weight.BOLD)
-        self.tree.append_column(Gtk.TreeViewColumn(
-            _("Risk"), risk_renderer, text=self.C_RISK_LABEL, foreground=self.C_RISK_COLOR,
-        ))
+        self.tree.append_column(
+            Gtk.TreeViewColumn(
+                _("Risk"),
+                risk_renderer,
+                text=self.C_RISK_LABEL,
+                foreground=self.C_RISK_COLOR,
+            )
+        )
 
         col_path = Gtk.TreeViewColumn(_("Path"), Gtk.CellRendererText(), text=self.C_PATH)
         col_path.set_min_width(260)
@@ -131,9 +140,13 @@ class TaskPanel(Gtk.Box):
         col_size.set_sort_column_id(self.C_SIZE_BYTES)
         self.tree.append_column(col_size)
 
-        self.tree.append_column(Gtk.TreeViewColumn(
-            _("Description"), Gtk.CellRendererText(), text=self.C_DESC,
-        ))
+        self.tree.append_column(
+            Gtk.TreeViewColumn(
+                _("Description"),
+                Gtk.CellRendererText(),
+                text=self.C_DESC,
+            )
+        )
         self.tree.set_tooltip_column(self.C_DESC)
 
         scroll.add(self.tree)
@@ -150,9 +163,7 @@ class TaskPanel(Gtk.Box):
         self.preview_label.set_margin_top(4)
         self.preview_label.set_margin_bottom(4)
         self.preview_label.set_markup(
-            "<i>" + GLib.markup_escape_text(
-                _("Select a row to see its contents here.")
-            ) + "</i>"
+            "<i>" + GLib.markup_escape_text(_("Select a row to see its contents here.")) + "</i>"
         )
         self.preview_exp.add(self.preview_label)
         self.tree.get_selection().connect("changed", self._on_selection_changed)
@@ -235,16 +246,18 @@ class TaskPanel(Gtk.Box):
 
     def _store_append(self, row: TaskRow) -> None:
         color, label = RISK_COLORS.get(row.risk, RISK_COLORS["medium"])
-        self.store.append([
-            row.checked,
-            row.status_marker + row.name,
-            label,
-            color,
-            row.path,
-            row.size_text,
-            row.size_bytes or 0,
-            row.desc,
-        ])
+        self.store.append(
+            [
+                row.checked,
+                row.status_marker + row.name,
+                label,
+                color,
+                row.path,
+                row.size_text,
+                row.size_bytes or 0,
+                row.desc,
+            ]
+        )
 
     def _on_preview(self, result: PreviewResult) -> None:
         markup = _format_preview_markup(result)
@@ -260,9 +273,9 @@ class TaskPanel(Gtk.Box):
         model, it = sel.get_selected()
         if it is None:
             self.preview_label.set_markup(
-                "<i>" + GLib.markup_escape_text(
-                    _("Select a row to see its contents here.")
-                ) + "</i>"
+                "<i>"
+                + GLib.markup_escape_text(_("Select a row to see its contents here."))
+                + "</i>"
             )
             return
         idx = model.get_path(it).get_indices()[0]
@@ -306,7 +319,8 @@ class TaskPanel(Gtk.Box):
             + f"\n\n{items_str}"
         )
         dlg = Gtk.MessageDialog(
-            transient_for=self.win, modal=True,
+            transient_for=self.win,
+            modal=True,
             message_type=Gtk.MessageType.QUESTION,
             buttons=Gtk.ButtonsType.YES_NO,
             text=_("Confirm cleanup"),
@@ -331,11 +345,7 @@ def _format_preview_markup(result: PreviewResult) -> str:
     """View-specific: build Pango markup."""
     if result.state == "scanning":
         return (
-            "<i>"
-            + GLib.markup_escape_text(
-                _("Scanning: {path}").format(path=result.path)
-            )
-            + "</i>"
+            "<i>" + GLib.markup_escape_text(_("Scanning: {path}").format(path=result.path)) + "</i>"
         )
     if result.state == "missing":
         return (
@@ -348,9 +358,7 @@ def _format_preview_markup(result: PreviewResult) -> str:
     if result.state == "error":
         return (
             "<i>"
-            + GLib.markup_escape_text(
-                _("permission/access: {err}").format(err=result.error)
-            )
+            + GLib.markup_escape_text(_("permission/access: {err}").format(err=result.error))
             + "</i>"
         )
     if result.state == "file":
@@ -360,24 +368,20 @@ def _format_preview_markup(result: PreviewResult) -> str:
         )
     # directory
     header_suffix = ngettext(
-        "{n} item", "{n} items", result.total_items,
+        "{n} item",
+        "{n} items",
+        result.total_items,
     ).format(n=result.total_items)
     lines = [
-        f"<b>{GLib.markup_escape_text(result.path)}</b>  "
-        f"— {GLib.markup_escape_text(header_suffix)}"
+        f"<b>{GLib.markup_escape_text(result.path)}</b>  — {GLib.markup_escape_text(header_suffix)}"
     ]
     for item in result.items:
         icon = "📁" if item.is_dir else "📄"
         esc_name = GLib.markup_escape_text(item.name)
         suffix = ""
         if item.is_sparse:
-            sparse_text = _("(sparse, nominal: {size})").format(
-                size=human(item.nominal_size)
-            )
-            suffix = (
-                f"  <span color='#888'>{GLib.markup_escape_text(sparse_text)}"
-                f"</span>"
-            )
+            sparse_text = _("(sparse, nominal: {size})").format(size=human(item.nominal_size))
+            suffix = f"  <span color='#888'>{GLib.markup_escape_text(sparse_text)}</span>"
         lines.append(f"  {icon} {esc_name}  <tt>{human(item.size)}</tt>{suffix}")
     remaining = result.total_items - len(result.items)
     if remaining > 0:
@@ -392,6 +396,7 @@ def _format_preview_markup(result: PreviewResult) -> str:
 
 def _basename(path: str) -> str:
     import os
+
     return os.path.basename(path) or path
 
 

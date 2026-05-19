@@ -12,11 +12,12 @@ drawing) are **not part of this class**. The View handles click/up
 events, calls ``hit_test`` to find the node, and calls
 :meth:`drill_in` / :meth:`drill_up`.
 """
+
 from __future__ import annotations
 
 import threading
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Optional
 
 from .. import events
 from ..config import HOME
@@ -52,8 +53,8 @@ class TreemapController:
 
     def __init__(self) -> None:
         # State
-        self.root_node: Optional[TreeNode] = None
-        self.current_node: Optional[TreeNode] = None
+        self.root_node: TreeNode | None = None
+        self.current_node: TreeNode | None = None
         self.history: list[TreeNode] = []
         self._cancel_event = threading.Event()
         self._busy = False
@@ -98,15 +99,9 @@ class TreemapController:
         self._cancel_event.clear()
         self._set_busy(True)
         path = self.path
-        self.on_log(
-            "\n--- "
-            + _("Disk map: scanning {path}").format(path=path)
-            + " ---\n"
-        )
+        self.on_log("\n--- " + _("Disk map: scanning {path}").format(path=path) + " ---\n")
         events.emit("treemap.scan.started", path=path)
-        threading.Thread(
-            target=self._scan_thread, args=(path,), daemon=True
-        ).start()
+        threading.Thread(target=self._scan_thread, args=(path,), daemon=True).start()
 
     def cancel(self) -> None:
         self._cancel_event.set()
@@ -123,8 +118,10 @@ class TreemapController:
         self.path = target.path
         self.on_current_changed(self.current_node, self.history)
         events.emit(
-            "treemap.drill", direction="in",
-            from_path=prev.path, to_path=target.path,
+            "treemap.drill",
+            direction="in",
+            from_path=prev.path,
+            to_path=target.path,
         )
 
     def drill_up(self) -> None:
@@ -141,14 +138,12 @@ class TreemapController:
         self.path = self.current_node.path
         self.on_current_changed(self.current_node, self.history)
         events.emit(
-            "treemap.drill", direction="up",
-            from_path=prev_path, to_path=self.current_node.path,
+            "treemap.drill",
+            direction="up",
+            from_path=prev_path,
+            to_path=self.current_node.path,
         )
-        if (
-            self.current_node.is_dir
-            and not self.current_node.children
-            and not self._busy
-        ):
+        if self.current_node.is_dir and not self.current_node.children and not self._busy:
             self.start_scan()
 
     def drill_to(self, target: TreeNode) -> None:
@@ -163,8 +158,10 @@ class TreemapController:
                 self.path = self.current_node.path
                 self.on_current_changed(self.current_node, self.history)
                 events.emit(
-                    "treemap.drill", direction="to",
-                    from_path=prev_path, to_path=self.current_node.path,
+                    "treemap.drill",
+                    direction="to",
+                    from_path=prev_path,
+                    to_path=self.current_node.path,
                 )
                 return
 
@@ -181,7 +178,7 @@ class TreemapController:
 
     # ---- Queries ----
 
-    def hit_test(self, x: float, y: float) -> Optional[TreeNode]:
+    def hit_test(self, x: float, y: float) -> TreeNode | None:
         """Hit test according to visual mode. Called by the View on click events."""
         if not self.current_node:
             return None
@@ -223,7 +220,7 @@ class TreemapController:
                 pass
         self._scan_done(node, path)
 
-    def _scan_done(self, node: Optional[TreeNode], path: str) -> None:
+    def _scan_done(self, node: TreeNode | None, path: str) -> None:
         self._set_busy(False)
         if node is None:
             self.on_progress(_("Scan cancelled or errored."))
@@ -235,12 +232,12 @@ class TreemapController:
         self.history = []
         self.on_root_loaded(node)
         self.on_current_changed(node, self.history)
-        self.on_log(
-            _("Disk map ready: total {size}").format(size=human(node.size)) + "\n"
-        )
+        self.on_log(_("Disk map ready: total {size}").format(size=human(node.size)) + "\n")
         events.emit(
             "treemap.scan.finished",
-            path=node.path, size=node.size, ok=True,
+            path=node.path,
+            size=node.size,
+            ok=True,
         )
 
     def _set_busy(self, busy: bool) -> None:

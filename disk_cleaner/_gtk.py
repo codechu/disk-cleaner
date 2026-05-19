@@ -4,6 +4,7 @@ UI modules pull these via ``from .._gtk import Gtk, Gdk, GLib, Pango``.
 Importing ``cairo`` is required to register the foreign-struct
 converter (functions like Gdk.cairo_create depend on it).
 """
+
 from __future__ import annotations
 
 import gi
@@ -15,6 +16,7 @@ from gi.repository import Gdk, GLib, Gtk, Pango  # noqa: E402
 
 try:  # noqa: SIM105
     import cairo  # noqa: F401  — importing it is enough to register the converter
+
     _ = cairo.Context
 except ImportError:
     pass

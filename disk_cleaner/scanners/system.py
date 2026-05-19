@@ -4,10 +4,11 @@ A thin Strategy adapter over the existing ``SYSTEM_TASKS`` dict list
 (:mod:`disk_cleaner._tasks`). SYSTEM_TASKS becomes a direct Task list
 later; for now the dict schema is kept for backwards compatibility.
 """
+
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from threading import Event
-from typing import Callable, Iterable, Optional
 
 from ..cleaners.base import Cleaner
 from ..i18n import _
@@ -33,8 +34,8 @@ class SystemScanner(Scanner):
     def list_tasks(
         self,
         *,
-        cancel: Optional[Event] = None,
-        progress: Optional[Callable[[str], None]] = None,
+        cancel: Event | None = None,
+        progress: Callable[[str], None] | None = None,
     ) -> Iterable[Task]:
         from .. import _tasks
 

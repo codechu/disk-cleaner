@@ -3,6 +3,7 @@
 After deletion, invalidates ``du_cache`` so the stale size does not
 linger in the UI.
 """
+
 from __future__ import annotations
 
 from pathlib import Path

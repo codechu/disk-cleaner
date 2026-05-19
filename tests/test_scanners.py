@@ -1,4 +1,5 @@
 """Smoke tests for Scanner classes (verifies the Strategy surface)."""
+
 from __future__ import annotations
 
 from disk_cleaner.app import AppContext
@@ -59,8 +60,15 @@ def test_system_scanner_yields_tasks():
 def test_appcontext_wires_all_scanners(tmp_path):
     ctx = AppContext(settings_dir=tmp_path)
     expected = {
-        "system", "artifacts", "explorer", "old_files", "duplicates",
-        "empty", "similar", "apps", "user_rules",
+        "system",
+        "artifacts",
+        "explorer",
+        "old_files",
+        "duplicates",
+        "empty",
+        "similar",
+        "apps",
+        "user_rules",
     }
     actual = {name for name, _ in ctx.scanners}
     assert actual == expected

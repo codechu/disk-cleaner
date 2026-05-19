@@ -1,4 +1,5 @@
 """TaskListController — headless state machine testleri."""
+
 from __future__ import annotations
 
 import threading
@@ -64,7 +65,7 @@ def test_auto_select_low_risk_above_threshold():
     c = TaskListController(lambda: tasks, auto_select=True)
     c.start_scan()
     assert _wait_until(lambda: not c.busy)
-    assert c.rows[0].checked is True   # big low risk → auto
+    assert c.rows[0].checked is True  # big low risk → auto
     assert c.rows[1].checked is False  # small (<100MB)
     assert c.rows[2].checked is False  # high risk
 
@@ -142,9 +143,11 @@ def test_clean_preview_data():
     assert _wait_until(lambda: not c.busy)
     c.select_all()
     captured: list[CleanPreview] = []
+
     def confirm(p):
         captured.append(p)
         return False
+
     c.start_clean(confirm)
     assert len(captured) == 1
     assert captured[0].count == 3
@@ -168,14 +171,16 @@ def test_provider_signature_fallback():
 
 
 def test_preview_request_missing_path(tmp_path):
-    tasks = [{
-        "name": "ghost",
-        "desc": "",
-        "risk": "low",
-        "path": str(tmp_path / "does-not-exist"),
-        "size_fn": lambda: 0,
-        "clean_fn": lambda: (0, ""),
-    }]
+    tasks = [
+        {
+            "name": "ghost",
+            "desc": "",
+            "risk": "low",
+            "path": str(tmp_path / "does-not-exist"),
+            "size_fn": lambda: 0,
+            "clean_fn": lambda: (0, ""),
+        }
+    ]
     c = TaskListController(lambda: tasks, auto_select=False)
     c.start_scan()
     assert _wait_until(lambda: not c.busy)
@@ -188,23 +193,23 @@ def test_preview_request_missing_path(tmp_path):
 def test_preview_directory(tmp_path):
     (tmp_path / "a.txt").write_text("hi")
     (tmp_path / "b.txt").write_text("bye")
-    tasks = [{
-        "name": "dir",
-        "desc": "",
-        "risk": "low",
-        "path": str(tmp_path),
-        "size_fn": lambda: 0,
-        "clean_fn": lambda: (0, ""),
-    }]
+    tasks = [
+        {
+            "name": "dir",
+            "desc": "",
+            "risk": "low",
+            "path": str(tmp_path),
+            "size_fn": lambda: 0,
+            "clean_fn": lambda: (0, ""),
+        }
+    ]
     c = TaskListController(lambda: tasks, auto_select=False)
     c.start_scan()
     assert _wait_until(lambda: not c.busy)
     captured: list[PreviewResult] = []
     c.on_preview = lambda r: captured.append(r)
     c.request_preview(0)
-    assert _wait_until(
-        lambda: any(p.state == "directory" for p in captured), timeout=3
-    )
+    assert _wait_until(lambda: any(p.state == "directory" for p in captured), timeout=3)
     dir_result = next(p for p in captured if p.state == "directory")
     assert dir_result.total_items == 2
 
@@ -233,5 +238,5 @@ def test_observer_busy_state():
     c.on_busy_changed = lambda b, p: seen.append((b, p))
     c.start_scan()
     assert _wait_until(lambda: not c.busy)
-    assert seen[0][0] is True       # first: busy=True
-    assert seen[-1][0] is False     # last: busy=False
+    assert seen[0][0] is True  # first: busy=True
+    assert seen[-1][0] is False  # last: busy=False

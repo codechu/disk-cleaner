@@ -14,6 +14,7 @@ Schema (kept bit-for-bit compatible with the legacy version):
 - ``blacklist`` (list[str])
 - ``watchdog_*`` (various)
 """
+
 from __future__ import annotations
 
 import json

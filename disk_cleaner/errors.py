@@ -3,6 +3,7 @@
 All domain errors derive from :class:`DiskCleanerError`. Modules use
 their own specific errors; calling code can catch the single base.
 """
+
 from __future__ import annotations
 
 

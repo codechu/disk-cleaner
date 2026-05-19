@@ -10,6 +10,7 @@ Functions that need ``TRASH_MODE`` and ``DRY_RUN`` read the values at
 call time via :mod:`disk_cleaner.runtime` — runtime is mutable, late
 binding.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -18,7 +19,6 @@ from ..i18n import _
 from ..utils import parse_size, run
 from .safe_remove import rm_contents, safe_remove
 from .sizing import dir_size
-
 
 # ---------- Size measurers ----------
 
@@ -31,7 +31,8 @@ def size_docker_builder() -> int | None:
     for line in out.splitlines():
         if "Build Cache" in line:
             toks = [
-                t for t in line.split()
+                t
+                for t in line.split()
                 if t and t[0].isdigit() and t[-1] in "BkMGT" or t.endswith("kB")
             ]
             for t in toks[::-1]:
@@ -47,9 +48,7 @@ def size_docker_dangling_images() -> int:
         return 0
     total = 0
     for img_id in out.strip().splitlines():
-        rc2, out2 = run(
-            ["docker", "image", "inspect", img_id, "--format", "{{.Size}}"]
-        )
+        rc2, out2 = run(["docker", "image", "inspect", img_id, "--format", "{{.Size}}"])
         if rc2 == 0:
             try:
                 total += int(out2.strip())
@@ -59,10 +58,17 @@ def size_docker_dangling_images() -> int:
 
 
 def size_docker_stopped_containers() -> int:
-    rc, out = run([
-        "docker", "ps", "-a", "--filter", "status=exited",
-        "--format", "{{.Size}}",
-    ])
+    rc, out = run(
+        [
+            "docker",
+            "ps",
+            "-a",
+            "--filter",
+            "status=exited",
+            "--format",
+            "{{.Size}}",
+        ]
+    )
     if rc != 0:
         return 0
     total = 0
@@ -81,7 +87,7 @@ def size_journal() -> int | None:
     rc, out = run(["journalctl", "--disk-usage"])
     if rc != 0:
         return None
-    mult_map = {"B": 1, "K": 1024, "M": 1024 ** 2, "G": 1024 ** 3, "T": 1024 ** 4}
+    mult_map = {"B": 1, "K": 1024, "M": 1024**2, "G": 1024**3, "T": 1024**4}
     for tok in out.split():
         if tok and tok[0].isdigit() and tok[-1] in "BKMGT":
             try:
@@ -100,7 +106,7 @@ def size_snap_disabled() -> int | None:
     total = 0
     for line in out.splitlines():
         low = line.lower()
-        if "disabled" in low :
+        if "disabled" in low:
             parts = line.split()
             if len(parts) >= 3:
                 p = Path(f"/var/lib/snapd/snaps/{parts[0]}_{parts[2]}.snap")
@@ -112,8 +118,7 @@ def size_snap_disabled() -> int | None:
 def size_flatpak_unused() -> int | None:
     """``flatpak uninstall --unused`` dry-run; "Nothing unused" → 0, error → None."""
     rc, out = run(
-        ["flatpak", "uninstall", "--unused", "--noninteractive",
-         "--assumeyes", "--dry-run"],
+        ["flatpak", "uninstall", "--unused", "--noninteractive", "--assumeyes", "--dry-run"],
         timeout=60,
     )
     if rc != 0:
@@ -195,7 +200,7 @@ def clean_snap_disabled_action() -> tuple[int, str]:
     targets: list[tuple[str, str]] = []
     for line in out.splitlines():
         low = line.lower()
-        if "disabled" in low :
+        if "disabled" in low:
             parts = line.split()
             if len(parts) >= 3:
                 targets.append((parts[0], parts[2]))

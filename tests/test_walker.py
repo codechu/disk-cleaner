@@ -1,9 +1,9 @@
 """Pure-logic tests for ``core.walker`` (using tmp_path)."""
+
 from __future__ import annotations
 
 import os
 import time
-from pathlib import Path
 
 from disk_cleaner.core.walker import (
     ARTIFACT_DIRS,

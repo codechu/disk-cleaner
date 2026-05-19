@@ -4,6 +4,7 @@ A cached result is considered safe as long as the directory ``mtime``
 has not changed. Cache is invalidated when the TTL expires; manual
 ``invalidate(path)`` is also supported.
 """
+
 from __future__ import annotations
 
 import sqlite3
@@ -67,9 +68,7 @@ def cached_dir_size(path: str | Path, ttl: float = DEFAULT_DU_CACHE_TTL_SEC) -> 
         return dir_size(p)
 
 
-def lookup_cached_dir_size(
-    path: str | Path, ttl: float = DEFAULT_DU_CACHE_TTL_SEC
-) -> int | None:
+def lookup_cached_dir_size(path: str | Path, ttl: float = DEFAULT_DU_CACHE_TTL_SEC) -> int | None:
     """Return cached size if fresh, else None — never walks the directory.
 
     Suitable as a :class:`codechu_treeviz.SizeProvider` callback. Returning

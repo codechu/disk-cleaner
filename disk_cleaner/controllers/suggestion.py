@@ -10,19 +10,20 @@ size cap.
 View concerns (TreeStore, filter, sort, dialog, right-click menu) are
 not part of this class.
 """
+
 from __future__ import annotations
 
 import os
 import threading
-import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Iterable
+from typing import Any
 
 from .. import events
 from ..config import HOME
-from ..i18n import _, ngettext
 from ..core.process import get_open_paths
 from ..core.score import compute_score_and_reason
+from ..i18n import _, ngettext
 from ..settings import add_to_blacklist, is_blacklisted
 from ..storage.snapshots import compute_growth, save_snapshot
 from ..utils import ThrottledProgress, human
@@ -32,18 +33,18 @@ from ..utils import ThrottledProgress, human
 class SuggestionRow:
     """Hierarchical suggestion row — group or leaf task."""
 
-    tid: int                       # -1: group; >=0: task id
+    tid: int  # -1: group; >=0: task id
     name: str
-    score: int                     # 0..100+
+    score: int  # 0..100+
     size_bytes: int
     size_text: str
     reason: str
-    risk_color: str                # hex
-    kind: str                      # "system" / "artifact" / "oldfile" / "group"
+    risk_color: str  # hex
+    kind: str  # "system" / "artifact" / "oldfile" / "group"
     is_group: bool
     checked: bool = False
-    status_marker: str = ""        # "✓ " / "✗ " after cleanup
-    children: list["SuggestionRow"] = field(default_factory=list)
+    status_marker: str = ""  # "✓ " / "✗ " after cleanup
+    children: list[SuggestionRow] = field(default_factory=list)
 
 
 @dataclass
@@ -66,7 +67,7 @@ class GrowthInfo:
 class CleanPreview:
     count: int
     total_bytes: int
-    items: list[tuple[int, int, str]]   # (group_idx, child_idx, name)
+    items: list[tuple[int, int, str]]  # (group_idx, child_idx, name)
 
 
 @dataclass
@@ -109,7 +110,9 @@ class SuggestionController:
         # Observers
         self.on_busy_changed: Callable[[bool, str], None] = _noop2
         self.on_rows_replaced: Callable[[list[SuggestionRow], GrowthInfo | None], None] = _noop2
-        self.on_row_updated: Callable[[int, int, SuggestionRow], None] = _noop3   # (group_idx, child_idx, row)
+        self.on_row_updated: Callable[[int, int, SuggestionRow], None] = (
+            _noop3  # (group_idx, child_idx, row)
+        )
         self.on_total_changed: Callable[[int, int], None] = _noop2  # (count, total_bytes)
         self.on_progress: Callable[[str], None] = _noop
         self.on_log: Callable[[str], None] = _noop
@@ -169,7 +172,6 @@ class SuggestionController:
         """
         self._set_all(False)
         # Collect leaves — low risk
-        from .. import settings  # avoid top-level circular
         leaves: list[tuple[int, int, int, int]] = []  # (gidx, cidx, score, size)
         for gi, row in enumerate(self.rows):
             if row.is_group:
@@ -195,9 +197,7 @@ class SuggestionController:
             picked += 1
         self._emit_total()
         self.on_log(
-            _(
-                "Targeted selection: {picked} items, {total} (target: {target})"
-            ).format(
+            _("Targeted selection: {picked} items, {total} (target: {target})").format(
                 picked=picked,
                 total=human(cumulative),
                 target=human(target_bytes),
@@ -229,18 +229,14 @@ class SuggestionController:
         preview = CleanPreview(
             count=len(selected),
             total_bytes=total,
-            items=[
-                (gi, ci, t["name"]) for gi, ci, t in selected[:MAX_PREVIEW_ITEMS]
-            ],
+            items=[(gi, ci, t["name"]) for gi, ci, t in selected[:MAX_PREVIEW_ITEMS]],
         )
         if not confirm(preview):
             return False
         self._cancel_event.clear()
         self._set_busy(True, f"0 / {len(selected)}")
         events.emit("clean.started", panel="suggestion", count=len(selected))
-        threading.Thread(
-            target=self._clean_thread, args=(selected,), daemon=True
-        ).start()
+        threading.Thread(target=self._clean_thread, args=(selected,), daemon=True).start()
         return True
 
     def blacklist_and_remove(self, group_idx: int, child_idx: int | None) -> None:
@@ -345,9 +341,12 @@ class SuggestionController:
         # Snapshot + growth
         items_for_db = [
             {
-                "path": t.get("path", ""), "kind": kind,
-                "size_bytes": size, "score": int(score),
-                "risk": t.get("risk", ""), "name": t.get("name", ""),
+                "path": t.get("path", ""),
+                "kind": kind,
+                "size_bytes": size,
+                "score": int(score),
+                "risk": t.get("risk", ""),
+                "name": t.get("name", ""),
             }
             for t, size, kind, score, _ in enriched
         ]
@@ -374,15 +373,14 @@ class SuggestionController:
         self.on_rows_replaced(self.rows, growth_info)
         self._set_busy(False, "")
         group_count = sum(1 for r in self.rows if r.is_group)
-        suggestions_msg = ngettext(
-            "{n} suggestion", "{n} suggestions", self.total_items
-        ).format(n=self.total_items)
-        groups_msg = ngettext(
-            "{n} group", "{n} groups", group_count
-        ).format(n=group_count)
+        suggestions_msg = ngettext("{n} suggestion", "{n} suggestions", self.total_items).format(
+            n=self.total_items
+        )
+        groups_msg = ngettext("{n} group", "{n} groups", group_count).format(n=group_count)
         self.on_log(
             _("Smart scan complete: {suggestions} ({groups})").format(
-                suggestions=suggestions_msg, groups=groups_msg,
+                suggestions=suggestions_msg,
+                groups=groups_msg,
             )
             + "\n"
         )
@@ -452,10 +450,7 @@ class SuggestionController:
                 break
 
         # Blacklist filter
-        results = [
-            (t, s, k) for t, s, k in results
-            if not is_blacklisted(t.get("path", ""))
-        ]
+        results = [(t, s, k) for t, s, k in results if not is_blacklisted(t.get("path", ""))]
 
         # Score + reason
         progress(_("Scoring…"))
@@ -483,12 +478,10 @@ class SuggestionController:
                 color = _LOW_COLOR
             active_count = sum(1 for t, *_ in items if "ACTIVE" in t.get("desc", ""))
             inactive = len(items) - active_count
-            items_part = ngettext(
-                "{n} item", "{n} items", len(items)
-            ).format(n=len(items))
-            reason = _(
-                "{items_part} · {inactive} old + {active} active"
-            ).format(items_part=items_part, inactive=inactive, active=active_count)
+            items_part = ngettext("{n} item", "{n} items", len(items)).format(n=len(items))
+            reason = _("{items_part} · {inactive} old + {active} active").format(
+                items_part=items_part, inactive=inactive, active=active_count
+            )
             score = max(int(it[3]) for it in items)
             group_row = SuggestionRow(
                 tid=-1,
@@ -505,21 +498,21 @@ class SuggestionController:
                 tid = self._next_tid
                 self._next_tid += 1
                 self.tasks[tid] = task
-                child_color = _RISK_COLOR_MAP.get(
-                    task.get("risk", "medium"), _MEDIUM_COLOR
+                child_color = _RISK_COLOR_MAP.get(task.get("risk", "medium"), _MEDIUM_COLOR)
+                group_row.children.append(
+                    SuggestionRow(
+                        tid=tid,
+                        name=task.get("name", "?"),
+                        score=int(sc),
+                        size_bytes=size,
+                        size_text=human(size),
+                        reason=rs,
+                        risk_color=child_color,
+                        kind=kind,
+                        is_group=False,
+                        checked=id(task) in auto_set,
+                    )
                 )
-                group_row.children.append(SuggestionRow(
-                    tid=tid,
-                    name=task.get("name", "?"),
-                    score=int(sc),
-                    size_bytes=size,
-                    size_text=human(size),
-                    reason=rs,
-                    risk_color=child_color,
-                    kind=kind,
-                    is_group=False,
-                    checked=id(task) in auto_set,
-                ))
             rows.append(group_row)
 
         for task, size, kind, sc, rs in singles:
@@ -527,37 +520,36 @@ class SuggestionController:
             self._next_tid += 1
             self.tasks[tid] = task
             color = _RISK_COLOR_MAP.get(task.get("risk", "medium"), _MEDIUM_COLOR)
-            rows.append(SuggestionRow(
-                tid=tid,
-                name=task.get("name", "?"),
-                score=int(sc),
-                size_bytes=size,
-                size_text=human(size),
-                reason=rs,
-                risk_color=color,
-                kind=kind,
-                is_group=False,
-                checked=id(task) in auto_set,
-            ))
+            rows.append(
+                SuggestionRow(
+                    tid=tid,
+                    name=task.get("name", "?"),
+                    score=int(sc),
+                    size_bytes=size,
+                    size_text=human(size),
+                    reason=rs,
+                    risk_color=color,
+                    kind=kind,
+                    is_group=False,
+                    checked=id(task) in auto_set,
+                )
+            )
         return rows
 
     # ---- Internals — clean ----
 
-    def _clean_thread(
-        self, selected: list[tuple[int, int, dict[str, Any]]]
-    ) -> None:
+    def _clean_thread(self, selected: list[tuple[int, int, dict[str, Any]]]) -> None:
         for n, (gi, ci, task) in enumerate(selected, 1):
             if self._cancel_event.is_set():
                 self.on_log(
                     _("Cancelled: {done}/{total} done").format(
-                        done=n - 1, total=len(selected),
+                        done=n - 1,
+                        total=len(selected),
                     )
                     + "\n"
                 )
                 break
-            self.on_progress(
-                f"{n} / {len(selected)} — {task.get('name', '')}"
-            )
+            self.on_progress(f"{n} / {len(selected)} — {task.get('name', '')}")
             self.on_log(f"▶ {task['name']}\n")
             try:
                 rc, out = task["clean_fn"]()
@@ -642,7 +634,8 @@ def _group_enriched(
 
 
 def _compute_auto_select(
-    groups: dict[str, list], singles: list,
+    groups: dict[str, list],
+    singles: list,
 ) -> set[int]:
     """Top-N + score threshold + cumulative cap — returns a set of id(task)."""
     all_items: list[tuple[dict[str, Any], int, str, float, str, str | None]] = []
@@ -653,11 +646,11 @@ def _compute_auto_select(
         all_items.append((t, size, kind, sc, rs, None))
     all_items.sort(key=lambda x: -x[3])
 
-    cap = AUTO_SELECT_MAX_GB * (1024 ** 3)
+    cap = AUTO_SELECT_MAX_GB * (1024**3)
     auto_set: set[int] = set()
     cumulative = 0
     picked = 0
-    for t, size, kind, sc, rs, _key in all_items:
+    for t, size, _kind, sc, rs, _key in all_items:
         if picked >= AUTO_SELECT_TOP_N:
             break
         if cumulative + size > cap:
@@ -681,9 +674,12 @@ def _coerce_growth(raw: dict | None) -> GrowthInfo | None:
         return None
     items = [
         GrowthItem(
-            path=g["path"], name=g.get("name", ""),
-            current_size=g["current_size"], prev_size=g["prev_size"],
-            delta=g["delta"], ratio=g["ratio"],
+            path=g["path"],
+            name=g.get("name", ""),
+            current_size=g["current_size"],
+            prev_size=g["prev_size"],
+            delta=g["delta"],
+            ratio=g["ratio"],
         )
         for g in raw["growth"]
     ]

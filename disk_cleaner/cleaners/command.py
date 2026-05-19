@@ -3,6 +3,7 @@
 When ``need_root=True`` it is wrapped with ``pkexec``. ``DRY_RUN`` is
 read at call time from :mod:`disk_cleaner.runtime` (runtime mutable).
 """
+
 from __future__ import annotations
 
 import os

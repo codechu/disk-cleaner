@@ -4,6 +4,7 @@ Calls ``make_old_files_tasks`` with a folder + age threshold (days).
 Risk is high — results are the user's own files; nothing is
 auto-selected.
 """
+
 from __future__ import annotations
 
 from ..._gtk import Gtk

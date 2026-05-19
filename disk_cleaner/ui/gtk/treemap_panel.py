@@ -13,13 +13,14 @@ class is responsible only for:
 The callbacks the controller invokes may come from worker threads, so
 each one is wrapped with ``GLib.idle_add``.
 """
+
 from __future__ import annotations
 
 import colorsys
 import math
 import os
 import time
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from ..._gtk import Gdk, GLib, Gtk, Pango
 from ...controllers import TreemapController
@@ -44,8 +45,10 @@ def _node_color_themed(
 
 def _idle(fn: Callable) -> Callable:
     """Marshal a callback from a worker thread onto the Gtk main thread."""
+
     def wrapper(*args, **kwargs):
         GLib.idle_add(lambda: (fn(*args, **kwargs), False)[1])
+
     return wrapper
 
 
@@ -57,7 +60,7 @@ class TreemapPanel(Gtk.Box):
         self.controller: TreemapController = controller or TreemapController()
 
         # View-local state (controller'a ait olmayan)
-        self._hover_node: Optional[TreeNode] = None
+        self._hover_node: TreeNode | None = None
         self._hover_center = False
         self._fade_alpha = 1.0
         self._fade_dir = 0  # -1: out, +1: in, 0: idle
@@ -124,20 +127,20 @@ class TreemapPanel(Gtk.Box):
         self.area.set_hexpand(True)
         self.area.set_vexpand(True)
         self.area.connect("draw", self.on_draw)
-        self.area.add_events(
-            Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK
-        )
+        self.area.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK)
         self.area.connect("button-press-event", self.on_click)
         self.area.connect("motion-notify-event", self.on_motion)
         self.pack_start(self.area, True, True, 0)
 
         hint = Gtk.Label(xalign=0)
-        hint.set_markup(_(
-            "<i>Each colored block is a child of the current folder. "
-            "Size = disk size. "
-            "<b>Click</b> a folder → drill in. "
-            "<b>Right-click</b> or ⬆ Up → go up.</i>"
-        ))
+        hint.set_markup(
+            _(
+                "<i>Each colored block is a child of the current folder. "
+                "Size = disk size. "
+                "<b>Click</b> a folder → drill in. "
+                "<b>Right-click</b> or ⬆ Up → go up.</i>"
+            )
+        )
         hint.set_line_wrap(True)
         self.pack_start(hint, False, False, 0)
 
@@ -170,9 +173,7 @@ class TreemapPanel(Gtk.Box):
             self.cancel_btn.show()
             self.spinner.show()
             self.spinner.start()
-            self._set_crumb_text(
-                _("Scanning: {path}").format(path=self.controller.path)
-            )
+            self._set_crumb_text(_("Scanning: {path}").format(path=self.controller.path))
         else:
             self.cancel_btn.hide()
             self.spinner.stop()
@@ -239,10 +240,12 @@ class TreemapPanel(Gtk.Box):
     def _on_crumb_clicked(self, _btn, target_path: str) -> None:
         if self._fade_dir != 0:
             return
+
         def commit() -> None:
             if not self.controller.drill_to_path(target_path):
                 self.entry.set_text(target_path)
                 self.win.log(_("Path: {path} (press Scan)\n").format(path=target_path))
+
         self._begin_drill(commit)
 
     # ---- Fade animation (view-only) ----
@@ -293,12 +296,7 @@ class TreemapPanel(Gtk.Box):
             self._begin_drill(self.controller.drill_up)
             return True
         hit = self.controller.hit_test(event.x, event.y)
-        if (
-            hit
-            and hit.is_dir
-            and hit is not self.controller.current_node
-            and self._fade_dir == 0
-        ):
+        if hit and hit.is_dir and hit is not self.controller.current_node and self._fade_dir == 0:
             self._begin_drill(lambda: self.controller.drill_in(hit))
         return True
 
@@ -328,11 +326,11 @@ class TreemapPanel(Gtk.Box):
         try:
             if node.is_dir:
                 child_text = ngettext(
-                    "{n} child", "{n} children", len(node.children),
+                    "{n} child",
+                    "{n} children",
+                    len(node.children),
                 ).format(n=len(node.children))
-                parts.append(
-                    f"<span color='#888'>{GLib.markup_escape_text(child_text)}</span>"
-                )
+                parts.append(f"<span color='#888'>{GLib.markup_escape_text(child_text)}</span>")
         except Exception:
             pass
         try:
@@ -340,11 +338,11 @@ class TreemapPanel(Gtk.Box):
             age = int((time.time() - mt) / 86400)
             if age > 0:
                 ago_text = ngettext(
-                    "{n} day ago", "{n} days ago", age,
+                    "{n} day ago",
+                    "{n} days ago",
+                    age,
                 ).format(n=age)
-                parts.append(
-                    f"<span color='#888'>{GLib.markup_escape_text(ago_text)}</span>"
-                )
+                parts.append(f"<span color='#888'>{GLib.markup_escape_text(ago_text)}</span>")
         except Exception:
             pass
         return "  ·  ".join(parts)
@@ -361,8 +359,10 @@ class TreemapPanel(Gtk.Box):
             action=Gtk.FileChooserAction.SAVE,
         )
         dlg.add_buttons(
-            _("Cancel"), Gtk.ResponseType.CANCEL,
-            _("Save"), Gtk.ResponseType.ACCEPT,
+            _("Cancel"),
+            Gtk.ResponseType.CANCEL,
+            _("Save"),
+            Gtk.ResponseType.ACCEPT,
         )
         dlg.set_do_overwrite_confirmation(True)
         ts = time.strftime("%Y-%m-%d_%H-%M")
@@ -537,9 +537,11 @@ class TreemapPanel(Gtk.Box):
 
     def _draw_arc_label(self, cr, node, cx, cy, r_in, r_out, a0, a1) -> None:
         if node.is_other:
-            name = _("Other") + " " + ngettext(
-                "({n} item)", "({n} items)", node.small_count
-            ).format(n=node.small_count)
+            name = (
+                _("Other")
+                + " "
+                + ngettext("({n} item)", "({n} items)", node.small_count).format(n=node.small_count)
+            )
         else:
             name = os.path.basename(node.path) or node.path
         if is_hash_like(name):
@@ -585,7 +587,7 @@ class TreemapPanel(Gtk.Box):
 
         if is_top:
             cur = mid_angle - total_arc / 2
-            for ch, adv in zip(text, char_widths):
+            for ch, adv in zip(text, char_widths, strict=False):
                 ch_arc = adv / radius
                 ch_mid = cur + ch_arc / 2
                 cr.save()
@@ -599,7 +601,7 @@ class TreemapPanel(Gtk.Box):
                 cur += ch_arc
         else:
             cur = mid_angle + total_arc / 2
-            for ch, adv in zip(text, char_widths):
+            for ch, adv in zip(text, char_widths, strict=False):
                 ch_arc = adv / radius
                 ch_mid = cur - ch_arc / 2
                 cr.save()
@@ -716,9 +718,13 @@ class TreemapPanel(Gtk.Box):
             cr.stroke()
         if w > 60 and h > 24:
             if is_other:
-                name = _("Other") + " " + ngettext(
-                    "({n} item)", "({n} items)", node.small_count
-                ).format(n=node.small_count)
+                name = (
+                    _("Other")
+                    + " "
+                    + ngettext("({n} item)", "({n} items)", node.small_count).format(
+                        n=node.small_count
+                    )
+                )
             else:
                 name = os.path.basename(node.path) or node.path
             size_str = human(node.size)
@@ -737,11 +743,11 @@ class TreemapPanel(Gtk.Box):
     # ---- Backward compatibility (attributes read by the control API) ----
 
     @property
-    def current_node(self) -> Optional[TreeNode]:
+    def current_node(self) -> TreeNode | None:
         return self.controller.current_node
 
     @property
-    def root_node(self) -> Optional[TreeNode]:
+    def root_node(self) -> TreeNode | None:
         return self.controller.root_node
 
     @property

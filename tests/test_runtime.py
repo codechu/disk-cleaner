@@ -1,7 +1,6 @@
 """runtime module — TRASH_MODE + DRY_RUN state flags."""
-from __future__ import annotations
 
-import pytest
+from __future__ import annotations
 
 from disk_cleaner import runtime
 from disk_cleaner.cleaners.command import CommandCleaner

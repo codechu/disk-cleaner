@@ -7,6 +7,7 @@ the GTK GUI.
 Legacy entry points (``python3 disk_cleaner.py``,
 ``python -m disk_cleaner``, ``disk-cleaner``) all flow through here.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -86,17 +87,19 @@ def cli_collect_tasks(
     enriched: list[dict] = []
     for t, size, kind in results:
         score, reason = compute_score_and_reason(t, size, kind, open_paths)
-        enriched.append({
-            "name": t.get("name", ""),
-            "path": t.get("path", ""),
-            "kind": kind,
-            "size_bytes": size,
-            "size_human": human(size),
-            "score": int(score),
-            "reason": reason,
-            "risk": t.get("risk", ""),
-            "_task": t,  # internal — stripped from output
-        })
+        enriched.append(
+            {
+                "name": t.get("name", ""),
+                "path": t.get("path", ""),
+                "kind": kind,
+                "size_bytes": size,
+                "size_human": human(size),
+                "score": int(score),
+                "reason": reason,
+                "risk": t.get("risk", ""),
+                "_task": t,  # internal — stripped from output
+            }
+        )
     enriched.sort(key=lambda x: -x["score"])
     return enriched
 
@@ -106,32 +109,50 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="disk_cleaner",
         description=_("Disk Cleaner — GUI or CLI"),
     )
-    p.add_argument("--scan", action="store_true",
-                   help=_("Headless scan, prints result (default: json)"))
-    p.add_argument("--clean", action="store_true",
-                   help=_("Scan and clean low-risk + safe items"))
-    p.add_argument("--dry-run", action="store_true",
-                   help=_("Do not delete anything, only show what would be done"))
-    p.add_argument("--trash", dest="trash", action="store_true",
-                   default=None, help=_("Trash mode (default on)"))
-    p.add_argument("--no-trash", dest="trash", action="store_false",
-                   help=_("Permanent delete"))
-    p.add_argument("--format", choices=["json", "csv", "table"],
-                   default="json", help=_("Output format (with --scan)"))
-    p.add_argument("--sources", default="system,artifacts,oldfiles",
-                   help=_("Sources (comma-separated): system,artifacts,oldfiles"))
+    p.add_argument(
+        "--scan", action="store_true", help=_("Headless scan, prints result (default: json)")
+    )
+    p.add_argument("--clean", action="store_true", help=_("Scan and clean low-risk + safe items"))
+    p.add_argument(
+        "--dry-run",
+        action="store_true",
+        help=_("Do not delete anything, only show what would be done"),
+    )
+    p.add_argument(
+        "--trash",
+        dest="trash",
+        action="store_true",
+        default=None,
+        help=_("Trash mode (default on)"),
+    )
+    p.add_argument("--no-trash", dest="trash", action="store_false", help=_("Permanent delete"))
+    p.add_argument(
+        "--format",
+        choices=["json", "csv", "table"],
+        default="json",
+        help=_("Output format (with --scan)"),
+    )
+    p.add_argument(
+        "--sources",
+        default="system,artifacts,oldfiles",
+        help=_("Sources (comma-separated): system,artifacts,oldfiles"),
+    )
     p.add_argument("--workspace", help=_("Root path for artifact scan"))
     p.add_argument("--downloads", help=_("Root path for old-files scan"))
-    p.add_argument("--min-score", type=int, default=40,
-                   help=_("Minimum score threshold for auto cleanup (default 40)"))
-    p.add_argument("--watchdog", action="store_true",
-                   help=_("Run in background watchdog mode (infinite loop)"))
-    p.add_argument("--watchdog-start", action="store_true",
-                   help=_("Start watchdog in the background (detach)"))
-    p.add_argument("--watchdog-stop", action="store_true",
-                   help=_("Stop running watchdog"))
-    p.add_argument("--watchdog-status", action="store_true",
-                   help=_("Print watchdog status"))
+    p.add_argument(
+        "--min-score",
+        type=int,
+        default=40,
+        help=_("Minimum score threshold for auto cleanup (default 40)"),
+    )
+    p.add_argument(
+        "--watchdog", action="store_true", help=_("Run in background watchdog mode (infinite loop)")
+    )
+    p.add_argument(
+        "--watchdog-start", action="store_true", help=_("Start watchdog in the background (detach)")
+    )
+    p.add_argument("--watchdog-stop", action="store_true", help=_("Stop running watchdog"))
+    p.add_argument("--watchdog-status", action="store_true", help=_("Print watchdog status"))
     return p
 
 
@@ -185,14 +206,13 @@ def cli_main(argv: list[str]) -> int:
         return 0
 
     sources = {s.strip() for s in args.sources.split(",") if s.strip()}
-    enriched = cli_collect_tasks(
-        sources, workspace=args.workspace, downloads=args.downloads
-    )
+    enriched = cli_collect_tasks(sources, workspace=args.workspace, downloads=args.downloads)
 
     if args.clean:
         # Low risk + above score threshold + not active + not currently open
         targets = [
-            r for r in enriched
+            r
+            for r in enriched
             if r["risk"] == "low"
             and r["score"] >= args.min_score
             and "ACTIVE" not in (r.get("reason", "") + r.get("name", ""))
@@ -217,7 +237,7 @@ def cli_main(argv: list[str]) -> int:
             try:
                 rc, out = t["clean_fn"]()
             except Exception as e:
-                rc, out = 1, str(e)
+                rc, _out = 1, str(e)
             status = _("OK") if rc == 0 else _("FAIL")
             print(f"[{status}] {r['name']}  {r['size_human']}", file=sys.stderr)
             if rc == 0:
@@ -229,10 +249,7 @@ def cli_main(argv: list[str]) -> int:
         return 0 if ok == len(targets) else 1
 
     # --scan: output
-    output_items = [
-        {k: v for k, v in r.items() if not k.startswith("_")}
-        for r in enriched
-    ]
+    output_items = [{k: v for k, v in r.items() if not k.startswith("_")} for r in enriched]
     if args.format == "json":
         json.dump(
             {
@@ -241,12 +258,12 @@ def cli_main(argv: list[str]) -> int:
                 "totals": {
                     "count": len(output_items),
                     "size_bytes": sum(r["size_bytes"] for r in output_items),
-                    "size_human": human(
-                        sum(r["size_bytes"] for r in output_items)
-                    ),
+                    "size_human": human(sum(r["size_bytes"] for r in output_items)),
                 },
             },
-            sys.stdout, indent=2, ensure_ascii=False,
+            sys.stdout,
+            indent=2,
+            ensure_ascii=False,
         )
         sys.stdout.write("\n")
     elif args.format == "csv":
@@ -255,8 +272,14 @@ def cli_main(argv: list[str]) -> int:
         w = csv.DictWriter(
             sys.stdout,
             fieldnames=[
-                "name", "path", "kind", "size_bytes", "size_human",
-                "score", "reason", "risk",
+                "name",
+                "path",
+                "kind",
+                "size_bytes",
+                "size_human",
+                "score",
+                "reason",
+                "risk",
             ],
         )
         w.writeheader()
@@ -284,14 +307,15 @@ def main() -> None:
     """Program main entry — GUI or CLI depending on arguments."""
     # Prepare XDG directories + migrate legacy (pre-XDG) layout if present
     from .config import ensure_dirs, migrate_pre_xdg_layout
+
     migrate_pre_xdg_layout()
     ensure_dirs()
 
     cli_args = [a for a in sys.argv[1:] if a.startswith("-")]
     if cli_args:
         sys.exit(cli_main(sys.argv[1:]))
-    from .ui import MainWindow
     from .theme import apply_user_preference
+    from .ui import MainWindow
 
     apply_user_preference()  # SETTINGS.theme → GTK dark-mode hint
     win = MainWindow()

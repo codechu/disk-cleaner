@@ -1,4 +1,5 @@
 """``python -m disk_cleaner`` entry point."""
+
 from __future__ import annotations
 
 from . import main
