@@ -1,14 +1,14 @@
-"""SuggestionController — akıllı tarama state machine'i.
+"""SuggestionController — smart scan state machine.
 
-Toplam tüm tarayıcıları (sistem cache + proje artefaktları + eski
-dosyalar) arka planda çalıştırır, ``compute_score_and_reason`` ile
-skorlar, snapshot kaydeder + 7-gün büyüme analizi yapar, sonuçları
-hiyerarşik olarak gruplayıp (📦 ``node_modules`` gibi artefakt türleri)
-sıralı şekilde sunar. Muhafazakar auto-select: top-N + skor eşiği +
-kümülatif boyut tavanı.
+Runs all scanners (system caches + project artifacts + old files) in the
+background, scores them via ``compute_score_and_reason``, saves a
+snapshot + computes 7-day growth, and presents the results grouped
+hierarchically (📦 artifact types such as ``node_modules``) in sorted
+order. Conservative auto-select: top-N + score threshold + cumulative
+size cap.
 
-View'ın görevi (TreeStore, filtre, sort, dialog, right-click menu) bu
-sınıfta yok.
+View concerns (TreeStore, filter, sort, dialog, right-click menu) are
+not part of this class.
 """
 from __future__ import annotations
 
@@ -30,9 +30,9 @@ from ..utils import ThrottledProgress, human
 
 @dataclass
 class SuggestionRow:
-    """Hiyerarşik öneri satırı — grup veya yaprak task."""
+    """Hierarchical suggestion row — group or leaf task."""
 
-    tid: int                       # -1: grup; >=0: task id
+    tid: int                       # -1: group; >=0: task id
     name: str
     score: int                     # 0..100+
     size_bytes: int
@@ -42,7 +42,7 @@ class SuggestionRow:
     kind: str                      # "system" / "artifact" / "oldfile" / "group"
     is_group: bool
     checked: bool = False
-    status_marker: str = ""        # "✓ " / "✗ " temizlik sonrası
+    status_marker: str = ""        # "✓ " / "✗ " after cleanup
     children: list["SuggestionRow"] = field(default_factory=list)
 
 
@@ -82,20 +82,20 @@ class ExportRow:
     selected: bool
 
 
-# Muhafazakar auto-select sabitleri
+# Conservative auto-select constants
 AUTO_SELECT_TOP_N = 5
 AUTO_SELECT_MAX_GB = 5.0
 AUTO_SELECT_MIN_SCORE = 60
 
-# Boyut filtresi — bu eşiğin altındaki görevler gösterilmez
+# Size filter — tasks below this threshold are not shown
 MIN_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB
 
-# Onay diyalogu için maks öğe göstergesi
+# Max items displayed in the confirmation dialog
 MAX_PREVIEW_ITEMS = 15
 
 
 class SuggestionController:
-    """Akıllı tarama state machine'i — View-bağımsız."""
+    """Smart scan state machine — view-independent."""
 
     def __init__(self) -> None:
         # State
@@ -135,8 +135,8 @@ class SuggestionController:
         self.on_progress(_("Cancelling…"))
 
     def toggle(self, group_idx: int, child_idx: int | None) -> None:
-        """child_idx None ise grubun kendisi toggle edilir; alt çocuklar
-        aynı duruma getirilir."""
+        """If child_idx is None, toggle the group itself; child rows are
+        set to the same state."""
         if not (0 <= group_idx < len(self.rows)):
             return
         row = self.rows[group_idx]
@@ -163,11 +163,12 @@ class SuggestionController:
         self._set_all(False)
 
     def select_target(self, target_bytes: int) -> int:
-        """Düşük riskli + skor sırasıyla kümülatif boyut hedefini aşana
-        kadar seç. Önceki seçim sıfırlanır. Returns: seçilen sayısı.
+        """Select low-risk items in score order until the cumulative size
+        target is exceeded. Previous selection is cleared. Returns: count
+        of selected items.
         """
         self._set_all(False)
-        # Yaprakları topla — düşük risk
+        # Collect leaves — low risk
         from .. import settings  # avoid top-level circular
         leaves: list[tuple[int, int, int, int]] = []  # (gidx, cidx, score, size)
         for gi, row in enumerate(self.rows):
@@ -206,7 +207,7 @@ class SuggestionController:
         return picked
 
     def start_clean(self, confirm: Callable[[CleanPreview], bool]) -> bool:
-        """Confirm callback senkron çağrılır. Returns: başlatıldıysa True."""
+        """Confirm callback is called synchronously. Returns: True if started."""
         selected: list[tuple[int, int, dict[str, Any]]] = []
         for gi, row in enumerate(self.rows):
             if row.is_group:
@@ -243,7 +244,7 @@ class SuggestionController:
         return True
 
     def blacklist_and_remove(self, group_idx: int, child_idx: int | None) -> None:
-        """Bir yolu blacklist'e ekle ve satırı kaldır."""
+        """Add a path to the blacklist and remove the row."""
         if not (0 <= group_idx < len(self.rows)):
             return
         if child_idx is None or child_idx < 0:
@@ -255,7 +256,7 @@ class SuggestionController:
             return
         path = task.get("path", "")
         add_to_blacklist(path)
-        # Satırı kaldır
+        # Remove the row
         if child_idx is None or child_idx < 0:
             del self.rows[group_idx]
             self.on_row_removed(group_idx, -1)
@@ -266,7 +267,7 @@ class SuggestionController:
         self._emit_total()
 
     def export_rows(self) -> list[ExportRow]:
-        """Mevcut tüm öğeleri (grup hariç) dışa aktarma için düz liste."""
+        """Flat list of all current items (excluding groups) for export."""
         out: list[ExportRow] = []
         for row in self.rows:
             if row.is_group:
@@ -318,7 +319,7 @@ class SuggestionController:
 
     @property
     def total_items(self) -> int:
-        """Yaprak sayısı (grup değil)."""
+        """Number of leaves (not groups)."""
         n = 0
         for row in self.rows:
             if row.is_group:
@@ -361,13 +362,13 @@ class SuggestionController:
         growth_info = _coerce_growth(raw_growth)
         self.last_growth = growth_info
 
-        # Gruplama
+        # Grouping
         groups, singles = _group_enriched(enriched)
 
-        # Auto-select kararı (score sırasıyla, kümülatif cap)
+        # Auto-select decision (sorted by score, cumulative cap)
         auto_set: set[int] = _compute_auto_select(groups, singles)
 
-        # Hiyerarşik satır yapısı kur
+        # Build hierarchical row structure
         self.rows = self._build_rows(groups, singles, auto_set)
 
         self.on_rows_replaced(self.rows, growth_info)
@@ -400,7 +401,7 @@ class SuggestionController:
     ) -> list[tuple[dict[str, Any], int, str, float, str]]:
         results: list[tuple[dict[str, Any], int, str]] = []
 
-        # Sistem cache
+        # System caches
         progress(_("Scanning system caches…"))
         for t in _tasks_mod.SYSTEM_TASKS:
             if self._cancel_event.is_set():
@@ -412,7 +413,7 @@ class SuggestionController:
             if size >= MIN_SIZE_BYTES:
                 results.append((t, size, "system"))
 
-        # Proje artefaktları
+        # Project artifacts
         ws = HOME / "workspace"
         if ws.exists() and not self._cancel_event.is_set():
             progress(_("Searching for project artifacts…"))
@@ -432,7 +433,7 @@ class SuggestionController:
                 if size >= MIN_SIZE_BYTES:
                     results.append((t, size, "artifact"))
 
-        # Eski dosyalar (İndirilenler / Downloads)
+        # Old files (Downloads / İndirilenler)
         for dlname in ("İndirilenler", "Downloads"):
             d = HOME / dlname
             if d.exists() and not self._cancel_event.is_set():
@@ -450,13 +451,13 @@ class SuggestionController:
                         results.append((t, size, "oldfile"))
                 break
 
-        # Blacklist filtre
+        # Blacklist filter
         results = [
             (t, s, k) for t, s, k in results
             if not is_blacklisted(t.get("path", ""))
         ]
 
-        # Skor + neden
+        # Score + reason
         progress(_("Scoring…"))
         enriched = []
         for t, size, kind in results:
@@ -605,9 +606,9 @@ class SuggestionController:
         self.on_busy_changed(busy, txt)
 
 
-# ---- helpers (modül seviyesi) ----
+# ---- helpers (module level) ----
 
-# Risk renkleri (RISK_COLORS'tan kopya — ui katmanına bağımlılık yok)
+# Risk colors (copy of RISK_COLORS — no dependency on the ui layer)
 _LOW_COLOR = "#1a7f37"
 _MEDIUM_COLOR = "#bf8700"
 _HIGH_COLOR = "#cf222e"
@@ -617,9 +618,9 @@ _RISK_COLOR_MAP = {"low": _LOW_COLOR, "medium": _MEDIUM_COLOR, "high": _HIGH_COL
 def _group_enriched(
     enriched: list[tuple[dict[str, Any], int, str, float, str]],
 ) -> tuple[dict[str, list], list]:
-    """Artefakt türlerini grupla; sistem/oldfile tekil kalır.
+    """Group artifact types; system/oldfile remain individual.
 
-    Tek öğeli gruplar açılır (singles'a karışır).
+    Single-item groups are unfolded (merged into singles).
     """
     groups: dict[str, list] = {}
     singles: list = []
@@ -643,7 +644,7 @@ def _group_enriched(
 def _compute_auto_select(
     groups: dict[str, list], singles: list,
 ) -> set[int]:
-    """Top-N + skor eşiği + kümülatif cap — id(task) seti döner."""
+    """Top-N + score threshold + cumulative cap — returns a set of id(task)."""
     all_items: list[tuple[dict[str, Any], int, str, float, str, str | None]] = []
     for key, items in groups.items():
         for t, size, kind, sc, rs in items:

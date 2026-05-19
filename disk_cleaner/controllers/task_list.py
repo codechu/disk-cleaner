@@ -1,20 +1,21 @@
-"""TaskListController — tara/seç/temizle akışının state machine'i.
+"""TaskListController — state machine for scan/select/clean flow.
 
-Tek bir görev listesi panelinin (sistem cache, proje artefaktları, eski
-dosyalar, vb.) sahibi olduğu state. View bunu observe eder, butonlar
-controller metodlarını çağırır.
+State owned by a single task-list panel (system cache, project
+artifacts, old files, etc.). The View observes this controller and
+buttons call controller methods.
 
-Tasarım:
+Design:
 
-- Görev listesi controller'da ``list[TaskRow]`` olarak yaşar; her satır
-  render-ready alanları içerir (name, risk, path, size_text, checked).
-- Boyut hesabı / temizlik / preview hep daemon thread'de; cancel için
-  ``threading.Event``.
-- Auto-select kuralı parametrize: risk + min boyut + ``auto_select`` flag.
-- Cleanup confirmation View'un sorumluluğunda — controller bir
-  :class:`CleanPreview` üretip View'a callback üzerinden sunar; View
-  dialog gösterir, bool döner.
-- Preview ayrı bir thread + cancel kanalı; her yeni request öncekini iptal eder.
+- The task list lives on the controller as ``list[TaskRow]``; each row
+  contains render-ready fields (name, risk, path, size_text, checked).
+- Sizing / cleanup / preview always run on a daemon thread; cancellation
+  uses ``threading.Event``.
+- Auto-select rule is parametrized: risk + min size + ``auto_select`` flag.
+- Cleanup confirmation is the View's responsibility — the controller
+  builds a :class:`CleanPreview` and offers it to the View via callback;
+  the View shows a dialog and returns a bool.
+- Preview runs on a separate thread + cancel channel; each new request
+  cancels the previous one.
 """
 from __future__ import annotations
 
@@ -33,17 +34,17 @@ from ..utils import ThrottledProgress, human
 
 @dataclass
 class TaskRow:
-    """View'a sunulan render-ready satır gösterimi."""
+    """Render-ready row representation exposed to the View."""
 
     tid: int                       # internal task id (stable)
     name: str
     risk: str                      # "low" / "medium" / "high"
     path: str
     desc: str
-    size_bytes: int | None = None  # None: henüz ölçülmemiş
+    size_bytes: int | None = None  # None: not yet measured
     size_text: str = "—"           # human(size) or "unmeasurable"
     checked: bool = False
-    status_marker: str = ""        # "✓ " / "✗ " temizlik sonrası
+    status_marker: str = ""        # "✓ " / "✗ " after cleanup
 
 
 @dataclass
@@ -57,9 +58,10 @@ class PreviewItem:
 
 @dataclass
 class PreviewResult:
-    """View'a sunulan zengin preview verisi.
+    """Rich preview data presented to the View.
 
-    View bunu kendi markup'ına (Pango / HTML / Qt rich text) çevirir.
+    The View converts this into its own markup (Pango / HTML / Qt rich
+    text).
     """
 
     path: str
@@ -72,15 +74,15 @@ class PreviewResult:
 
 @dataclass
 class CleanPreview:
-    """Onay diyaloğu için özet."""
+    """Summary for the confirmation dialog."""
 
     count: int
     total_bytes: int
-    items: list[tuple[int, str]]   # (row_index, task_name) — ilk 20'si
+    items: list[tuple[int, str]]   # (row_index, task_name) — first 20
 
 
 class TaskListController:
-    """Görev listesi state machine'i — View-bağımsız."""
+    """Task-list state machine — view-independent."""
 
     AUTO_SELECT_DEFAULT_MIN_BYTES = 100 * 1024 * 1024  # 100 MB
 
@@ -107,7 +109,7 @@ class TaskListController:
         self._busy = False
         self._next_tid = 0
 
-        # Observers (worker thread'den de çağrılabilir; View marshalling)
+        # Observers (may be invoked from worker threads; View handles marshalling)
         self.on_busy_changed: Callable[[bool, str], None] = _noop2
         self.on_rows_replaced: Callable[[list[TaskRow]], None] = _noop
         self.on_row_updated: Callable[[int, TaskRow], None] = _noop2
@@ -160,9 +162,9 @@ class TaskListController:
         self,
         confirm: Callable[[CleanPreview], bool],
     ) -> bool:
-        """Confirm callback senkron çağrılır (View'da dialog).
+        """Confirm callback is called synchronously (dialog on the View).
 
-        Returns: temizlik gerçekten başladıysa True.
+        Returns: True if cleanup actually started.
         """
         selected = [
             (i, self.tasks[i])
@@ -190,12 +192,12 @@ class TaskListController:
         return True
 
     def request_preview(self, idx: int) -> None:
-        """Bir satır seçilince çağrılır — eski preview thread cancel."""
+        """Called when a row is selected — cancels any old preview thread."""
         if not (0 <= idx < len(self.tasks)):
             return
         task = self.tasks[idx]
         path = task.get("path", "")
-        # Eski thread'i iptal et, yeni event
+        # Cancel old thread, fresh event
         self._preview_cancel.set()
         self._preview_cancel = threading.Event()
         self.on_preview(PreviewResult(path=path, state="scanning"))
@@ -235,7 +237,7 @@ class TaskListController:
             self._scan_done(cancelled=True)
             return
 
-        # Satırları kur
+        # Build rows
         new_rows: list[TaskRow] = []
         for t in tasks:
             tid = self._next_tid
@@ -258,7 +260,7 @@ class TaskListController:
             self._scan_done(cancelled=False)
             return
 
-        # Boyutları teker teker hesapla
+        # Compute sizes one by one
         for idx, t in enumerate(tasks):
             if self._cancel_event.is_set():
                 self._scan_done(cancelled=True)
@@ -432,7 +434,7 @@ def _call_provider(
     cancel: threading.Event,
     progress: Callable[[str], None],
 ) -> Iterable[dict[str, Any]] | None:
-    """Provider sözleşmesi esnek: hangi imzayı destekliyorsa onu kullan."""
+    """Provider contract is flexible: use whichever signature it supports."""
     try:
         return provider(cancel, progress=progress)
     except TypeError:

@@ -1,15 +1,16 @@
-"""TaskPanel — görev listesi View'u (Gtk).
+"""TaskPanel — task-list View (Gtk).
 
-State machine'i :class:`~disk_cleaner.controllers.TaskListController`
-sahibi; bu sınıf:
+The state machine is owned by
+:class:`~disk_cleaner.controllers.TaskListController`; this class is
+responsible for:
 
-- Widget kurulumu (toolbar, TreeView + ListStore, action bar, preview)
-- ``Gtk.ListStore`` ↔ controller satırları senkron
-- Onay diyaloğu (controller bunu callback üzerinden çağırır)
+- Widget setup (toolbar, TreeView + ListStore, action bar, preview)
+- Syncing ``Gtk.ListStore`` ↔ controller rows
+- The confirmation dialog (the controller calls it via callback)
 - :class:`~disk_cleaner.controllers.PreviewResult` → Pango markup
-- Tüm callback'ler ``_idle()`` wrapper'ı ile thread-safe
+- Thread-safety: every callback runs through the ``_idle()`` wrapper
 
-için sorumlu. Hiçbir scan/clean iş mantığı View'da yok.
+No scan/clean business logic lives in the View.
 """
 from __future__ import annotations
 
@@ -34,9 +35,9 @@ def _idle(fn: Callable) -> Callable:
 
 
 class TaskPanel(Gtk.Box):
-    """Tara/seç/temizle paneli — controller'a bağlı thin View."""
+    """Scan/select/clean panel — thin View bound to a controller."""
 
-    # ListStore sütun indeksleri
+    # ListStore column indices
     C_CHECK, C_NAME, C_RISK_LABEL, C_RISK_COLOR, C_PATH, C_SIZE_TEXT, \
         C_SIZE_BYTES, C_DESC = range(8)
 
@@ -177,7 +178,7 @@ class TaskPanel(Gtk.Box):
         self.clean_btn.set_sensitive(False)
         action_bar.pack_start(self.clean_btn, False, False, 0)
 
-        # ---- Observer wire'ları (thread-safe) ----
+        # ---- Observer wiring (thread-safe) ----
         c = self.controller
         c.on_busy_changed = _idle(self._on_busy_changed)
         c.on_rows_replaced = _idle(self._on_rows_replaced)
@@ -190,7 +191,7 @@ class TaskPanel(Gtk.Box):
 
         self._update_total_label(0, 0)
 
-    # ---- Observer reaksiyonları (Gtk main thread) ----
+    # ---- Observer reactions (on the Gtk main thread) ----
 
     def _on_busy_changed(self, busy: bool, progress_text: str) -> None:
         if busy:
@@ -281,8 +282,8 @@ class TaskPanel(Gtk.Box):
         popover.show_all()
 
     def _trigger_clean(self) -> None:
-        """Confirm callback senkron — controller dialog'u çağırırken View
-        burada bool döner."""
+        """Confirm callback is synchronous — when the controller invokes the
+        dialog, the View returns a bool here."""
         self.controller.start_clean(self._confirm_clean)
 
     def _confirm_clean(self, preview: CleanPreview) -> bool:
@@ -327,7 +328,7 @@ class TaskPanel(Gtk.Box):
 
 
 def _format_preview_markup(result: PreviewResult) -> str:
-    """View-specific: Pango markup oluştur."""
+    """View-specific: build Pango markup."""
     if result.state == "scanning":
         return (
             "<i>"

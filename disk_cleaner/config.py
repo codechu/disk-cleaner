@@ -1,17 +1,18 @@
-"""Tek noktadan sabitler ve yol tanımları (XDG Base Directory Spec uyumlu).
+"""Single source of constants and path definitions (XDG Base Directory Spec compliant).
 
-Magic number / magic path yok — buraya bak.
+No magic numbers / magic paths — look here.
 
-**Vendor namespace.** Tüm Codechu ürünleri kullanıcının diskinde ortak bir
-``codechu/`` namespace altında yaşar. İleride ``codechu/file-manager``,
-``codechu/system-monitor`` eklendiğinde tek dizini açan kullanıcı tüm
-Codechu ürünlerini bulur. JetBrains'in ``~/.config/JetBrains/`` veya
-Mozilla'nın ``~/.mozilla/`` deseniyle aynı.
+**Vendor namespace.** All Codechu products live under a shared
+``codechu/`` namespace on the user's disk. When future products like
+``codechu/file-manager`` or ``codechu/system-monitor`` are added, a user
+who opens that one directory finds every Codechu product. This follows
+the same pattern as JetBrains' ``~/.config/JetBrains/`` or Mozilla's
+``~/.mozilla/``.
 
-XDG yerleşimi:
+XDG layout:
     config (settings, user rules)   → $XDG_CONFIG_HOME/codechu/disk-cleaner/
-    cache  (regenerate edilebilir)  → $XDG_CACHE_HOME/codechu/disk-cleaner/
-    data   (kalıcı, regenerate yok) → $XDG_DATA_HOME/codechu/disk-cleaner/
+    cache  (regeneratable)          → $XDG_CACHE_HOME/codechu/disk-cleaner/
+    data   (persistent, no regen)   → $XDG_DATA_HOME/codechu/disk-cleaner/
     runtime (pid, socket, lock)     → $XDG_RUNTIME_DIR/codechu/disk-cleaner/
 """
 from __future__ import annotations
@@ -34,50 +35,50 @@ VENDOR = "codechu"
 PRODUCT = "disk-cleaner"
 
 SETTINGS_DIR: Path = XDG_CONFIG_HOME / VENDOR / PRODUCT   # config (settings, rules)
-CACHE_DIR:    Path = XDG_CACHE_HOME  / VENDOR / PRODUCT   # regenerate edilebilir
-DATA_DIR:     Path = XDG_DATA_HOME   / VENDOR / PRODUCT   # kalıcı veri
+CACHE_DIR:    Path = XDG_CACHE_HOME  / VENDOR / PRODUCT   # regeneratable
+DATA_DIR:     Path = XDG_DATA_HOME   / VENDOR / PRODUCT   # persistent data
 RUNTIME_DIR:  Path = XDG_RUNTIME_DIR / VENDOR / PRODUCT   # pid, socket, lock
 
 # ---- Concrete files ----
 SETTINGS_FILE:     Path = SETTINGS_DIR / "settings.json"
 USER_CLEANERS_DIR: Path = SETTINGS_DIR / "cleaners"
 
-DU_CACHE_DB:  Path = CACHE_DIR / "du_cache.db"    # disk usage cache — kaybolursa yeniden hesaplanır
-SNAPSHOTS_DB: Path = DATA_DIR  / "snapshots.db"   # 7-gün büyüme — kullanıcı verisi, kaybolursa geri gelmez
+DU_CACHE_DB:  Path = CACHE_DIR / "du_cache.db"    # disk usage cache — recomputed if lost
+SNAPSHOTS_DB: Path = DATA_DIR  / "snapshots.db"   # 7-day growth — user data, lost = gone
 
 WATCHDOG_PID:    Path = RUNTIME_DIR / "watchdog.pid"
 CONTROL_SOCKET:  str  = str(RUNTIME_DIR / "control.sock")
 
 
 def ensure_dirs() -> None:
-    """Tüm XDG-derived app dizinlerini oluştur (mevcutsa pas geç)."""
+    """Create all XDG-derived app directories (skip if they already exist)."""
     for d in (SETTINGS_DIR, CACHE_DIR, DATA_DIR, RUNTIME_DIR, USER_CLEANERS_DIR):
         d.mkdir(parents=True, exist_ok=True)
 
 
 def migrate_pre_xdg_layout() -> None:
-    """Önceki yerleşimlerden Codechu namespace'ine taşıma — idempotent.
+    """Migrate from previous layouts to the Codechu namespace — idempotent.
 
-    İki tarihsel layout var:
-    1. v0.1-öncesi: her şey ``~/.config/disk_cleaner/`` altında
-    2. v0.1: XDG-split ama vendor namespace yok (``~/.config/disk_cleaner/``,
-       ``~/.cache/disk_cleaner/``, vs.)
+    Two historical layouts exist:
+    1. pre-v0.1: everything under ``~/.config/disk_cleaner/``
+    2. v0.1: XDG-split but no vendor namespace (``~/.config/disk_cleaner/``,
+       ``~/.cache/disk_cleaner/``, etc.)
 
-    Bu fonksiyon ikisini de yeni layout'a (``codechu/disk-cleaner/``) taşır.
+    This function moves both into the new layout (``codechu/disk-cleaner/``).
     """
     ensure_dirs()
 
-    # Çift kaynak: legacy + v0.1-XDG (her ikisi de "disk_cleaner" dizin adı)
+    # Dual source: legacy + v0.1-XDG (both use the "disk_cleaner" directory name)
     legacy_config = XDG_CONFIG_HOME / "disk_cleaner"
     legacy_cache  = XDG_CACHE_HOME  / "disk_cleaner"
     legacy_data   = XDG_DATA_HOME   / "disk_cleaner"
     legacy_runtime = XDG_RUNTIME_DIR / "disk_cleaner"
 
     migrations = {
-        # v0.1-öncesi (her şey config'de) + v0.1-XDG (config split)
+        # pre-v0.1 (everything in config) + v0.1-XDG (config split)
         legacy_config / "settings.json": SETTINGS_FILE,
         legacy_config / "cleaners":      USER_CLEANERS_DIR,
-        legacy_config / "du_cache.db":   DU_CACHE_DB,    # v0.1-öncesi
+        legacy_config / "du_cache.db":   DU_CACHE_DB,    # pre-v0.1
         legacy_config / "snapshots.db":  SNAPSHOTS_DB,
         legacy_config / "watchdog.pid":  WATCHDOG_PID,
         # v0.1-XDG paths
@@ -96,13 +97,13 @@ def migrate_pre_xdg_layout() -> None:
             except OSError:
                 pass
 
-    # Boş kalan legacy dizinleri sil (rmdir sadece boşsa siler — güvenli)
+    # Remove empty legacy directories (rmdir only deletes if empty — safe)
     for legacy_dir in (legacy_config, legacy_cache, legacy_data, legacy_runtime):
         if legacy_dir.exists():
             try:
                 legacy_dir.rmdir()
             except OSError:
-                pass  # boş değil veya başka sorun — bırak
+                pass  # not empty or some other issue — leave it
 
 
 TREEMAP_MAX_DEPTH: int = 40
@@ -111,7 +112,7 @@ DEFAULT_MIN_SCORE: int = 40
 DEFAULT_PROGRESS_HZ: int = 5
 DEFAULT_RECURSION_LIMIT: int = 10000
 
-# Otomatik temizlikten daima dışlanan kullanıcı veri yolları
+# User data paths always excluded from automatic cleanup
 USER_DATA_PATHS: tuple[str, ...] = (
     "~/Documents",
     "~/Pictures",

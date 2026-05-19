@@ -16,7 +16,7 @@ limits; copy and paste the variant you need.
 | App ID (Flatpak/AppStream) | `io.github.codechu.DiskCleaner` *(initial)* or `com.codechu.DiskCleaner` *(after domain verification)* |
 | License | MIT |
 | Repo | https://github.com/codechu/disk-cleaner |
-| Homepage | https://codechu.com (planned) |
+| Homepage | https://codechu.com |
 | Email | info@codechu.com |
 | Brand color | `#1d4e83` (primary) · `#5da9e0` (accent) |
 

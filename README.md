@@ -96,16 +96,8 @@ Adding a new language: `cd po && msginit -i messages.pot -l <lang> -o <lang>.po`
 |---|---|---|
 | **Tier 1** | Fully supported, tested daily | Ubuntu 22.04+, Debian 12+, Linux Mint, Pop!_OS, elementary OS |
 | **Tier 2** | Core works, package-manager tasks skipped | Fedora, Arch, openSUSE, NixOS, Alpine |
-| **Not yet** | Roadmap | macOS, Windows, BSD (see [ARCHITECTURE.md](docs/ARCHITECTURE.md) for platform adapter plan) |
 
-## Distribution channels
-
-Planned:
-
-- **AppImage** — single-file, no install (GitHub Releases)
-- **Launchpad PPA** — `apt install` on Ubuntu, visible in Ubuntu App Center 26.04+
-- **Flathub** — cross-distro, sandboxed (system tasks limited)
-- **Snap Store** — under evaluation (classic confinement review)
+Current capability: Linux/GTK/Python. Other platforms (macOS, Windows, BSD) are not supported.
 
 ## Architecture
 

@@ -40,25 +40,25 @@ import time
 from contextlib import contextmanager
 from typing import Any, AsyncIterator, Iterator
 
-#: Tek subscription'ın kuyruğunda tutulabilen maks olay.
+#: Maximum events that can be held in a single subscription's queue.
 QUEUE_MAX: int = 200
 
-#: Aynı anda izin verilen maks abone (kaynak korunumu).
+#: Maximum subscribers allowed concurrently (resource preservation).
 MAX_SUBSCRIBERS: int = 64
 
-#: Sync iter idle olduğunda heartbeat aralığı (sn). 0 = kapalı.
+#: Heartbeat interval (sec) when sync iter is idle. 0 = disabled.
 DEFAULT_HEARTBEAT_SEC: float = 5.0
 
 
 class SubscriberLimitExceeded(Exception):
-    """``subscribe`` çağrısı MAX_SUBSCRIBERS aşılırken yapıldı."""
+    """``subscribe`` was called while MAX_SUBSCRIBERS was already reached."""
 
 
 class Subscription:
-    """Tek subscriber için kuyruk + filtre + iter API.
+    """Queue + filter + iter API for a single subscriber.
 
-    Doğrudan oluşturmayın; :func:`subscribe` veya
-    :func:`subscribe_ctx` kullanın.
+    Do not construct directly; use :func:`subscribe` or
+    :func:`subscribe_ctx`.
     """
 
     __slots__ = (
@@ -69,18 +69,18 @@ class Subscription:
     def __init__(self, types: list[str], heartbeat_sec: float) -> None:
         self.types: list[str] = list(types) if types else ["*"]
         self.queue: queue.Queue[dict[str, Any]] = queue.Queue(maxsize=QUEUE_MAX)
-        self.dropped: int = 0  # backpressure ile düşürülen
-        self.received: int = 0  # kuyruğa başarıyla giren
+        self.dropped: int = 0  # dropped due to backpressure
+        self.received: int = 0  # successfully enqueued
         self.created_at: float = time.time()
         self.heartbeat_sec: float = heartbeat_sec
         self._closed: bool = False
 
     def matches(self, event_type: str) -> bool:
-        """Bu olay tipini bu subscription dinliyor mu?"""
+        """Does this subscription listen to this event type?"""
         return any(fnmatch.fnmatchcase(event_type, t) for t in self.types)
 
     def push(self, event: dict[str, Any]) -> None:
-        """Yayıncı tarafında çağrılır — non-blocking, kapasite dolu ise düşür."""
+        """Called on the publisher side — non-blocking; drops if queue is full."""
         if self._closed:
             return
         try:
@@ -90,14 +90,14 @@ class Subscription:
             self.dropped += 1
 
     def close(self) -> None:
-        """İter'i sonlandırmak için sentinel gönder."""
+        """Send a sentinel to terminate the iterator."""
         self._closed = True
         try:
             self.queue.put_nowait({"event": "_closed"})
         except queue.Full:
-            pass  # consumer get'ten sonra zaten close görecek
+            pass  # consumer will see close after the next get
 
-    # ---- Sync tüketim ----
+    # ---- Sync consumption ----
 
     def iter(
         self,
@@ -105,13 +105,13 @@ class Subscription:
         timeout: float | None = None,
         heartbeat: bool = True,
     ) -> Iterator[dict[str, Any]]:
-        """Olayları sıralı döndür.
+        """Yield events in order.
 
-        ``timeout`` verilirse o kadar süre içinde event gelmezse iter biter.
-        ``heartbeat=True`` ve ``self.heartbeat_sec > 0`` ise boş kuyrukta
-        periyodik ``_keepalive`` event'i üretilir (consumer dead-detect
-        edebilsin). ``close()`` çağrılırsa kuyruk drain edildikten sonra
-        iter biter.
+        If ``timeout`` is given and no event arrives within that period,
+        iteration ends. If ``heartbeat=True`` and ``self.heartbeat_sec > 0``,
+        a periodic ``_keepalive`` event is emitted on an empty queue (so the
+        consumer can detect dead connections). If ``close()`` is called,
+        iteration ends after the queue is drained.
         """
         deadline: float | None = None
         if timeout is not None:
@@ -122,7 +122,7 @@ class Subscription:
         )
 
         while True:
-            # Etkili get timeout: heartbeat ve deadline'ın min'i
+            # Effective get timeout: min of heartbeat and deadline
             get_timeout = hb_interval
             if deadline is not None:
                 remaining = deadline - time.monotonic()
@@ -139,8 +139,8 @@ class Subscription:
                     continue
                 if deadline is not None:
                     return
-                # heartbeat ve deadline yoksa sonsuza dek bekle — bu kola
-                # düşemeyiz (get_timeout=None ile Empty olmaz).
+                # Without heartbeat and deadline, block forever — we cannot
+                # reach this branch (Empty cannot be raised with get_timeout=None).
                 continue
             if event.get("event") == "_closed":
                 return
@@ -149,14 +149,14 @@ class Subscription:
     def __iter__(self) -> Iterator[dict[str, Any]]:
         return self.iter()
 
-    # ---- Async tüketim ----
+    # ---- Async consumption ----
 
     async def aiter(self, *, heartbeat: bool = True) -> AsyncIterator[dict[str, Any]]:
-        """asyncio caller'lar için: ``async for ev in sub.aiter(): ...``.
+        """For asyncio callers: ``async for ev in sub.aiter(): ...``.
 
-        Implementasyon ``loop.run_in_executor`` ile blocking get'i bir
-        executor thread'inde bekler — minimal asyncio entegrasyonu, ekstra
-        bağımlılık yok.
+        The implementation uses ``loop.run_in_executor`` to wait for a
+        blocking get on an executor thread — minimal asyncio integration
+        with no extra dependency.
         """
         import asyncio
 
@@ -184,14 +184,14 @@ def _blocking_get(
     q: queue.Queue[dict[str, Any]],
     timeout: float | None,
 ) -> dict[str, Any]:
-    """``run_in_executor`` için pickle'lanması gereken üst-seviye fonksiyon."""
+    """Top-level function that needs to be picklable for ``run_in_executor``."""
     try:
         return q.get(timeout=timeout)
     except queue.Empty:
         return _EMPTY_SENTINEL
 
 
-# ---- modül global'leri ----
+# ---- module globals ----
 
 _lock = threading.Lock()
 _subs: list[Subscription] = []
@@ -203,10 +203,10 @@ def subscribe(
     *,
     heartbeat_sec: float = DEFAULT_HEARTBEAT_SEC,
 ) -> Subscription:
-    """Yeni abone oluştur.
+    """Create a new subscriber.
 
     Raises:
-        SubscriberLimitExceeded: ``MAX_SUBSCRIBERS`` zaten dolu.
+        SubscriberLimitExceeded: ``MAX_SUBSCRIBERS`` is already full.
     """
     with _lock:
         if len(_subs) >= MAX_SUBSCRIBERS:
@@ -219,7 +219,7 @@ def subscribe(
 
 
 def unsubscribe(sub: Subscription) -> None:
-    """Aboneliği kaldır (idempotent). ``sub.close()`` da çağırır."""
+    """Remove the subscription (idempotent). Also calls ``sub.close()``."""
     with _lock:
         try:
             _subs.remove(sub)
@@ -234,7 +234,7 @@ def subscribe_ctx(
     *,
     heartbeat_sec: float = DEFAULT_HEARTBEAT_SEC,
 ) -> Iterator[Subscription]:
-    """``with subscribe_ctx([...]) as sub:`` — kapanışta otomatik unsubscribe."""
+    """``with subscribe_ctx([...]) as sub:`` — auto-unsubscribe on exit."""
     sub = subscribe(types, heartbeat_sec=heartbeat_sec)
     try:
         yield sub
@@ -243,13 +243,14 @@ def subscribe_ctx(
 
 
 def emit(event_type: str, **fields: Any) -> None:
-    """Yeni bir olay yayınla. Yayıncı hiç bloke olmaz.
+    """Publish a new event. The publisher never blocks.
 
     Args:
-        event_type: Nokta-ayrımlı tip adı (``scan.started``, ...).
-            ``_`` ile başlayan adlar (``_keepalive``, ``_closed``) iç
-            kullanım için ayrılmış.
-        **fields: Ek alanlar. ``event`` ve ``ts`` otomatik eklenir.
+        event_type: Dot-separated type name (``scan.started``, ...).
+            Names starting with ``_`` (``_keepalive``, ``_closed``) are
+            reserved for internal use.
+        **fields: Additional fields. ``event`` and ``ts`` are added
+            automatically.
     """
     global _total_emitted
     event: dict[str, Any] = {
@@ -265,7 +266,7 @@ def emit(event_type: str, **fields: Any) -> None:
 
 
 def stats() -> dict[str, Any]:
-    """Monitoring için anlık durum: subscriber sayısı, queue derinliği, drop."""
+    """Snapshot for monitoring: subscriber count, queue depth, drops."""
     with _lock:
         subs_info = [
             {
@@ -287,13 +288,13 @@ def stats() -> dict[str, Any]:
 
 
 def subscriber_count() -> int:
-    """Test/debug için: aktif subscriber sayısı."""
+    """For test/debug: number of active subscribers."""
     with _lock:
         return len(_subs)
 
 
 def reset_for_tests() -> None:
-    """Yalnızca testlerde — tüm subscription'ları kapat ve sayaçları sıfırla."""
+    """Tests only — close all subscriptions and reset counters."""
     global _total_emitted
     with _lock:
         for s in _subs:

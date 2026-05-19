@@ -1,4 +1,4 @@
-"""Cleaner sınıfları davranış testleri."""
+"""Behavior tests for Cleaner classes."""
 from __future__ import annotations
 
 from disk_cleaner.cleaners import (
@@ -17,7 +17,7 @@ def test_cleaners_implement_abc():
 def test_safe_path_cleaner_missing_path(tmp_path):
     c = SafePathCleaner(tmp_path / "ghost")
     rc, msg = c.execute()
-    # safe_remove "yok, atlandı" döner; failure değil
+    # safe_remove returns "missing, skipped"; not a failure
     assert rc == 0
     assert "skipped" in msg or "ghost" in msg
 

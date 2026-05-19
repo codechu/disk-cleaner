@@ -1,10 +1,9 @@
-"""GTK port — Linux desktop View'u.
+"""GTK port — Linux desktop View.
 
-Mevcut tek port; ileride :mod:`disk_cleaner.ui.qt` ve
-:mod:`disk_cleaner.ui.web` kardeşi olarak yaşayacak. Tüm widget'lar
-``controllers/`` katmanından servis alır.
+The current port. All widgets get their services from the
+``controllers/`` layer.
 
-Public sınıflar (CLI ``main()`` ve API tarafından kullanılır):
+Public classes (used by CLI ``main()`` and the API):
 
 - :class:`MainWindow` + :func:`try_init_tray`
 - :class:`SuggestionPanel`

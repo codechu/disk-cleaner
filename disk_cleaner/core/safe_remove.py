@@ -1,9 +1,9 @@
-"""Güvenli silme: çöp kutusu varsayılan, kalıcı silme yalnızca açıkça istendiğinde.
+"""Safe delete: trash by default, permanent only when explicitly requested.
 
-``TRASH_MODE`` ve ``DRY_RUN`` runtime mutable globaller — UI'daki kutular
-değiştirir. :mod:`disk_cleaner.runtime` modülünde yaşarlar; bu modülün
-fonksiyonları onları **çağrı anında** okur (geç bağlama), böylece
-import sırası problemine yol açmaz.
+``TRASH_MODE`` and ``DRY_RUN`` are runtime-mutable globals — UI
+checkboxes change them. They live in :mod:`disk_cleaner.runtime`; the
+functions in this module read them **at call time** (late binding) to
+avoid import-order issues.
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from ..utils import run
 
 
 def rm_path(path: str | Path) -> None:
-    """Geri dönüşsüz silme."""
+    """Irreversible deletion."""
     p = Path(path)
     if not p.exists() and not p.is_symlink():
         return
@@ -28,7 +28,7 @@ def rm_path(path: str | Path) -> None:
 
 
 def _is_inside_trash(p: str | Path) -> bool:
-    """Yol çöp klasörünün içinde mi? Çöpe-çöp döngüsünü engellemek için."""
+    """Is the path inside the trash directory? Prevents a trash-to-trash loop."""
     try:
         rp = Path(p).resolve()
     except Exception:
@@ -54,17 +54,18 @@ def _is_inside_trash(p: str | Path) -> bool:
 
 
 def _flags() -> tuple[bool, bool]:
-    """Çağrı anında TRASH_MODE / DRY_RUN değerlerini :mod:`runtime`'den oku."""
+    """Read TRASH_MODE / DRY_RUN from :mod:`runtime` at call time."""
     from .. import runtime
 
     return bool(runtime.TRASH_MODE), bool(runtime.DRY_RUN)
 
 
 def safe_remove(path: str | Path) -> str:
-    """``TRASH_MODE`` açıksa ``gio trash`` ile, değilse kalıcı sil.
+    """Delete via ``gio trash`` if ``TRASH_MODE`` is on; otherwise permanent.
 
-    Yol zaten çöp kutusunun içindeyse zorunlu kalıcı silme yapar (sonsuz
-    döngüyü engeller). ``DRY_RUN`` açıkken hiçbir şey silmez.
+    If the path is already inside the trash, forces permanent deletion
+    (prevents an infinite loop). When ``DRY_RUN`` is on, nothing is
+    deleted.
     """
     p = Path(path)
     if not p.exists() and not p.is_symlink():
@@ -82,10 +83,10 @@ def safe_remove(path: str | Path) -> str:
 
 
 def rm_contents(path: str | Path, force_permanent: bool = False) -> tuple[int, str]:
-    """Dizin içindeki her öğeyi kaldır.
+    """Remove every item inside the directory.
 
-    ``force_permanent=True``: TRASH_MODE'u yoksay, kalıcı sil — çöp
-    boşaltma akışında kullanılır.
+    ``force_permanent=True``: ignore TRASH_MODE and delete permanently —
+    used by the trash-emptying flow.
     """
     p = Path(path).expanduser()
     if not p.exists():

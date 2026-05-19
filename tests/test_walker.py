@@ -1,4 +1,4 @@
-"""``core.walker`` saf logic testleri (tmp_path üzerinde)."""
+"""Pure-logic tests for ``core.walker`` (using tmp_path)."""
 from __future__ import annotations
 
 import os
@@ -19,7 +19,7 @@ from disk_cleaner.core.walker import (
 
 
 def test_artifact_constants_consistent():
-    # Risk haritası ARTIFACT_DIRS'in subset'i olmalı.
+    # The risk map must be a subset of ARTIFACT_DIRS.
     for d in ARTIFACT_RISK:
         assert d in ARTIFACT_DIRS
 
@@ -36,7 +36,7 @@ def test_find_project_artifacts_does_not_descend_into_artifact(tmp_path):
     inner = tmp_path / "proj" / "node_modules" / "sub" / "dist"
     inner.mkdir(parents=True)
     found = find_project_artifacts(tmp_path)
-    # node_modules bulunmalı, içindeki dist ayrıca raporlanmamalı
+    # node_modules must be found; the nested dist must not be reported
     assert any(p.endswith("node_modules") for p in found)
     assert not any(p.endswith("/dist") for p in found)
 
@@ -103,5 +103,5 @@ def test_find_duplicates_groups_identical(tmp_path):
     b.write_bytes(content)
     (tmp_path / "c.bin").write_bytes(b"y" * (2 * 1024 * 1024))
     groups = find_duplicates(tmp_path, min_size=1024 * 1024)
-    # En az bir grup ve a ile b o grupta olmalı
+    # At least one group, and a and b must be in that group
     assert any(set(group) >= {str(a), str(b)} for _, group in groups)

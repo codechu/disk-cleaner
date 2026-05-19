@@ -1,11 +1,13 @@
-"""Küçük, UI-bağımsız yardımcı fonksiyonlar.
+"""Small, UI-independent helper functions.
 
-- :func:`run` / :func:`_resolve` — PATH-zenginleştirilmiş subprocess sarmalayıcısı
-  (nvm node, ~/.local/bin, snap vb. ek konumları otomatik ekler).
-- :func:`human` / :func:`parse_size` — byte ↔ insan-okur biçim çevirimi.
-- :class:`ThrottledProgress` — UI thread'ini boğmayan callback hız sınırlayıcı.
-- :func:`list_real_mounts` — ``findmnt`` üstünden gerçek mount noktaları
-  (snap loop, tmpfs, fuse.portal vb. dışlanır).
+- :func:`run` / :func:`_resolve` — subprocess wrapper with PATH enrichment
+  (auto-adds extra locations such as nvm node, ~/.local/bin, snap, etc.).
+- :func:`human` / :func:`parse_size` — byte ↔ human-readable format
+  conversion.
+- :class:`ThrottledProgress` — callback rate limiter that does not flood
+  the UI thread.
+- :func:`list_real_mounts` — real mount points via ``findmnt``
+  (snap loop, tmpfs, fuse.portal, etc. are excluded).
 """
 from __future__ import annotations
 
@@ -20,15 +22,15 @@ from typing import Any, Callable, Iterable, Optional
 from .config import HOME
 from .i18n import _
 
-# Komut adı yalın geldiğinde aranacak ek yollar.
-# Kullanıcı kurulumları önce — sandboxlı snap'leri sonradan dene.
+# Extra paths searched when the command name arrives bare.
+# User installs first — try sandboxed snap variants last.
 _EXTRA_BIN_DIRS: list[str] = [
     str(HOME / ".local" / "bin"),
     str(HOME / ".bun" / "bin"),
     str(HOME / ".cargo" / "bin"),
     str(HOME / ".dotnet" / "tools"),
 ]
-# nvm altındaki node sürümleri (en yenisi önce)
+# node versions under nvm (newest first)
 _EXTRA_BIN_DIRS += sorted(
     _glob.glob(str(HOME / ".nvm" / "versions" / "node" / "*" / "bin")),
     reverse=True,
@@ -37,12 +39,12 @@ _EXTRA_BIN_DIRS += [
     "/usr/local/bin",
     "/usr/bin",
     "/bin",
-    "/snap/bin",  # sandboxlı sürümler — son çare
+    "/snap/bin",  # sandboxed variants — last resort
 ]
 
 
 def _resolve(cmd: list[str] | tuple[str, ...]) -> list[str] | tuple[str, ...]:
-    """Komutun ilk elemanı yalın bir ad ise gerçek yolunu bul."""
+    """If the first element of the command is a bare name, find its real path."""
     if not cmd:
         return cmd
     name = cmd[0]
@@ -55,7 +57,7 @@ def _resolve(cmd: list[str] | tuple[str, ...]) -> list[str] | tuple[str, ...]:
         candidate = os.path.join(d, name)
         if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
             return [candidate] + list(cmd[1:])
-    return cmd  # bulamadık; orijinal hatayla başarısız olsun
+    return cmd  # not found; fail with the original error
 
 
 def run(
@@ -63,16 +65,16 @@ def run(
     shell: bool = False,
     timeout: float = 600,
 ) -> tuple[int, str]:
-    """Subprocess çağrısı — PATH zenginleştirilmiş, hata yutmaz.
+    """Subprocess call — PATH-enriched, does not swallow errors.
 
-    Returns ``(returncode, stdout + stderr birleşik)``. Exception olursa
-    ``(1, "hata: ...")`` döner — çağıran kod hep aynı şekilde ele alır.
+    Returns ``(returncode, stdout + stderr combined)``. On exception,
+    returns ``(1, "error: ...")`` — callers always handle it the same way.
     """
     try:
         if not shell and isinstance(cmd, list):
             cmd = _resolve(cmd)
-        # Çocuk süreçlerin (örn. npm → env node) ek yolları bulabilmesi için
-        # PATH'i ek dizinlerle zenginleştir.
+        # Enrich PATH with the extra directories so child processes
+        # (e.g. npm → env node) can find the extra paths.
         env = os.environ.copy()
         env["PATH"] = ":".join(_EXTRA_BIN_DIRS) + ":" + env.get("PATH", "")
         r = subprocess.run(
@@ -89,7 +91,7 @@ def run(
 
 
 def human(n: float | int | None) -> str:
-    """Byte sayısını insan-okur biçime çevir."""
+    """Convert a byte count to a human-readable format."""
     if n is None:
         return "?"
     for unit in ("B", "KB", "MB", "GB", "TB"):
@@ -100,7 +102,7 @@ def human(n: float | int | None) -> str:
 
 
 def parse_size(s: str) -> int:
-    """``"2.5GB"`` gibi metni byte sayısına çevir. Tanınmazsa 0."""
+    """Convert text like ``"2.5GB"`` to a byte count. 0 if not recognized."""
     s = s.strip()
     if not s:
         return 0
@@ -125,10 +127,11 @@ def parse_size(s: str) -> int:
 
 
 class ThrottledProgress:
-    """Geri çağrım hızını sınırlar (varsayılan: en fazla 5 Hz).
+    """Throttle callback rate (default: at most 5 Hz).
 
-    UI thread'ini boğmadan canlı durum göstermek için. ``sink`` ``None``
-    ise çağrı no-op'tur — opsiyonel progress callback'leri kolay sarmalar.
+    For live status display without flooding the UI thread. If ``sink``
+    is ``None`` the call is a no-op — wraps optional progress callbacks
+    conveniently.
     """
 
     def __init__(self, sink: Optional[Callable[[str], None]], hz: float = 5) -> None:
@@ -149,7 +152,7 @@ class ThrottledProgress:
             pass
 
 
-# Mount listelemede dışlanan dosya sistemleri ve yol önekleri.
+# Filesystems and path prefixes excluded when listing mounts.
 _SKIP_MOUNT_FS: frozenset[str] = frozenset({
     "squashfs", "tmpfs", "devtmpfs", "overlay", "overlayfs",
     "fuse.portal", "sysfs", "proc", "cgroup", "cgroup2",
@@ -162,11 +165,11 @@ _SKIP_MOUNT_PREFIX: tuple[str, ...] = (
 
 
 def list_real_mounts() -> list[dict[str, str]]:
-    """``findmnt`` ile gerçek mount noktalarını listele.
+    """List real mount points via ``findmnt``.
 
-    Snap loop, tmpfs, fuse.portal gibi suni / kullanıcıya alakasız
-    mount'lar filtrelenir. Her öğe ``{target, source, fstype, size, used,
-    avail, pcent}`` şemasında string'lerdir.
+    Artificial / user-irrelevant mounts like snap loop, tmpfs, fuse.portal
+    are filtered. Each item is a dict of strings with the schema
+    ``{target, source, fstype, size, used, avail, pcent}``.
     """
     rc, out = run([
         "findmnt", "--real", "--json",

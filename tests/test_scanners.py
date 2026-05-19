@@ -1,4 +1,4 @@
-"""Scanner sınıfları smoke testleri (Strategy yüzeyini doğrular)."""
+"""Smoke tests for Scanner classes (verifies the Strategy surface)."""
 from __future__ import annotations
 
 from disk_cleaner.app import AppContext

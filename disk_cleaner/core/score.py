@@ -1,8 +1,8 @@
-"""Akıllı öneri skorlama.
+"""Smart suggestion scoring.
 
-Bir Task + boyutu + tür + açık-süreç bilgisini 0..100+ aralığında bir
-skora ve tek satır gerekçeye çevirir. Saf logic — UI bağımsız, test
-edilebilir.
+Converts a Task + size + kind + open-process information into a score
+in the 0..100+ range and a one-line reason. Pure logic — UI-independent
+and testable.
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from .process import path_holders
 
 _RISK_FACTOR: dict[str, float] = {"low": 1.0, "medium": 0.6, "high": 0.15}
 _KIND_BONUS: dict[str, int] = {
-    "system": 10,    # genelde güvenli, yeniden üretilir
+    "system": 10,    # usually safe, regenerated automatically
     "artifact": 8,
     "duplicate": 12,
     "oldfile": 5,
@@ -40,7 +40,7 @@ def compute_score_and_reason(
     kind: str,
     open_paths: set[tuple[str, str]],
 ) -> tuple[float, str]:
-    """Görev için skor (0-100+) ve tek satır gerekçe üret."""
+    """Compute a score (0-100+) and a one-line reason for a task."""
     path = task.get("path", "")
     risk = task.get("risk", "medium")
     desc = task.get("desc", "")
@@ -48,14 +48,14 @@ def compute_score_and_reason(
     reasons: list[str] = []
     score = 0.0
 
-    # Boyut bileşeni: log ölçek (her 10× ≈ +30 puan)
+    # Size component: log scale (each 10× ≈ +30 points)
     size_gb = max(size, 1) / (1024 ** 3)
     score += min(60, 30 * math.log10(max(size_gb, 0.001) + 1) + 30)
 
     score *= _RISK_FACTOR.get(risk, 0.5)
     score += _KIND_BONUS.get(kind, 0)
 
-    # Yaş bilgisi (mtime varsa kullan)
+    # Age information (use mtime if available)
     age_days: float | None = None
     try:
         p = Path(os.path.expanduser(path))
@@ -69,16 +69,16 @@ def compute_score_and_reason(
         reasons.append(_("not touched in {n} days").format(n=int(age_days)))
     elif age_days is not None and age_days < 1:
         reasons.append(_("modified in last 24 hours"))
-        score -= 30  # çok yeni — muhtemelen aktif
+        score -= 30  # very recent — likely active
 
-    # Süreç farkındalığı
+    # Process awareness
     holders = path_holders(path, open_paths)
     if holders:
         names = sorted(holders)[:3]
         reasons.append(_("currently open: {names}").format(names=", ".join(names)))
-        score -= 40  # çok riskli
+        score -= 40  # very risky
 
-    # Risk metni (aktif proje tespiti zaten desc'e yazıldı)
+    # Risk text (active-project detection is already written into desc)
     if "ACTIVE" in desc or "AKTİF" in desc:
         reasons.append(_("active project, KEEP recommended"))
         score -= 60

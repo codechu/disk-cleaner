@@ -1,4 +1,4 @@
-"""Event bus testleri — multichannel, kaynak yönetimi, thread-safety."""
+"""Event bus tests — multichannel, resource management, thread-safety."""
 from __future__ import annotations
 
 import threading
@@ -34,15 +34,15 @@ def test_glob_channel_filter():
     events.emit("treemap.drill", direction="in")
     events.emit("mount.changed", target="/")
 
-    # scan.* sadece scan.started görür
+    # scan.* only sees scan.started
     assert sub_scan.queue.qsize() == 1
     assert sub_scan.queue.get_nowait()["event"] == "scan.started"
 
-    # treemap.* sadece treemap.drill
+    # treemap.* only sees treemap.drill
     assert sub_treemap.queue.qsize() == 1
     assert sub_treemap.queue.get_nowait()["event"] == "treemap.drill"
 
-    # all hepsini
+    # all sees every event
     assert sub_all.queue.qsize() == 3
 
 
@@ -56,7 +56,7 @@ def test_subscribe_ctx_unsubscribes_on_exit():
 def test_unsubscribe_idempotent():
     sub = events.subscribe()
     events.unsubscribe(sub)
-    events.unsubscribe(sub)  # ikinci çağrı hata vermemeli
+    events.unsubscribe(sub)  # the second call must not raise
     assert events.subscriber_count() == 0
 
 
@@ -70,7 +70,7 @@ def test_subscriber_limit():
         with pytest.raises(events.SubscriberLimitExceeded):
             events.subscribe()
         events.unsubscribe(s1)
-        # bir slot açıldı, yenisi geçer
+        # a slot opened up; a new one fits
         s4 = events.subscribe()
         assert s4 is not None
     finally:
@@ -79,7 +79,7 @@ def test_subscriber_limit():
 
 def test_backpressure_drops_when_queue_full():
     sub = events.subscribe()
-    # QUEUE_MAX kadar doldur, sonra fazla emit drop edilmeli
+    # Fill to QUEUE_MAX, then further emits must be dropped
     for i in range(events.QUEUE_MAX):
         events.emit("scan.progress", i=i)
     assert sub.dropped == 0
@@ -106,7 +106,7 @@ def test_stats_reports_subscribers():
 
 
 def test_thread_safe_emit():
-    """10 thread paralel emit yapsa subscriber tüm event'leri görür."""
+    """With 10 threads emitting in parallel, the subscriber sees all events."""
     sub = events.subscribe()
     N_THREADS = 10
     N_PER_THREAD = 15
@@ -120,15 +120,15 @@ def test_thread_safe_emit():
         t.start()
     for t in threads:
         t.join()
-    # Hepsi queue'da olmalı (QUEUE_MAX = 200 > 150)
+    # All must be in the queue (QUEUE_MAX = 200 > 150)
     assert sub.queue.qsize() == N_THREADS * N_PER_THREAD
 
 
 def test_iter_yields_events():
-    sub = events.subscribe(heartbeat_sec=0)  # heartbeat kapalı
+    sub = events.subscribe(heartbeat_sec=0)  # heartbeat disabled
     events.emit("scan.started", panel="x")
     events.emit("scan.finished", panel="x")
-    # close ile iter'i sonlandır
+    # terminate iter via close
     sub.close()
     got = list(sub.iter())
     assert len(got) == 2
@@ -142,7 +142,7 @@ def test_iter_with_timeout_returns():
     got = list(sub.iter(timeout=0.2))
     elapsed = time.monotonic() - start
     assert got == []
-    assert 0.15 < elapsed < 0.4  # ~0.2sn sonra döndü
+    assert 0.15 < elapsed < 0.4  # returned after ~0.2s
 
 
 def test_iter_emits_heartbeat_when_idle():
@@ -168,7 +168,7 @@ def test_close_terminates_iter():
     events.emit("scan.started")
     sub.close()
     got = list(sub.iter())
-    # close öncesi event geldi, sonra iter bitti
+    # the event arrived before close; iter then ended
     assert len(got) == 1
     assert got[0]["event"] == "scan.started"
 

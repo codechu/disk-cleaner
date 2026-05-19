@@ -1,10 +1,10 @@
-"""Visualization alt paketi.
+"""Visualization subpackage.
 
-- :class:`TreeNode` + :func:`build_tree` — disk haritası veri yapısı
+- :class:`TreeNode` + :func:`build_tree` — disk map data structure
 - :class:`TreemapStrategy` — squarified treemap (Bruls, Huijsen, van Wijk 2000)
 - :class:`SunburstStrategy` — radial treemap
-- :func:`node_color` — paylaşılan renk paleti (dark/light)
-- :func:`is_hash_like` — etiket yardımcısı
+- :func:`node_color` — shared color palette (dark/light)
+- :func:`is_hash_like` — label helper
 """
 from __future__ import annotations
 

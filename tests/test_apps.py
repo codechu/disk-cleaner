@@ -35,7 +35,7 @@ def test_app_related_paths_returns_list_of_str(tmp_path, monkeypatch):
 
 
 def test_app_related_paths_finds_known(monkeypatch, tmp_path):
-    # ~/.config/foo gibi bir dizin yarat, fonksiyonun bulduğunu doğrula
+    # Create a directory like ~/.config/foo and assert the function finds it
     fake_home = tmp_path
     config = fake_home / ".config" / "myapp"
     config.mkdir(parents=True)

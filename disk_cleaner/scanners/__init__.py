@@ -1,19 +1,20 @@
-"""Scanner Strategy alt paketi.
+"""Scanner Strategy subpackage.
 
-Built-in scanner'lar (hepsi :class:`Scanner` alt sınıfı):
+Built-in scanners (all :class:`Scanner` subclasses):
 
 - :class:`SystemScanner` — ``SYSTEM_TASKS`` (cache, docker, apt, ...)
-- :class:`ArtifactScanner` — workspace altında build artefaktları
-- :class:`ExplorerScanner` — generic klasör gez
-- :class:`OldFilesScanner` — Downloads benzeri eski dosyalar
-- :class:`DuplicatesScanner` — aynı içerikli dosyalar
-- :class:`EmptyScanner` — boş klasör / 0-byte dosya
-- :class:`SimilarImagesScanner` — dHash + hamming yakın görseller
-- :class:`AppUninstallScanner` — apt purge adayları
-- :class:`UserRulesScanner` — kullanıcı tanımlı JSON kurallar
+- :class:`ArtifactScanner` — build artifacts under the workspace
+- :class:`ExplorerScanner` — generic folder walker
+- :class:`OldFilesScanner` — old files in Downloads-like folders
+- :class:`DuplicatesScanner` — files with identical content
+- :class:`EmptyScanner` — empty folders / 0-byte files
+- :class:`SimilarImagesScanner` — dHash + hamming near-duplicate images
+- :class:`AppUninstallScanner` — apt purge candidates
+- :class:`UserRulesScanner` — user-defined JSON rules
 
-Yeni bir kaynak eklemek için :class:`Scanner` alt sınıfı yaz, registry'e
-kaydet veya doğrudan :class:`~disk_cleaner.app.AppContext` üzerinden bağla.
+To add a new source: write a :class:`Scanner` subclass and either
+register it on the registry or wire it directly through
+:class:`~disk_cleaner.app.AppContext`.
 """
 from __future__ import annotations
 
@@ -32,7 +33,7 @@ from .user_rules import UserRulesScanner
 
 
 class ScannerRegistry:
-    """İsim → Scanner örneği eşleştirmesi (plugin tarzı genişletme)."""
+    """Name → Scanner instance mapping (plugin-style extension)."""
 
     def __init__(self) -> None:
         self._scanners: Dict[str, Scanner] = {}

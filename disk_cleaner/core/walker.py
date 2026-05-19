@@ -1,12 +1,12 @@
-"""Dosya sistemi tarayıcıları — saf, UI-bağımsız.
+"""Filesystem scanners — pure, UI-independent.
 
-Tüm fonksiyonlar:
+All functions:
 
-- ``cancel`` set edilince kısa sürede çıkar
-- ``progress`` (varsa) küçük insan-okur metin gönderir (ThrottledProgress
-  ile sarmalanmalı)
-- I/O yapar ama sonucu hesaplama olarak temizdir — testler tmp_path ile
-  doğrudan çağırabilir.
+- exit quickly once ``cancel`` is set
+- emit short human-readable text via ``progress`` (if provided; wrap
+  with ThrottledProgress)
+- perform I/O but their results are pure computations — tests can call
+  them directly with tmp_path.
 """
 from __future__ import annotations
 
@@ -22,14 +22,14 @@ from ..i18n import _
 from ..utils import human
 from .sizing import dir_size
 
-# Build artefaktı klasör adları — find_project_artifacts bunları arar.
+# Build artifact directory names — find_project_artifacts looks for these.
 ARTIFACT_DIRS: frozenset[str] = frozenset({
     "node_modules", "target", "build", "dist", ".next", ".nuxt",
     "out", "bin", "obj", "__pycache__", ".pytest_cache",
     "venv", ".venv", ".gradle", ".cargo-target",
 })
 
-# Artefakt adına göre varsayılan risk seviyesi.
+# Default risk level keyed by artifact name.
 ARTIFACT_RISK: dict[str, str] = {
     "node_modules": "low", "target": "low", "build": "low", "dist": "low",
     ".next": "low", ".nuxt": "low", "out": "medium",
@@ -42,7 +42,7 @@ _IMAGE_EXTS: frozenset[str] = frozenset({
     ".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif",
 })
 
-# os.walk'ta hiç inilmemesi gereken dizin adları.
+# Directory names that os.walk should never descend into.
 _SKIP_WALK_DIRS: frozenset[str] = frozenset({
     ".git", "node_modules", "__pycache__", ".cache",
 })
@@ -53,9 +53,10 @@ def find_project_artifacts(
     cancel: Optional[Event] = None,
     progress: Optional[Callable[[str], None]] = None,
 ) -> list[str]:
-    """``root`` altında build / cache artefakt klasörlerini bul.
+    """Find build / cache artifact folders under ``root``.
 
-    Bir artefakt bulununca altına inmez (alt artefaktlar gereksiz).
+    Once an artifact is found, do not descend into it (nested artifacts
+    are not needed).
     """
     root = Path(root).expanduser()
     if not root.exists():
@@ -80,7 +81,7 @@ def find_project_artifacts(
 
 
 def find_git_root(path: str | Path) -> Path | None:
-    """Yukarı doğru ``.git`` dizini ara; yoksa None."""
+    """Walk up to find a ``.git`` directory; None if not found."""
     p = Path(path).parent
     while True:
         if (p / ".git").exists():
@@ -91,7 +92,7 @@ def find_git_root(path: str | Path) -> Path | None:
 
 
 def project_activity_days(artifact_path: str | Path) -> float | None:
-    """Üst projenin son aktivite yaşı (gün). ``.git`` yoksa None."""
+    """Last activity age (in days) of the parent project. None if no ``.git``."""
     git_root = find_git_root(artifact_path)
     if not git_root:
         return None
@@ -111,7 +112,7 @@ def project_activity_days(artifact_path: str | Path) -> float | None:
 
 
 def list_dir_children(path: str | Path) -> list[str]:
-    """``path`` altındaki bir-seviye çocukları döndür."""
+    """Return one-level children under ``path``."""
     p = Path(path).expanduser()
     if not p.exists() or not p.is_dir():
         return []
@@ -122,9 +123,9 @@ def list_dir_children(path: str | Path) -> list[str]:
 
 
 def find_old_files(folder: str | Path, days: int) -> list[tuple[str, int, float]]:
-    """``folder``'ın bir-seviye çocukları arasından ``days`` günden eski olanları döndür.
+    """Return one-level children of ``folder`` older than ``days`` days.
 
-    Returns ``[(path, size, mtime), ...]`` — boyuta göre azalan.
+    Returns ``[(path, size, mtime), ...]`` — sorted by size descending.
     """
     p = Path(folder).expanduser()
     if not p.exists():
@@ -147,7 +148,7 @@ def find_old_files(folder: str | Path, days: int) -> list[tuple[str, int, float]
 
 
 def _dhash(path: str | Path) -> int | None:
-    """64-bit difference hash. Pillow gerekir."""
+    """64-bit difference hash. Requires Pillow."""
     try:
         from PIL import Image
     except ImportError:
@@ -178,11 +179,11 @@ def find_similar_images(
     threshold: int = 5,
     min_size: int = 20 * 1024,
 ) -> dict[str, Any]:
-    """Görsel olarak benzer fotoğrafları bul (dHash + hamming ≤ threshold).
+    """Find visually similar photos (dHash + hamming ≤ threshold).
 
-    ``threshold=5``: yaklaşık aynı; daha yüksek = daha gevşek.
-    Returns ``{"groups": [[path, ...], ...], "scanned": int}`` veya
-    Pillow yoksa ``{"error": "..."}``.
+    ``threshold=5``: nearly identical; higher = more permissive.
+    Returns ``{"groups": [[path, ...], ...], "scanned": int}`` or
+    ``{"error": "..."}`` if Pillow is missing.
     """
     try:
         from PIL import Image  # noqa: F401
@@ -224,7 +225,7 @@ def find_similar_images(
         if h is not None:
             hashes.append((p, h))
 
-    # Gruplama: O(n²) — büyük setler için BK-tree daha iyi ama bu yeterli.
+    # Grouping: O(n²) — a BK-tree would be better for large sets, but this is enough.
     groups: list[list[str]] = []
     used: set[int] = set()
     for i in range(len(hashes)):
@@ -241,7 +242,7 @@ def find_similar_images(
                 group.append(hashes[j][0])
                 used.add(j)
         if len(group) >= 2:
-            # En yüksek çözünürlüğü/boyutu koru (varsayalım büyük = orijinal).
+            # Keep the highest resolution/size first (assume large = original).
             group.sort(key=lambda x: -os.path.getsize(x))
             groups.append(group)
 
@@ -254,10 +255,10 @@ def find_empty_items(
     progress: Optional[Callable[[str], None]] = None,
     include_zero_byte: bool = True,
 ) -> tuple[list[str], list[str]]:
-    """Boş dizinleri ve 0-byte dosyaları bul.
+    """Find empty directories and 0-byte files.
 
-    ``.git/``, ``node_modules/``, ``__pycache__/``, ``.cache/`` içlerine
-    inilmez. Returns ``(empty_dirs, zero_byte_files)``.
+    Does not descend into ``.git/``, ``node_modules/``, ``__pycache__/``,
+    ``.cache/``. Returns ``(empty_dirs, zero_byte_files)``.
     """
     folder = Path(folder).expanduser()
     if not folder.exists():
@@ -282,7 +283,7 @@ def find_empty_items(
                         zero_files.append(full)
                 except OSError:
                     continue
-        # Klasör boş mu? (topdown=False ile çocuklar zaten işlendi)
+        # Is the directory empty? (with topdown=False children are already processed)
         try:
             if not os.listdir(root):
                 empty_dirs.append(root)
@@ -297,12 +298,12 @@ def find_duplicates(
     progress: Optional[Callable[[str], None]] = None,
     min_size: int = 1024 * 1024,
 ) -> list[tuple[int, list[str]]]:
-    """Aynı içeriğe sahip dosya gruplarını bul.
+    """Find groups of files with identical content.
 
-    Önce boyuta göre eşleştir (cheap), sonra eşleşen gruplarda blake2b
-    ile içerik hashle. ``min_size`` altı atlanır. Returns
-    ``[(size, [path, ...]), ...]`` — büyüklük × tekrar sayısına göre
-    azalan.
+    First match by size (cheap), then content-hash the matching groups
+    with blake2b. Files below ``min_size`` are skipped. Returns
+    ``[(size, [path, ...]), ...]`` — sorted by size × duplicate count
+    descending.
     """
     folder = Path(folder).expanduser()
     if not folder.exists():

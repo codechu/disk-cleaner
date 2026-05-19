@@ -1,8 +1,9 @@
-"""Scanner Strategy temel tipleri.
+"""Scanner Strategy base types.
 
-Bir :class:`Scanner` ``list_tasks`` ile :class:`Task` üretir. Yeni bir tarama
-türü eklemek için: ``Scanner`` alt sınıfı yaz, ``list_tasks`` döndür, registry'e
-ekle. UI ve API bu ABC üzerinden konuşur — yeni scanner UI değişmeden çalışır.
+A :class:`Scanner` yields :class:`Task` objects via ``list_tasks``. To
+add a new scan type: write a ``Scanner`` subclass, return tasks from
+``list_tasks``, and register it. UI and API speak to this ABC — a new
+scanner works without UI changes.
 """
 from __future__ import annotations
 
@@ -19,10 +20,10 @@ Risk = Literal["low", "medium", "high"]
 
 @dataclass
 class Task:
-    """Tek bir temizlik adayı.
+    """A single cleanup candidate.
 
-    ``size_fn`` tembel — yalnızca ihtiyaç anında çağrılır (du ağır).
-    ``cleaner`` :class:`Cleaner` örneği; ``execute()`` ile uygulanır.
+    ``size_fn`` is lazy — called only when needed (du is expensive).
+    ``cleaner`` is a :class:`Cleaner` instance applied via ``execute()``.
     """
 
     name: str
@@ -35,7 +36,7 @@ class Task:
 
 
 class Scanner(ABC):
-    """Bir tarama stratejisi — :class:`Task`'lar üretir."""
+    """A scanning strategy — yields :class:`Task` instances."""
 
     name: str = "unknown"
 
@@ -46,12 +47,12 @@ class Scanner(ABC):
         cancel: Optional[Event] = None,
         progress: Optional[Callable[[str], None]] = None,
     ) -> Iterable[Task]:
-        """Bu kaynağın tüm ada Task'larını döndür.
+        """Return all candidate Tasks for this source.
 
         Args:
-            cancel: Set edildiğinde uzun döngülerden erken çık.
-            progress: Her küçük adımda kısa bir mesajla çağrılır
-                (``ThrottledProgress`` ile sarmalanır).
+            cancel: When set, exit long loops early.
+            progress: Called with a short message at each small step
+                (wrapped with ``ThrottledProgress``).
         """
 
 

@@ -19,9 +19,9 @@ def test_initial_state():
 
 
 def test_observer_callbacks_default_noop():
-    """Callback'ler atanmasa bile çağrı patlamaz."""
+    """Calls don't blow up even if no callbacks are assigned."""
     c = TreemapController()
-    # Internal _set_busy callback'i tetikler
+    # _set_busy fires the internal callback
     c._set_busy(True)
     c._set_busy(False)
 
@@ -46,7 +46,7 @@ def test_drill_in_refuses_non_dir():
     root.children = [f]
     c.current_node = root
     c.drill_in(f)
-    assert c.current_node is root  # değişmemeli
+    assert c.current_node is root  # must not change
 
 
 def test_drill_in_refuses_self():
@@ -54,7 +54,7 @@ def test_drill_in_refuses_self():
     root = _mk_node("/", 100, is_dir=True)
     c.current_node = root
     c.drill_in(root)
-    assert c.history == []  # kendi içine girilmez
+    assert c.history == []  # cannot drill into self
 
 
 def test_drill_up_pops_history():
@@ -72,11 +72,11 @@ def test_drill_up_pops_history():
 def test_drill_up_noop_when_empty():
     c = TreemapController()
     c.drill_up()
-    assert c.current_node is None  # patlamadı
+    assert c.current_node is None  # didn't blow up
 
 
 def test_drill_to_truncates_history():
-    """Üç seviye drill; ortadakine drill_to → history o seviyeye düşer."""
+    """Drill three levels; drill_to the middle → history truncates to that level."""
     c = TreemapController()
     a = _mk_node("/a", 1000, is_dir=True)
     b = _mk_node("/a/b", 500, is_dir=True)
@@ -147,7 +147,7 @@ def test_set_viz_mode_emits_observer():
     c.on_viz_mode_changed = lambda m: seen.append(m)
     c.viz_mode = "treemap"  # baseline
     c.set_viz_mode("sunburst")
-    c.set_viz_mode("sunburst")  # aynı, no-op
+    c.set_viz_mode("sunburst")  # same value, no-op
     c.set_viz_mode("treemap")
     assert seen == ["sunburst", "treemap"]
 

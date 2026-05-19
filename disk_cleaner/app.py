@@ -1,8 +1,9 @@
-"""Composition root — ``AppContext`` tüm bağımlılıkları bağlar.
+"""Composition root — ``AppContext`` wires all dependencies together.
 
-Yeni tüketiciler için public yüzey ve DI noktası. Scanner / Cleaner /
-Viz Strategy'leri buradan tüketin. UI ve API doğrudan bu nesne üzerinden
-servis alabilir; eski callable factory'ler hâlâ :mod:`_tasks`'ta yaşar.
+Public surface and DI point for new consumers. Consume Scanner /
+Cleaner / Viz Strategy instances from here. UI and API can take
+services directly off this object; the legacy callable factories still
+live in :mod:`_tasks`.
 """
 from __future__ import annotations
 
@@ -29,10 +30,10 @@ from .storage.snapshots import SnapshotStore
 
 
 class AppContext:
-    """Servislerin tek noktada birleştiği composition root.
+    """Composition root where services come together in one place.
 
-    Yeni servis eklemek için: konstrüktörde ekle, type-hint yaz, isim
-    karakter karakter consistency korunsun.
+    To add a new service: add it in the constructor, write a type hint,
+    and keep naming consistency character by character.
     """
 
     def __init__(

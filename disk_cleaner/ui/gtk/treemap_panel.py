@@ -1,16 +1,17 @@
-"""TreemapPanel — disk haritası View'u (Gtk).
+"""TreemapPanel — disk-map View (Gtk).
 
-State machine'i :class:`~disk_cleaner.controllers.treemap.TreemapController`
-sahip; bu sınıf yalnızca:
+The state machine is owned by
+:class:`~disk_cleaner.controllers.treemap.TreemapController`; this
+class is responsible only for:
 
-- Widget kurulumu (toolbar, breadcrumb, DrawingArea)
-- Cairo çizimi (treemap rect'leri + sunburst arc'ları + curved text)
-- Hover state ve drill geçiş fade animasyonu (UI animasyonu)
-- PNG export dialog'u
-- Controller observer wire'ları
+- Widget setup (toolbar, breadcrumb, DrawingArea)
+- Cairo drawing (treemap rects + sunburst arcs + curved text)
+- Hover state and drill-transition fade animation (UI animation)
+- PNG export dialog
+- Controller observer wiring
 
-için sorumlu. Controller'ın çağırdığı callback'ler worker thread'den
-gelebilir; bu yüzden hepsi ``GLib.idle_add`` wrapper'ı arkasında.
+The callbacks the controller invokes may come from worker threads, so
+each one is wrapped with ``GLib.idle_add``.
 """
 from __future__ import annotations
 
@@ -35,12 +36,12 @@ from ...viz.treemap import OTHER_MARKER, layout_treemap
 def _node_color_themed(
     top_idx: int, depth: int, is_other: bool = False
 ) -> tuple[float, float, float]:
-    """``viz.node_color`` üstünde theme-aware sarmalayıcı."""
+    """Theme-aware wrapper over ``viz.node_color``."""
     return node_color(top_idx, depth, dark=is_dark_theme(), is_other=is_other)
 
 
 def _idle(fn: Callable) -> Callable:
-    """Worker thread'den gelen callback'i Gtk main thread'ine marshal et."""
+    """Marshal a callback from a worker thread onto the Gtk main thread."""
     def wrapper(*args, **kwargs):
         GLib.idle_add(lambda: (fn(*args, **kwargs), False)[1])
     return wrapper
@@ -143,7 +144,7 @@ class TreemapPanel(Gtk.Box):
         self.info.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
         self.pack_start(self.info, False, False, 0)
 
-        # ---- Controller observer wire'ları (thread-safe) ----
+        # ---- Controller observer wiring (thread-safe) ----
         c = self.controller
         c.on_busy_changed = _idle(self._on_busy_changed)
         c.on_root_loaded = _idle(self._on_root_loaded)
@@ -153,13 +154,13 @@ class TreemapPanel(Gtk.Box):
         c.on_log = _idle(self.win.log)
         c.on_error = _idle(self.win.log)
 
-    # ---- Public helpers (eski API kanıt) ----
+    # ---- Public helpers (legacy API surface) ----
 
     def set_default_path(self, path: str) -> None:
         self.entry.set_text(path)
         self.controller.set_path(path)
 
-    # ---- Observer reaksiyonları (Gtk main thread'inde çağrılır) ----
+    # ---- Observer reactions (invoked on the Gtk main thread) ----
 
     def _on_busy_changed(self, busy: bool) -> None:
         self.scan_btn.set_sensitive(not busy)
@@ -242,10 +243,10 @@ class TreemapPanel(Gtk.Box):
                 self.win.log(_("Path: {path} (press Scan)\n").format(path=target_path))
         self._begin_drill(commit)
 
-    # ---- Fade animasyonu (View-only) ----
+    # ---- Fade animation (view-only) ----
 
     def _begin_drill(self, commit: Callable[[], None]) -> None:
-        """Fade-out başlat; tamamlanınca commit() çağrılır → controller state mutasyonu."""
+        """Start fade-out; commit() is called on completion → controller state mutation."""
         if self._fade_dir != 0:
             return
         self._pending_commit = commit
@@ -727,7 +728,7 @@ class TreemapPanel(Gtk.Box):
             cr.move_to(x + 6, y + 32)
             cr.show_text(size_str)
 
-    # ---- Backward compatibility (kontrol API'si tarafından okunan attribute'lar) ----
+    # ---- Backward compatibility (attributes read by the control API) ----
 
     @property
     def current_node(self) -> Optional[TreeNode]:

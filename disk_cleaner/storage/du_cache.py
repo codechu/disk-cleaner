@@ -1,7 +1,8 @@
-"""SQLite ``du`` cache — re-scan'i ~430× hızlandırır.
+"""SQLite ``du`` cache — speeds up re-scan by ~430×.
 
-Dizinin ``mtime`` değişmediği sürece kayıtlı sonuç güvenli kabul edilir.
-TTL süresi geçince invalidate; manuel ``invalidate(path)`` da destekli.
+A cached result is considered safe as long as the directory ``mtime``
+has not changed. Cache is invalidated when the TTL expires; manual
+``invalidate(path)`` is also supported.
 """
 from __future__ import annotations
 
@@ -21,7 +22,7 @@ _SCHEMA = """CREATE TABLE IF NOT EXISTS du_cache (
 
 
 def du_cache_connect() -> sqlite3.Connection:
-    """SQLite bağlantısı + tablo garantisi."""
+    """SQLite connection + ensure the table exists."""
     SETTINGS_DIR.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(DU_CACHE_DB))
     conn.execute(_SCHEMA)
@@ -30,7 +31,7 @@ def du_cache_connect() -> sqlite3.Connection:
 
 
 def cached_dir_size(path: str | Path, ttl: float = DEFAULT_DU_CACHE_TTL_SEC) -> int:
-    """``dir_size`` cache'li sürüm — mtime aynıysa ve TTL geçmemişse cache."""
+    """Cached ``dir_size`` — uses the cache when mtime matches and TTL is fresh."""
     p = Path(path).expanduser()
     if not p.exists():
         return 0
@@ -62,12 +63,12 @@ def cached_dir_size(path: str | Path, ttl: float = DEFAULT_DU_CACHE_TTL_SEC) -> 
         finally:
             conn.close()
     except Exception:
-        # cache çalışmazsa düz dir_size
+        # if the cache fails, fall back to plain dir_size
         return dir_size(p)
 
 
 def du_cache_invalidate(path: str | None = None) -> None:
-    """Belirli bir yolu (ve altını) ya da tüm cache'i temizle."""
+    """Clear a specific path (and everything below) or the whole cache."""
     try:
         conn = du_cache_connect()
         try:
@@ -86,7 +87,7 @@ def du_cache_invalidate(path: str | None = None) -> None:
 
 
 class DuCache:
-    """``cached_dir_size`` / ``du_cache_invalidate`` üstüne ince OOP sarmalayıcı."""
+    """Thin OOP wrapper over ``cached_dir_size`` / ``du_cache_invalidate``."""
 
     def __init__(self, path: Path | str = DU_CACHE_DB) -> None:
         self.path = Path(path)

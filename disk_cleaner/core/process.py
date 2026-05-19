@@ -1,7 +1,7 @@
-"""Açık dosya / süreç farkındalığı (``lsof`` cache).
+"""Open file / process awareness (``lsof`` cache).
 
-Skorlayıcı, "bu yol şu an açık mı?" sorusunu çağırma başına lsof
-spawn etmeden cevaplayabilsin diye düşük-frekanslı bir cache kullanır.
+Uses a low-frequency cache so the scorer can answer "is this path
+currently open?" without spawning lsof on every call.
 """
 from __future__ import annotations
 
@@ -12,14 +12,14 @@ from ..utils import run
 
 _DEFAULT_MAX_AGE = 30.0
 
-# Module-level cache — tüm get_open_paths çağrıları paylaşır.
+# Module-level cache — shared across all get_open_paths calls.
 _OPEN_PATHS_CACHE: dict[str, object] = {"ts": 0.0, "paths": set()}
 
 
 def get_open_paths(max_age: float = _DEFAULT_MAX_AGE) -> set[tuple[str, str]]:
-    """lsof ile bu kullanıcının açık tuttuğu ``(path, cmd)`` çiftlerini döndür.
+    """Return ``(path, cmd)`` pairs the current user holds open via lsof.
 
-    Cache TTL ``max_age`` sn. Hata durumunda boş set döner.
+    Cache TTL is ``max_age`` seconds. Returns an empty set on error.
     """
     now = time.monotonic()
     ts = _OPEN_PATHS_CACHE["ts"]
@@ -45,7 +45,7 @@ def get_open_paths(max_age: float = _DEFAULT_MAX_AGE) -> set[tuple[str, str]]:
 
 
 def path_holders(path: str, open_paths: set[tuple[str, str]]) -> set[str]:
-    """``path`` (veya altındaki bir yol) açık tutan süreç adlarını döndür."""
+    """Return the names of processes holding ``path`` (or anything under it) open."""
     if not path:
         return set()
     p = os.path.abspath(os.path.expanduser(path)).rstrip("/")
@@ -57,7 +57,7 @@ def path_holders(path: str, open_paths: set[tuple[str, str]]) -> set[str]:
 
 
 class OpenPathsCache:
-    """``get_open_paths`` üstüne ince OOP sarmalayıcı (DI için)."""
+    """Thin OOP wrapper over ``get_open_paths`` (for DI)."""
 
     def __init__(self, max_age: float = _DEFAULT_MAX_AGE) -> None:
         self.max_age = max_age

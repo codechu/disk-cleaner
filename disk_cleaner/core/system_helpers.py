@@ -1,14 +1,14 @@
-"""Sistem cache/temizlik yardımcıları.
+"""System cache/cleanup helpers.
 
-Docker / apt / journal / snap / firefox / flatpak için boyut ölçücüleri
-ve temizlik aksiyonları. Bunlar :class:`~disk_cleaner.cleaners.Cleaner`
-ABC'sine değil, klasik ``(rc, msg)`` döndüren fonksiyonlardır — SYSTEM_TASKS
-listesi bunları doğrudan ``clean_fn`` olarak çağırır. Faz E'de Cleaner
-sınıflarına dönüşecekler.
+Size measurers and cleanup actions for docker / apt / journal / snap /
+firefox / flatpak. These are classic functions returning ``(rc, msg)``,
+not subclasses of the :class:`~disk_cleaner.cleaners.Cleaner` ABC —
+SYSTEM_TASKS calls them directly as ``clean_fn``. They become Cleaner
+classes in phase E.
 
-``TRASH_MODE`` ve ``DRY_RUN`` ihtiyacı olan fonksiyonlar değerleri çağrı
-anında :mod:`disk_cleaner.runtime` üstünden okur — runtime mutable, geç
-bağlama.
+Functions that need ``TRASH_MODE`` and ``DRY_RUN`` read the values at
+call time via :mod:`disk_cleaner.runtime` — runtime is mutable, late
+binding.
 """
 from __future__ import annotations
 
@@ -20,11 +20,11 @@ from .safe_remove import rm_contents, safe_remove
 from .sizing import dir_size
 
 
-# ---------- Boyut ölçücüler ----------
+# ---------- Size measurers ----------
 
 
 def size_docker_builder() -> int | None:
-    """``docker system df`` çıktısından Build Cache satırını ayıkla."""
+    """Extract the Build Cache line from ``docker system df`` output."""
     rc, out = run(["docker", "system", "df"])
     if rc != 0:
         return None
@@ -77,7 +77,7 @@ def size_apt() -> int:
 
 
 def size_journal() -> int | None:
-    """``journalctl --disk-usage`` çıktısından byte sayısı çıkar."""
+    """Extract a byte count from ``journalctl --disk-usage`` output."""
     rc, out = run(["journalctl", "--disk-usage"])
     if rc != 0:
         return None
@@ -93,7 +93,7 @@ def size_journal() -> int | None:
 
 
 def size_snap_disabled() -> int | None:
-    """Devre dışı snap revisionlarının toplam boyutu."""
+    """Total size of disabled snap revisions."""
     rc, out = run(["snap", "list", "--all"])
     if rc != 0:
         return None
@@ -110,7 +110,7 @@ def size_snap_disabled() -> int | None:
 
 
 def size_flatpak_unused() -> int | None:
-    """``flatpak uninstall --unused`` dry-run; "Nothing unused" → 0, hata → None."""
+    """``flatpak uninstall --unused`` dry-run; "Nothing unused" → 0, error → None."""
     rc, out = run(
         ["flatpak", "uninstall", "--unused", "--noninteractive",
          "--assumeyes", "--dry-run"],
@@ -127,7 +127,7 @@ def size_flatpak_unused() -> int | None:
 
 
 def _firefox_profile_dirs() -> list[Path]:
-    """Firefox cache2 alt klasörü olan profilleri döndür."""
+    """Return Firefox profiles that contain a cache2 subfolder."""
     base = Path("~/.mozilla/firefox").expanduser()
     if not base.exists():
         return []
@@ -139,7 +139,7 @@ def size_firefox_cache() -> int:
 
 
 def clean_firefox_cache() -> tuple[int, str]:
-    """Tüm Firefox profillerinde ``cache2`` içeriğini ``safe_remove`` ile boşalt."""
+    """Empty ``cache2`` contents in all Firefox profiles via ``safe_remove``."""
     n = 0
     errs: list[str] = []
     for prof in _firefox_profile_dirs():
@@ -161,11 +161,11 @@ def clean_firefox_cache() -> tuple[int, str]:
     return 0, msg
 
 
-# ---------- Toplu silme ----------
+# ---------- Bulk deletion ----------
 
 
 def _clean_multi(paths: list[str]) -> tuple[int, str]:
-    """Birden çok yol için ``rm_contents`` çağrısı, sonuçları birleştir."""
+    """Call ``rm_contents`` for multiple paths and combine the results."""
     cleaned = 0
     errs: list[str] = []
     for p in paths:
@@ -186,7 +186,7 @@ def _clean_multi(paths: list[str]) -> tuple[int, str]:
 
 
 def clean_snap_disabled_action() -> tuple[int, str]:
-    """Devre dışı snap revisionlarını pkexec ile sil. DRY_RUN'a uyar."""
+    """Remove disabled snap revisions via pkexec. Honors DRY_RUN."""
     from .. import runtime
 
     rc, out = run(["snap", "list", "--all"])
@@ -215,11 +215,11 @@ def clean_snap_disabled_action() -> tuple[int, str]:
     return 0, "\n".join(log)
 
 
-# ---------- ~/.cache (Chrome hariç) ----------
+# ---------- ~/.cache (except Chrome) ----------
 
 
 def clean_cache_except_chrome() -> tuple[int, str]:
-    """``~/.cache`` altındaki her şeyi çöpe taşı, ``google-chrome`` korunur."""
+    """Move everything under ``~/.cache`` to trash; ``google-chrome`` is preserved."""
     from .. import runtime
 
     p = Path("~/.cache").expanduser()

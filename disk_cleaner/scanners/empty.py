@@ -1,4 +1,4 @@
-"""EmptyScanner — boş dizinler ve 0-byte dosyaları yayınla."""
+"""EmptyScanner — emit empty directories and 0-byte files."""
 from __future__ import annotations
 
 from pathlib import Path

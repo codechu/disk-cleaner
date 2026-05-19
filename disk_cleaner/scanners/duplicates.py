@@ -1,4 +1,4 @@
-"""DuplicatesScanner — bir klasörde aynı içerikli dosyaları yayınla."""
+"""DuplicatesScanner — emit identical-content files in a folder."""
 from __future__ import annotations
 
 from pathlib import Path

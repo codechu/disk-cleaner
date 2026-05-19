@@ -23,11 +23,11 @@ def test_disk_usage_label_markup():
 
 
 def test_read_disk_usage_root():
-    """Gerçek df çağrısı — / için sonuç dönmeli."""
+    """Real df call — must produce a result for /."""
     u = read_disk_usage("/")
     assert u is not None
     assert 0 <= u.percent <= 100
-    # Renk eşikleri tutarlı
+    # Color thresholds are consistent
     if u.percent >= 90:
         assert u.color == _COLOR_RED
     elif u.percent >= 75:
@@ -62,7 +62,7 @@ def test_controller_find_mount():
 def test_set_mount_emits_observer():
     c = MainController()
     if len(c.mounts) < 2:
-        pytest.skip("İkinci mount yok")
+        pytest.skip("no second mount")
     other = next(m.target for m in c.mounts if m.target != c.current_mount)
     seen: list[str] = []
     c.on_mount_changed = lambda t: seen.append(t)
@@ -106,9 +106,9 @@ def test_set_dry_run_updates_runtime():
 
 
 def test_btrfs_fs_warning_text():
-    """fs_warning_for sentetik BTRFS mount için yardım metni üretir."""
+    """fs_warning_for emits help text for a synthetic BTRFS mount."""
     c = MainController()
-    # Inject sahte mount
+    # Inject fake mount
     c.mounts = [Mount(target="/btrfs", source="/dev/x", fstype="btrfs",
                       size="1T", used="0", avail="1T", pcent="0")]
     msg = c.fs_warning_for("/btrfs")
@@ -135,7 +135,7 @@ def test_no_fs_warning_for_ext4():
 
 
 def test_save_panel_entries():
-    """settings.json'a yazma — sadece TypeError olmamalı."""
+    """Writing to settings.json — must not raise TypeError."""
     c = MainController()
     c.save_panel_entries({"artifacts": "/foo", "explorer": "/bar"})
     from disk_cleaner.settings import SETTINGS
@@ -148,6 +148,6 @@ def test_refresh_disk_usage_emits():
     c.on_disk_usage_updated = lambda u: seen.append(u)
     c.refresh_disk_usage()
     assert len(seen) == 1
-    # Aktif mount geçerli, sonuç None olmamalı
+    # Active mount is valid; the result must not be None
     if c.current_mount == "/":
         assert seen[0] is not None

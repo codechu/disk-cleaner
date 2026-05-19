@@ -1,6 +1,7 @@
-"""SafePathCleaner — tek bir yolu güvenli sil (çöp varsayılan).
+"""SafePathCleaner — safely delete a single path (trash by default).
 
-Silme sonrası ``du_cache``'i invalidate eder; eski boyut UI'da kalmaz.
+After deletion, invalidates ``du_cache`` so the stale size does not
+linger in the UI.
 """
 from __future__ import annotations
 
@@ -13,7 +14,7 @@ from .base import Cleaner
 
 
 class SafePathCleaner(Cleaner):
-    """``safe_remove`` üstüne ince sarmalayıcı + cache invalidate."""
+    """Thin wrapper over ``safe_remove`` with cache invalidation."""
 
     def __init__(self, path: str | Path) -> None:
         self.path = str(path)

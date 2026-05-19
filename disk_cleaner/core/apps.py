@@ -1,9 +1,10 @@
-"""Yüklü uygulama listesi ve ilgili kullanıcı veri klasörleri.
+"""Installed application list and related user data folders.
 
-dpkg-query üstünden kullanıcının manuel kurduğu paketleri tahmin eder
-(kernel + kütüphane + dil-paketi filtreler). ``app_related_paths`` bir
-paket adına yakın ``~/.config``, ``~/.cache``, ``~/.local/share`` alt
-klasörlerini yakalar — apt purge'dan sonra silmek için.
+Uses dpkg-query to guess packages installed manually by the user
+(filters out kernel + library + language-pack noise).
+``app_related_paths`` finds matching ``~/.config``, ``~/.cache``,
+``~/.local/share`` subfolders for a package name — so they can be
+removed after apt purge.
 """
 from __future__ import annotations
 
@@ -26,11 +27,11 @@ _SKIP_EXACT: frozenset[str] = frozenset({
 
 
 def list_installed_apps(min_size_kb: int = 1024) -> list[dict[str, Any]]:
-    """dpkg üzerinde yüklü 'gerçek' uygulama paketlerini listele.
+    """List 'real' application packages installed via dpkg.
 
-    Kernel / kütüphane / dil-paketi gibi sistem paketleri elenir.
-    ``min_size_kb`` altındakiler atlanır. Sonuç byte cinsinden boyuta
-    göre azalan sırada.
+    Filters out system packages such as kernels / libraries / language
+    packs. Packages below ``min_size_kb`` are skipped. The result is
+    sorted by byte size descending.
     """
     rc, out = run(
         ["dpkg-query", "-W", "-f", "${Package}\\t${Installed-Size}\\t${Description}\\n"]
@@ -59,10 +60,11 @@ def list_installed_apps(min_size_kb: int = 1024) -> list[dict[str, Any]]:
 
 
 def app_related_paths(pkg_name: str) -> list[str]:
-    """Bir paket adı için olası kullanıcı veri klasörlerini tahmin et.
+    """Guess candidate user data folders for a package name.
 
-    ``~/.config``, ``~/.cache``, ``~/.local/share`` altında paket adının
-    yaygın varyasyonlarını arar (lowercase, tire-siz, ilk parça).
+    Looks for common variants of the package name (lowercase,
+    dash-stripped, first segment) under ``~/.config``, ``~/.cache``,
+    and ``~/.local/share``.
     """
     bases = [HOME / ".config", HOME / ".cache", HOME / ".local" / "share"]
     variants = {

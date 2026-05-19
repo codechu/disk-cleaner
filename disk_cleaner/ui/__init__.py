@@ -1,19 +1,14 @@
-"""UI alt paketi — platform-spesifik View portları.
+"""UI subpackage — platform-specific View ports.
 
-Mevcut portlar:
+Current ports:
 
-- :mod:`disk_cleaner.ui.gtk` — Linux desktop (GTK 3 + Cairo). Şu an
-  varsayılan; ``cli.main()`` GUI moduna geçince bunu başlatır.
+- :mod:`disk_cleaner.ui.gtk` — Linux desktop (GTK 3 + Cairo). The
+  default port; ``cli.main()`` launches it when entering GUI mode.
 
-Planlanan portlar (her biri ``controllers/`` katmanına bağlanır):
-
-- ``disk_cleaner.ui.qt`` — PyQt6 / PySide6 (cross-platform native)
-- ``disk_cleaner.ui.web`` — pywebview + d3.js (en hafif cross-platform)
-- ``disk_cleaner.ui.textual`` — terminal UI (headless makineler için)
-
-Geriye uyumluluk için public sınıflar bu modülden de import edilebilir
-(eski ``from disk_cleaner.ui.main_window import MainWindow`` çağrısı
-yerine ``from disk_cleaner.ui.gtk import MainWindow``).
+For backwards compatibility, public classes can be imported from this
+module as well (the legacy
+``from disk_cleaner.ui.main_window import MainWindow`` is replaced by
+``from disk_cleaner.ui.gtk import MainWindow``).
 """
 from __future__ import annotations
 

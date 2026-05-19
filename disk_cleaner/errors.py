@@ -1,33 +1,33 @@
 """Disk Cleaner exception hierarchy.
 
-Tüm domain hataları :class:`DiskCleanerError`'dan türetilir. Modüller kendi
-spesifik hatalarını kullanır; çağıran kod tek bir base'i yakalayabilir.
+All domain errors derive from :class:`DiskCleanerError`. Modules use
+their own specific errors; calling code can catch the single base.
 """
 from __future__ import annotations
 
 
 class DiskCleanerError(Exception):
-    """Tüm disk-cleaner hatalarının ortak base'i."""
+    """Common base for all disk-cleaner errors."""
 
 
 class ScannerError(DiskCleanerError):
-    """Bir Scanner ``list_tasks`` çağrısı sırasında oluşan hata."""
+    """Error raised during a Scanner ``list_tasks`` call."""
 
 
 class CleanerError(DiskCleanerError):
-    """Bir Cleaner ``execute`` çağrısı sırasında oluşan hata."""
+    """Error raised during a Cleaner ``execute`` call."""
 
 
 class StorageError(DiskCleanerError):
-    """SQLite / ayar dosyası / snapshot katmanından gelen hata."""
+    """Error from the SQLite / settings file / snapshot layer."""
 
 
 class ApiError(DiskCleanerError):
-    """Control API (Unix socket) işleyicisinde oluşan hata."""
+    """Error raised inside the Control API (Unix socket) handler."""
 
 
 class ConfigError(DiskCleanerError):
-    """Geçersiz ayar veya kullanıcı tarafından sağlanan kural."""
+    """Invalid setting or user-supplied rule."""
 
 
 __all__ = [

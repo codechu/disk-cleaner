@@ -1,13 +1,14 @@
 """i18n setup — gettext-based message translation.
 
-Kaynak kod İngilizce; çeviriler ``po/*.po``'da. ``LANG`` / ``LC_MESSAGES`` env
-değişkenine bakar; uygulama hiçbir çeviri bulamazsa İngilizce'ye düşer.
+Source code is in English; translations live in ``po/*.po``. Looks at
+the ``LANG`` / ``LC_MESSAGES`` environment variables; falls back to
+English when no translation is available.
 
 Usage:
     from disk_cleaner.i18n import _
 
     print(_("Smart scan"))            # → "Akıllı tara" (tr), "Smart scan" (en)
-    print(_("{n} items").format(n=3)) # markup placeholder, çeviri sonrası format
+    print(_("{n} items").format(n=3)) # markup placeholder, format after translation
 """
 from __future__ import annotations
 
@@ -15,8 +16,9 @@ import gettext as _gettext
 import os
 from pathlib import Path
 
-# Bu paketin yanındaki ``locale/`` dizini — pyproject ile install edildiğinde
-# /usr/share/locale/ altına gider; lokal geliştirmede paket içinde aranır.
+# ``locale/`` directory next to this package — when installed via
+# pyproject it lands under /usr/share/locale/; during local development
+# it is looked up inside the package.
 _PACKAGE_DIR = Path(__file__).parent
 _LOCAL_LOCALE = _PACKAGE_DIR / "locale"
 _SYSTEM_LOCALE = Path("/usr/share/locale")
@@ -25,22 +27,23 @@ _DOMAIN = "disk_cleaner"
 
 
 def _resolve_localedir() -> Path:
-    """Önce paket-içi locale (geliştirme), sonra sistem locale (kurulu)."""
+    """In-package locale first (development), then system locale (installed)."""
     if _LOCAL_LOCALE.is_dir():
         return _LOCAL_LOCALE
     return _SYSTEM_LOCALE
 
 
 def _resolve_language() -> str | None:
-    """Üç-katmanlı dil seçimi (yüksek öncelik ilk):
+    """Three-layer language selection (highest priority first):
 
     1. ``DISK_CLEANER_LANG`` env override (dev/test/CI)
-    2. ``settings.json`` içindeki ``language`` anahtarı (kullanıcı tercihi)
-    3. ``None`` → gettext kendi ``LANG``/``LC_MESSAGES`` çözümlemesini yapar
+    2. ``language`` key in ``settings.json`` (user preference)
+    3. ``None`` → gettext performs its own ``LANG``/``LC_MESSAGES``
+       resolution
     """
     if lang := os.environ.get("DISK_CLEANER_LANG"):
         return lang
-    # Settings.json'u raw oku — settings.py import etmek circular yaratabilir
+    # Read settings.json raw — importing settings.py could cause a cycle
     try:
         from .config import SETTINGS_FILE
         if SETTINGS_FILE.exists():
@@ -55,7 +58,7 @@ def _resolve_language() -> str | None:
 
 
 def _build_translation() -> _gettext.NullTranslations:
-    """Çeviri nesnesi kur — yoksa NullTranslations (İngilizce passthrough)."""
+    """Build a translation object — fall back to NullTranslations (English passthrough)."""
     localedir = _resolve_localedir()
     lang = _resolve_language()
     languages = [lang] if lang else None
@@ -72,10 +75,11 @@ ngettext = _translation.ngettext
 
 
 def reload_translations(lang: str | None = None) -> None:
-    """Runtime'da dil değiştirmek için — yeni LANG'la çevirileri yeniden yükle.
+    """Change language at runtime — reload translations with a new LANG.
 
-    Mevcut process'te alınmış ``_`` referansları eski kalır; yeni stringler
-    yeni çeviri tarafından döner. Settings UI'sından çağrılır.
+    Existing ``_`` references in the running process stay bound to the
+    old translator; new strings are resolved by the new one. Called
+    from the Settings UI.
     """
     global _translation, _, ngettext
     if lang:

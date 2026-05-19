@@ -1,4 +1,4 @@
-"""OldFilesScanner — bir klasörün ``days`` günden eski çocuklarını yayınla."""
+"""OldFilesScanner — emit a folder's children older than ``days`` days."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,7 +10,7 @@ from .system import _CallableCleaner
 
 
 class OldFilesScanner(Scanner):
-    """Downloads benzeri bir klasör + yaş eşiği → eski dosya görevleri."""
+    """A Downloads-like folder + age threshold → old-file tasks."""
 
     name = "old_files"
 

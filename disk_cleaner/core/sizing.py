@@ -1,8 +1,8 @@
-"""Boyut hesaplama yardımcıları — gerçek (block-based) vs nominal.
+"""Size helpers — real (block-based) vs. nominal.
 
-Önceden ``du -sb`` (apparent size) kullanılıyordu; Docker.raw gibi sparse
-dosyalarda 10× yanlış raporluyordu. Şimdi ``du -sB1`` (block-based) ile
-gerçek disk kullanımı baz alınır.
+Previously used ``du -sb`` (apparent size); for sparse files like
+Docker.raw it overreported by 10×. We now base sizes on ``du -sB1``
+(block-based), i.e. real disk usage.
 """
 from __future__ import annotations
 
@@ -11,11 +11,11 @@ from pathlib import Path
 
 from ..utils import run
 
-_SPARSE_DIFF_THRESHOLD = 100 * 1024 * 1024  # 100 MB altı sparse kabul edilmez
+_SPARSE_DIFF_THRESHOLD = 100 * 1024 * 1024  # below 100 MB is not considered sparse
 
 
 def dir_size(path: str | Path) -> int:
-    """Dizinin gerçek disk kullanımı (byte). Yoksa 0."""
+    """Real disk usage (bytes) of a directory. 0 if missing."""
     p = Path(path).expanduser()
     if not p.exists():
         return 0
@@ -29,10 +29,10 @@ def dir_size(path: str | Path) -> int:
 
 
 def path_size(path: str | Path) -> int:
-    """Dosya veya dizin için gerçek disk kullanımı.
+    """Real disk usage for a file or directory.
 
-    Dosyalarda ``st_blocks * 512`` — sparse dosyalar için doğru gerçek
-    boyut. Dizinler için ``dir_size`` (du) kullanır.
+    For files: ``st_blocks * 512`` — accurate real size for sparse
+    files. For directories: ``dir_size`` (du).
     """
     p = Path(path).expanduser()
     if not p.exists() and not p.is_symlink():
@@ -47,7 +47,7 @@ def path_size(path: str | Path) -> int:
 
 
 def apparent_size(path: str | Path) -> int:
-    """Sembolik/nominal boyut. Sparse dosyalarda gerçek değerden farklı."""
+    """Symbolic/nominal size. Differs from the real value on sparse files."""
     p = Path(path).expanduser()
     if not p.exists() and not p.is_symlink():
         return 0
@@ -58,8 +58,8 @@ def apparent_size(path: str | Path) -> int:
 
 
 def is_sparse(path: str | Path) -> bool:
-    """Dosya sparse mi? Gerçek block kullanımı nominal'in %90'ından küçükse
-    ve fark en az 100 MB ise sparse kabul edilir.
+    """Is the file sparse? Considered sparse if real block usage is below
+    90% of nominal and the difference is at least 100 MB.
     """
     real = path_size(path)
     nominal = apparent_size(path)

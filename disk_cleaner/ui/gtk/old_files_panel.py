@@ -1,7 +1,8 @@
-"""OldFilesPanel — eski dosya tarayıcı paneli.
+"""OldFilesPanel — old-file scanner panel.
 
-Klasör + yaş eşiği (gün) ile ``make_old_files_tasks`` çağırır.
-Risk yüksek — sonuçlar kullanıcının kendi dosyalarıdır, otomatik seçilmez.
+Calls ``make_old_files_tasks`` with a folder + age threshold (days).
+Risk is high — results are the user's own files; nothing is
+auto-selected.
 """
 from __future__ import annotations
 

@@ -1,8 +1,8 @@
-"""SystemScanner — sistem cache görevlerini :class:`Task` olarak yayınlar.
+"""SystemScanner — emit system cache tasks as :class:`Task` instances.
 
-Mevcut ``SYSTEM_TASKS`` dict listesi (:mod:`disk_cleaner._tasks`) üstüne
-ince bir Strategy adaptörü. İleride SYSTEM_TASKS doğrudan Task listesi
-olacak; şimdilik dict şeması geriye uyumu için korunuyor.
+A thin Strategy adapter over the existing ``SYSTEM_TASKS`` dict list
+(:mod:`disk_cleaner._tasks`). SYSTEM_TASKS becomes a direct Task list
+later; for now the dict schema is kept for backwards compatibility.
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from .base import Scanner, Task
 
 
 class _CallableCleaner(Cleaner):
-    """Eski ``clean_fn`` callable'ını :class:`Cleaner` arayüzüne sar."""
+    """Wrap the legacy ``clean_fn`` callable in the :class:`Cleaner` interface."""
 
     def __init__(self, fn: Callable[[], tuple[int, str]], label: str = "") -> None:
         self._fn = fn
@@ -26,7 +26,7 @@ class _CallableCleaner(Cleaner):
 
 
 class SystemScanner(Scanner):
-    """SYSTEM_TASKS dict listesini :class:`Task` akışına dönüştürür."""
+    """Convert the SYSTEM_TASKS dict list into a :class:`Task` stream."""
 
     name = "system"
 

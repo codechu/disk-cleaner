@@ -1,4 +1,4 @@
-"""AppUninstallScanner — apt purge + ilgili klasör temizlik adayları."""
+"""AppUninstallScanner — apt purge + related folder cleanup candidates."""
 from __future__ import annotations
 
 from threading import Event
@@ -9,7 +9,7 @@ from .system import _CallableCleaner
 
 
 class AppUninstallScanner(Scanner):
-    """Yüklü ilk 80 büyük apt paketini ``risk=high`` Task olarak yayınla."""
+    """Emit the top 80 installed apt packages by size as ``risk=high`` Tasks."""
 
     name = "apps"
 

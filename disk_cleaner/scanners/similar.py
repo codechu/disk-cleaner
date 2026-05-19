@@ -1,4 +1,4 @@
-"""SimilarImagesScanner — dHash + hamming ile yakın görselleri yayınla."""
+"""SimilarImagesScanner — emit near-duplicate images via dHash + hamming."""
 from __future__ import annotations
 
 from pathlib import Path

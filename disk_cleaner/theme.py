@@ -1,9 +1,9 @@
-"""Karanlık / aydınlık tema algılama + kullanıcı tercih override'ı.
+"""Dark / light theme detection + user-preference override.
 
-Üç-katmanlı (yüksek öncelik ilk):
-1. ``settings.json`` ``theme`` anahtarı: ``"light"`` / ``"dark"`` / ``"auto"``
-2. GTK ``Gtk.Settings`` özelliği ``gtk-application-prefer-dark-theme``
-3. GTK tema adında ``dark`` geçerse dark mode kabul edilir
+Three layers (highest priority first):
+1. ``theme`` key in ``settings.json``: ``"light"`` / ``"dark"`` / ``"auto"``
+2. GTK ``Gtk.Settings`` property ``gtk-application-prefer-dark-theme``
+3. If the GTK theme name contains ``dark``, dark mode is assumed
 """
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from ._gtk import Gtk
 
 
 def _user_theme_pref() -> str:
-    """settings.json'dan kullanıcı tercihi — default ``"auto"``."""
+    """User preference from settings.json — default ``"auto"``."""
     try:
         from .settings import SETTINGS
         return SETTINGS.get("theme", "auto")
@@ -20,7 +20,7 @@ def _user_theme_pref() -> str:
 
 
 def _gtk_dark() -> bool:
-    """GTK sistem temasına göre dark mode mu (override yok varsayımı)."""
+    """Dark mode according to the system GTK theme (assuming no override)."""
     try:
         s = Gtk.Settings.get_default()
         if s is None:
@@ -34,7 +34,7 @@ def _gtk_dark() -> bool:
 
 
 def is_dark_theme() -> bool:
-    """Dark mode aktif mi? Kullanıcı override'ı ile birlikte."""
+    """Is dark mode active? Includes user override."""
     pref = _user_theme_pref()
     if pref == "dark":
         return True
@@ -44,7 +44,7 @@ def is_dark_theme() -> bool:
 
 
 def apply_user_preference() -> None:
-    """Kullanıcı tercihini GTK'ya bildir — yeni pencereler doğru tema açar."""
+    """Inform GTK of the user preference — new windows open in the right theme."""
     pref = _user_theme_pref()
     if pref == "auto":
         return  # GTK system default

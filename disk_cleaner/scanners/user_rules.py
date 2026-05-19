@@ -1,4 +1,4 @@
-"""UserRulesScanner — ``~/.config/disk_cleaner/cleaners/*.json`` kurallarını yayınla."""
+"""UserRulesScanner — emit rules from ``~/.config/disk_cleaner/cleaners/*.json``."""
 from __future__ import annotations
 
 from threading import Event
@@ -9,7 +9,7 @@ from .system import _CallableCleaner
 
 
 class UserRulesScanner(Scanner):
-    """Kullanıcı tanımlı temizleyici JSON'larını Task akışına dönüştürür."""
+    """Convert user-defined cleaner JSON files into a Task stream."""
 
     name = "user_rules"
 

@@ -1,7 +1,8 @@
-"""``rm_path`` ve ``safe_remove`` davranışı.
+"""Behavior of ``rm_path`` and ``safe_remove``.
 
-Gerçek çöp kutusunu kirletmemek için ``rm_path`` (kalıcı silme) testlenir.
-``safe_remove`` çöp kutusu modunu seçer; CI'da gio yoksa fallback'i test eder.
+To avoid polluting the real trash, ``rm_path`` (permanent delete) is
+tested. ``safe_remove`` selects trash mode; the test exercises the
+fallback when gio is missing on CI.
 """
 from __future__ import annotations
 

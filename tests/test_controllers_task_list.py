@@ -12,19 +12,19 @@ from disk_cleaner.controllers import (
 
 
 def _mk_task(name: str, size: int, risk: str = "low", desc: str = "") -> dict:
-    """Sentetik task dict — gerçek size_fn/clean_fn ile."""
+    """Synthetic task dict — with real size_fn/clean_fn."""
     return {
         "name": name,
-        "desc": desc or f"{name} açıklama",
+        "desc": desc or f"{name} description",
         "risk": risk,
         "path": f"/fake/{name}",
         "size_fn": lambda s=size: s,
-        "clean_fn": lambda: (0, f"{name} temizlendi"),
+        "clean_fn": lambda: (0, f"{name} cleaned"),
     }
 
 
 def _wait_until(predicate, timeout=2.0):
-    """Tarama bitene kadar polling."""
+    """Poll until the scan finishes."""
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         if predicate():
@@ -55,7 +55,7 @@ def test_scan_populates_rows():
 
 
 def test_auto_select_low_risk_above_threshold():
-    """Düşük risk + >100MB otomatik seçili."""
+    """Low risk + >100MB is auto-selected."""
     tasks = [
         _mk_task("big", 200 * 1024 * 1024, risk="low"),
         _mk_task("small", 50 * 1024 * 1024, risk="low"),
@@ -65,7 +65,7 @@ def test_auto_select_low_risk_above_threshold():
     c.start_scan()
     assert _wait_until(lambda: not c.busy)
     assert c.rows[0].checked is True   # big low risk → auto
-    assert c.rows[1].checked is False  # küçük (<100MB)
+    assert c.rows[1].checked is False  # small (<100MB)
     assert c.rows[2].checked is False  # high risk
 
 
@@ -153,14 +153,14 @@ def test_clean_preview_data():
 
 
 def test_provider_signature_fallback():
-    """Provider farklı imzalarda olabilir."""
-    # provider sadece () alır
+    """Providers may have different signatures."""
+    # provider takes only ()
     c = TaskListController(lambda: [_mk_task("a", 100)])
     c.start_scan()
     assert _wait_until(lambda: not c.busy)
     assert len(c.rows) == 1
 
-    # provider (cancel) alır
+    # provider takes (cancel)
     c2 = TaskListController(lambda cancel: [_mk_task("b", 200)])
     c2.start_scan()
     assert _wait_until(lambda: not c2.busy)
@@ -210,12 +210,12 @@ def test_preview_directory(tmp_path):
 
 
 def test_cancel_stops_scan():
-    """Yavaş provider + cancel → işlem durur."""
+    """Slow provider + cancel → the operation stops."""
     started_flag = threading.Event()
 
     def slow_provider(cancel=None):
         started_flag.set()
-        # Cancel'ı bekle
+        # Wait for cancel
         if cancel is not None:
             cancel.wait(timeout=2)
         return [_mk_task("a", 100)]
@@ -233,5 +233,5 @@ def test_observer_busy_state():
     c.on_busy_changed = lambda b, p: seen.append((b, p))
     c.start_scan()
     assert _wait_until(lambda: not c.busy)
-    assert seen[0][0] is True       # ilk: busy=True
-    assert seen[-1][0] is False     # son: busy=False
+    assert seen[0][0] is True       # first: busy=True
+    assert seen[-1][0] is False     # last: busy=False

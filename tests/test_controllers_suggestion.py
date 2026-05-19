@@ -16,7 +16,7 @@ from disk_cleaner.controllers.suggestion import (
 def _t(name: str, size: int = 100, risk: str = "low", desc: str = "") -> dict:
     return {
         "name": name,
-        "desc": desc or f"{name} açıklama",
+        "desc": desc or f"{name} description",
         "risk": risk,
         "path": f"/fake/{name}",
         "size_fn": lambda s=size: s,
@@ -25,7 +25,7 @@ def _t(name: str, size: int = 100, risk: str = "low", desc: str = "") -> dict:
 
 
 def test_group_enriched_artifact_grouping():
-    """Aynı türde 2+ artefakt grup; tek olan single."""
+    """Two or more artifacts of the same type form a group; lone ones stay single."""
     enriched = [
         (_t("a"), 100, "artifact", 80, ""),
         (_t("b"), 100, "artifact", 70, ""),
@@ -41,7 +41,7 @@ def test_group_enriched_artifact_grouping():
 
 
 def test_group_enriched_single_artifact_unpacks():
-    """Tek elemanlı artifact grubu açılır, single'a düşer."""
+    """A single-item artifact group is unfolded and falls into singles."""
     t = _t("lonely", 100, "low")
     t["path"] = "/x/lonely_thing"
     enriched = [(t, 100, "artifact", 50, "")]
@@ -51,7 +51,7 @@ def test_group_enriched_single_artifact_unpacks():
 
 
 def test_auto_select_top_n():
-    """Top 5 düşük-risk + skor>=60 + cap 5GB."""
+    """Top 5 low-risk + score>=60 + 5GB cap."""
     enriched = []
     for i in range(10):
         t = _t(f"big{i}", 200 * 1024 * 1024, "low")
@@ -69,7 +69,7 @@ def test_auto_select_skips_high_risk():
     groups, singles = _group_enriched(enriched)
     auto = _compute_auto_select(groups, singles)
     assert len(auto) == 1
-    # Sadece b (low) seçili
+    # Only b (low) is selected
     selected_names = [t.get("name") for t, _, _, _, _ in singles if id(t) in auto]
     assert selected_names == ["b"]
 
@@ -96,7 +96,7 @@ def test_auto_select_skips_open_paths():
 
 
 def test_auto_select_cumulative_cap():
-    """5GB cap — toplam aşarsa durmalı."""
+    """5GB cap — must stop once the cumulative total would exceed it."""
     # Her biri 1.5 GB, 5 tane = 7.5 GB, ama cap 5 GB
     one_gb_half = int(1.5 * 1024 * 1024 * 1024)
     enriched = [
@@ -105,7 +105,7 @@ def test_auto_select_cumulative_cap():
     ]
     groups, singles = _group_enriched(enriched)
     auto = _compute_auto_select(groups, singles)
-    # 3 öğe (4.5 GB) seçilmeli, 4. taşar
+    # 3 items (4.5 GB) should be selected; the 4th overflows
     assert len(auto) == 3
 
 
@@ -153,7 +153,7 @@ def test_controller_toggle_group_propagates_to_children():
         ),
     ]
     c.tasks = {0: _t("c1", 100), 1: _t("c2", 200)}
-    c.toggle(0, None)  # grup toggle
+    c.toggle(0, None)  # toggle the group
     assert c.rows[0].checked is True
     assert c.rows[0].children[0].checked is True
     assert c.rows[0].children[1].checked is True
@@ -175,8 +175,8 @@ def test_select_target_picks_by_score():
     ]
     c.tasks = {i: _t(f"t{i}", 0) for i in range(4)}
     picked = c.select_target(500 * 1024 * 1024)
-    # 200 + 300 = 500MB ya da en az 500MB'ı geçecek
-    # En yüksek skor 90 (200MB), 80 (300MB) — kümülatif 500MB
+    # 200 + 300 = 500MB, or at least reach 500MB
+    # Highest scores are 90 (200MB), 80 (300MB) — cumulative 500MB
     assert picked >= 2
 
 

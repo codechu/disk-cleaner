@@ -1,29 +1,28 @@
-"""Runtime mutable global'ler.
+"""Runtime mutable globals.
 
-UI tarafından değiştirilen, alt modüller tarafından çağrı anında
-okunan iki durum bayrağı:
+Two state flags changed by the UI and read at call time by submodules:
 
-- :data:`TRASH_MODE` — Çöp kutusu modu. True ise silme yerine
-  ``gio trash`` kullanılır (geri alınabilir).
-- :data:`DRY_RUN` — Test modu. True ise temizleme komutları
-  çalıştırılmaz, sadece "[KURU] silinecekti: …" loglanır.
+- :data:`TRASH_MODE` — Trash mode. If True, ``gio trash`` is used
+  instead of deletion (reversible).
+- :data:`DRY_RUN` — Test mode. If True, cleanup commands are not
+  executed; only "[DRY] would delete: …" is logged.
 
-**Neden modül global'i?** Bu değerler kullanıcı toggle'larıyla
-runtime'da değişir, ama hemen hemen her temizleyici çağrısında
-okunur. DI ile her aşamada propagate etmek yerine tek bir paylaşımlı
-state modülü kullanmak pratik. Yeni kod ``from .. import runtime``
-yapıp ``runtime.TRASH_MODE`` okumalı (import-time'da değil, çağrı
-anında — geç bağlama).
+**Why a module global?** These values change at runtime via user
+toggles but are read on almost every cleaner invocation. Instead of
+propagating them via DI at every level, sharing them through one
+state module is practical. New code should ``from .. import runtime``
+and read ``runtime.TRASH_MODE`` at call time (not at import time —
+late binding).
 
-İleride :class:`~disk_cleaner.settings.SettingsStore` üstüne typed
-accessor olarak taşınabilir.
+They can later be moved onto a typed accessor on
+:class:`~disk_cleaner.settings.SettingsStore`.
 """
 from __future__ import annotations
 
-#: Çöp kutusu modu (True → ``gio trash``, False → kalıcı silme).
+#: Trash mode (True → ``gio trash``, False → permanent deletion).
 TRASH_MODE: bool = True
 
-#: Dry-run (True → hiçbir şey silinmez, sadece loglanır).
+#: Dry-run (True → nothing is deleted, only logged).
 DRY_RUN: bool = False
 
 

@@ -1,16 +1,16 @@
-"""MainController — üst pencere kabuğunun state machine'i.
+"""MainController — state machine for the top window shell.
 
-Sahip olunan:
+Owned state:
 
-- Mount listesi ve aktif seçim
-- Disk usage parsing (df çıktısı + %dolu renk eşiği)
-- BTRFS/ZFS uyarı metinleri
-- ``runtime.TRASH_MODE`` / ``runtime.DRY_RUN`` toggle'ları
+- Mount list and active selection
+- Disk usage parsing (df output + %full color thresholds)
+- BTRFS/ZFS warning text
+- ``runtime.TRASH_MODE`` / ``runtime.DRY_RUN`` toggles
 - Watchdog start/stop/status
 - Settings persist (mount + entries)
 
-View'ın görevi: header bar widget'ları, panel oluşturma + wire'lama,
-infobar/tray icon. Bu sınıf View'a dokunmaz.
+View responsibilities: header bar widgets, panel construction + wiring,
+infobar/tray icon. This class does not touch the View.
 """
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ class Mount:
 
 @dataclass
 class DiskUsage:
-    """Görsel için hazır disk doluluk özeti."""
+    """Ready-to-render disk usage summary."""
 
     total: str     # "468G"
     used: str      # "338G"
@@ -58,14 +58,14 @@ class DiskUsage:
         )
 
 
-# Renk eşikleri
+# Color thresholds
 _DISK_RED = 90
 _DISK_YELLOW = 75
 _COLOR_RED = "#cf222e"
 _COLOR_YELLOW = "#bf8700"
 _COLOR_GREEN = "#1a7f37"
 
-# Hangi FS'ler kullanıcıya snapshot uyarısı vermeli
+# Filesystems that should show the user a snapshot warning
 _FS_WARN: dict[str, str] = {
     "btrfs": "btdu",
     "zfs": "zfs list -t snapshot",
@@ -73,10 +73,10 @@ _FS_WARN: dict[str, str] = {
 
 
 class MainController:
-    """Ana pencere state machine'i — View-bağımsız."""
+    """Main-window state machine — view-independent."""
 
     def __init__(self) -> None:
-        # Mount listesi
+        # Mount list
         raw = list_real_mounts() or []
         self.mounts: list[Mount] = [
             Mount(
@@ -91,7 +91,7 @@ class MainController:
             for m in raw
         ] or [Mount("/", "", "", "?", "?", "?", "?")]
 
-        # Aktif mount — settings'ten oku, yoksa "/" veya ilk mount
+        # Active mount — read from settings, otherwise "/" or first mount
         default = SETTINGS.get("mount", "/")
         if not any(m.target == default for m in self.mounts):
             default = (
@@ -100,7 +100,7 @@ class MainController:
             )
         self.current_mount: str = default
 
-        # Trash/Dry başlangıç durumu settings'ten
+        # Initial trash/dry state from settings
         runtime.TRASH_MODE = SETTINGS.get("trash_mode", True)
         runtime.DRY_RUN = SETTINGS.get("dry_run", False)
 
@@ -204,7 +204,7 @@ class MainController:
     # ---- Settings persist ----
 
     def save_panel_entries(self, entries: dict[str, str]) -> None:
-        """View tarafındaki panel entry'leri toplu kaydet."""
+        """Persist the View-side panel entries in bulk."""
         SETTINGS["entries"] = entries
         SETTINGS["mount"] = self.current_mount
         SETTINGS["trash_mode"] = runtime.TRASH_MODE
@@ -213,7 +213,7 @@ class MainController:
 
 
 def read_disk_usage(mount: str) -> DiskUsage | None:
-    """``df -h`` parse — okunabilir özet + renk önerisi."""
+    """Parse ``df -h`` — readable summary + color suggestion."""
     rc, out = run(["df", "-h", "--output=size,used,avail,pcent", mount])
     if rc != 0:
         return None

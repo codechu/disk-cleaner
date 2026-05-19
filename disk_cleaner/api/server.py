@@ -1,12 +1,14 @@
-"""Control API — Unix soketi üzerinden JSON-line komut sunucusu.
+"""Control API — JSON-line command server over a Unix socket.
 
-Soket yolu: ``$XDG_RUNTIME_DIR/disk_cleaner/control.sock``
-(bkz. :mod:`disk_cleaner.config`). Her bağlantı bir thread'de işlenir;
-``cmd`` ana thread'de ``GLib.idle_add`` ile çalıştırılır (Gtk thread-safe değil).
+Socket path: ``$XDG_RUNTIME_DIR/disk_cleaner/control.sock``
+(see :mod:`disk_cleaner.config`). Each connection runs on its own
+thread; ``cmd`` is executed on the main thread via ``GLib.idle_add``
+(Gtk is not thread-safe).
 
-**Güvenlik:** ``clean`` ve yıkıcı sayılan tüm hedefler API'den BLOKE.
-Yalnızca kullanıcı GUI'de manuel butona basabilir. ``_DESTRUCTIVE_TARGETS``
-listesini genişletmek için: kullanıcı verisi geri alınamaz yola ad eklenir.
+**Security:** ``clean`` and every target considered destructive is
+BLOCKED from the API. Only the user can trigger them manually via the
+GUI. To extend ``_DESTRUCTIVE_TARGETS``: add a target whose user data
+cannot be recovered.
 """
 from __future__ import annotations
 
@@ -26,10 +28,10 @@ CONTROL_SOCKET: Path = Path(_CONTROL_SOCKET_PATH)
 
 
 class ControlServer:
-    """JSON-line tabanlı socket sunucu. Her komut main thread'de yürütülür."""
+    """JSON-line socket server. Every command runs on the main thread."""
 
-    # Yıkıcı sayılan komutlar — API üzerinden ASLA tetiklenmez.
-    # Kullanıcı bilerek manuel onay vermeden silme akışı başlamasın.
+    # Commands considered destructive — NEVER triggered via the API.
+    # No deletion flow may start without explicit, manual user approval.
     _DESTRUCTIVE_TARGETS: frozenset[str] = frozenset({"clean"})
 
     def __init__(self, win) -> None:
@@ -75,9 +77,9 @@ class ControlServer:
                     self._send(f, {"ok": False, "error": f"json: {e}"})
                     continue
 
-                # subscribe: bağlantıyı push moduna geçir, conn kapanana
-                # kadar yaşat. Aynı bağlantıda subscribe sonrası başka
-                # cmd kabul edilmez (terminal).
+                # subscribe: switch the connection to push mode and keep
+                # it alive until conn is closed. After subscribe, no
+                # further cmd is accepted on the same connection (terminal).
                 if msg.get("cmd") == "subscribe":
                     self._stream_subscribe(f, msg)
                     return
@@ -110,15 +112,15 @@ class ControlServer:
                 pass
 
     def _stream_subscribe(self, f, msg: dict) -> None:
-        """Event bus → bu bağlantıya push.
+        """Event bus → push to this connection.
 
-        Mesaj alanları:
+        Message fields:
 
-        - ``types`` (opt): glob listesi, default ``["*"]``.
-        - ``heartbeat_sec`` (opt): default 5.0; 0 ile kapatılır.
+        - ``types`` (opt): glob list, default ``["*"]``.
+        - ``heartbeat_sec`` (opt): default 5.0; 0 disables it.
 
-        Bağlantı kapanana kadar tek yön push çalışır; pipe kırılırsa
-        sessizce çık.
+        One-way push runs until the connection is closed; exit silently
+        on broken pipe.
         """
         types = msg.get("types") or ["*"]
         hb = float(msg.get("heartbeat_sec", events.DEFAULT_HEARTBEAT_SEC))
@@ -127,7 +129,7 @@ class ControlServer:
         except events.SubscriberLimitExceeded as e:
             self._send(f, {"ok": False, "error": f"limit: {e}"})
             return
-        # Hoş geldin event'i: subscription onayı + filtre echo
+        # Welcome event: subscription ack + filter echo
         self._send(f, {
             "ok": True,
             "subscribed": types,
@@ -147,7 +149,7 @@ class ControlServer:
         except Exception:
             pass
 
-    # ---- komut dispatcher ----
+    # ---- command dispatcher ----
 
     def _dispatch(self, msg: dict) -> dict:
         cmd = msg.get("cmd")
@@ -202,7 +204,7 @@ class ControlServer:
             return {"ok": False, "error": str(e)}
 
     def _notebook(self):
-        """MainWindow.outer'ın child'ları arasında ilk Gtk.Notebook."""
+        """First Gtk.Notebook among the children of MainWindow.outer."""
         for child in self.win.get_children():
             if isinstance(child, Gtk.Box):
                 for c in child.get_children():
@@ -255,8 +257,8 @@ class ControlServer:
         return {"ok": True}
 
     def _cmd_click(self, msg: dict) -> dict:
-        """Hedef: ``scan`` / ``cancel`` / ``select_all`` / ``select_none`` /
-        ``export`` / ``png`` / ``up``. ``clean`` API'den BLOKE."""
+        """Targets: ``scan`` / ``cancel`` / ``select_all`` / ``select_none`` /
+        ``export`` / ``png`` / ``up``. ``clean`` is BLOCKED via the API."""
         target = msg.get("target", "scan")
         if target in self._DESTRUCTIVE_TARGETS:
             return {
@@ -315,7 +317,7 @@ class ControlServer:
         return {"ok": False, "error": _("no checkbox: {name}").format(name=chk)}
 
     def _cmd_click_at(self, msg: dict) -> dict:
-        """Treemap/sunburst gibi cairo render alanlarında koordinat tıklaması."""
+        """Coordinate click on cairo render areas (treemap/sunburst, etc.)."""
         x = float(msg.get("x", 0))
         y = float(msg.get("y", 0))
         button = int(msg.get("button", 1))
@@ -351,7 +353,7 @@ class ControlServer:
         return None
 
     def _cmd_debug(self, msg: dict) -> dict:
-        """Debug komutları: ``treemap_state`` / ``treemap_tree`` / ``redraw`` /
+        """Debug commands: ``treemap_state`` / ``treemap_tree`` / ``redraw`` /
         ``settings`` / ``history`` / ``bus_stats``."""
         target = msg.get("target", "treemap_state")
         if target == "treemap_state":

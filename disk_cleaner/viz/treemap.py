@@ -1,10 +1,11 @@
 """Squarified treemap layout (Bruls, Huijsen, van Wijk 2000).
 
-``layout_treemap`` çocukları kareye yakın dikdörtgenlere yerleştirir;
-toplamın ``min_frac`` (varsayılan %0.5) altındaki küçük öğeler tek bir
-'Diğer' yumağına toplanır — küçük renkli piksel salatası önlenir.
+``layout_treemap`` places children in near-square rectangles; small
+items below ``min_frac`` (default 0.5%) of the total are collapsed into
+a single 'Other' bundle — avoids a salad of tiny colored pixels.
 
-``hit_test`` tek seviyeli çizim için: önce children, yoksa node.
+``hit_test`` is for single-level drawing: prefer a child, otherwise the
+node itself.
 """
 from __future__ import annotations
 
@@ -14,7 +15,7 @@ from ..i18n import _
 from .strategy import VizStrategy
 from .tree_node import TreeNode
 
-# 'Diğer' yumaklarının ayırt edici prefix'i — re-render'da temizlenir.
+# Distinguishing prefix for 'Other' bundles — cleared on re-render.
 OTHER_MARKER: str = "__OTHER__"
 
 
@@ -27,12 +28,12 @@ def layout_treemap(
     depth: int = 0,
     min_frac: float = 0.005,
 ) -> None:
-    """Squarified treemap yerleşimi — ``node.rect``'leri set eder.
+    """Squarified treemap placement — sets ``node.rect`` on every child.
 
-    Sadece bir seviyeyi yerleştirir; drill-in olunca yeniden çağrılır.
+    Only places a single level; recalled on drill-in.
     """
     node.rect = (x, y, w, h)
-    # Eski 'Diğer' virtual node'larını temizle (yeniden render'da birikme).
+    # Clear old 'Other' virtual nodes (no accumulation across re-renders).
     node.children = [c for c in node.children if not c.path.startswith(OTHER_MARKER)]
     if not node.children or w < 2 or h < 2 or node.size == 0:
         return
@@ -59,7 +60,7 @@ def layout_treemap(
 
 
 def _worst_ratio(row: list[tuple[TreeNode, float]], length: float) -> float:
-    """Satırdaki en kötü en-boy oranı."""
+    """Worst aspect ratio in the row."""
     if not row or length <= 0:
         return float("inf")
     s = sum(a for _, a in row)
@@ -82,7 +83,7 @@ def _squarify(
     h: float,
     depth: int,
 ) -> None:
-    """İteratif squarify — derin recursion'a düşmez."""
+    """Iterative squarify — does not blow the recursion stack."""
     items = list(items)
     while items:
         head = items[0]
@@ -107,7 +108,7 @@ def _layout_row(
     w: float,
     h: float,
 ) -> tuple[float, float, float, float]:
-    """Satırı kısa kenar boyunca yerleştir. Kullanılmayan alan döndür."""
+    """Lay out the row along the short edge. Return the unused area."""
     if not row:
         return x, y, w, h
     s = sum(a for _, a in row)
@@ -130,10 +131,10 @@ def _layout_row(
 
 
 def hit_test(node: TreeNode, mx: float, my: float, depth: int = 0) -> Optional[TreeNode]:
-    """Tek seviyeli treemap çizimi için: önce children, yoksa node.
+    """For single-level treemap drawing: prefer children, otherwise the node.
 
-    Sadece 4-tuple (treemap) rect'leri kabul eder; mod geçişlerinden
-    artakalan sunburst rect'leri (7-tuple) sessizce atlanır.
+    Accepts only 4-tuple (treemap) rects; leftover sunburst rects
+    (7-tuple) from mode transitions are silently skipped.
     """
     if node.rect is None or len(node.rect) != 4:
         return None
@@ -147,11 +148,11 @@ def hit_test(node: TreeNode, mx: float, my: float, depth: int = 0) -> Optional[T
 
 
 class TreemapStrategy(VizStrategy):
-    """:class:`VizStrategy` implementasyonu — squarified treemap.
+    """:class:`VizStrategy` implementation — squarified treemap.
 
-    ``draw`` şu an UI panel'i (``TreemapPanel.on_draw``) tarafından
-    yapılıyor (cairo çizimi animasyon + hover state ile iç içe). Faz G'de
-    bu sınıfa taşınacak.
+    ``draw`` is currently performed by the UI panel
+    (``TreemapPanel.on_draw``) because cairo drawing is interleaved with
+    animation + hover state. It moves into this class in phase G.
     """
 
     name = "treemap"

@@ -1,10 +1,10 @@
-"""Ayar deposu — JSON, atomic-ish, kararlı şema.
+"""Settings store — JSON, atomic-ish, stable schema.
 
-Modül seviyesinde paylaşılan ``SETTINGS`` dict UI ve mantık tarafından
-ortak okunur/yazılır. Tam DI'a geçtikten sonra bu global :class:`SettingsStore`
-örneğine dönüşecek; şimdilik geriye uyumluluk için kalır.
+The module-level shared ``SETTINGS`` dict is read/written by both the
+UI and the logic layer. Once full DI is in place this global becomes a
+:class:`SettingsStore` instance; it stays for backwards compatibility.
 
-Şema (eski sürümle birebir uyumlu):
+Schema (kept bit-for-bit compatible with the legacy version):
 
 - ``trash_mode`` (bool)
 - ``dry_run`` (bool)
@@ -12,7 +12,7 @@ ortak okunur/yazılır. Tam DI'a geçtikten sonra bu global :class:`SettingsStor
 - ``entries`` (list[str])
 - ``viz_mode`` ("treemap" | "sunburst")
 - ``blacklist`` (list[str])
-- ``watchdog_*`` (çeşitli)
+- ``watchdog_*`` (various)
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ from .config import SETTINGS_DIR, SETTINGS_FILE
 
 
 def load_settings() -> dict[str, Any]:
-    """``settings.json``'u oku. Yoksa veya bozuksa boş dict."""
+    """Read ``settings.json``. Empty dict if missing or corrupted."""
     if not SETTINGS_FILE.exists():
         return {}
     try:
@@ -35,8 +35,8 @@ def load_settings() -> dict[str, Any]:
 
 
 def save_settings(data: dict[str, Any]) -> None:
-    """``settings.json``'a yaz. Sessiz başarısızlık — diske yazılamasa da
-    uygulama durmaz."""
+    """Write to ``settings.json``. Fail silently — the app keeps running
+    even if the file cannot be written."""
     try:
         SETTINGS_DIR.mkdir(parents=True, exist_ok=True)
         with open(SETTINGS_FILE, "w") as f:
@@ -45,12 +45,12 @@ def save_settings(data: dict[str, Any]) -> None:
         pass
 
 
-# Modül seviyesinde paylaşılan ayar sözlüğü.
+# Module-level shared settings dict.
 SETTINGS: dict[str, Any] = load_settings()
 
 
 def is_blacklisted(path: str) -> bool:
-    """``SETTINGS['blacklist']`` altında varsa, bu yol önerilmez."""
+    """If present in ``SETTINGS['blacklist']``, this path is not suggested."""
     if not path:
         return False
     bl = SETTINGS.get("blacklist", [])
@@ -75,10 +75,10 @@ def remove_from_blacklist(path: str) -> None:
 
 
 class SettingsStore:
-    """JSON ayar deposu OOP yüzü (gelecekte DI için).
+    """OOP front for the JSON settings store (DI handle).
 
-    Şu an modül-seviyesi ``SETTINGS`` paylaşımı korunur; ileride bu
-    sınıf kendi ``_data``'sını tutarak global'i kaldıracak.
+    Currently the module-level ``SETTINGS`` sharing is preserved; this
+    class can later own its ``_data`` and remove the global.
     """
 
     def __init__(self, path: Path | str = SETTINGS_FILE) -> None:

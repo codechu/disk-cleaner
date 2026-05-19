@@ -50,7 +50,7 @@ canonical language for this document.
 - **Logging > print** — `logger = logging.getLogger(__name__)`.
 - **Errors as classes** — `DiskCleanerError` base + specific subclasses.
 - **Constants in one place** — `disk_cleaner/config.py`; no magic numbers.
-- **i18n hooks ready** — `_("…")`-style wrapper in a future release.
+- **i18n hooks** — `_("…")`-style gettext wrapper for translatable strings.
 
 ## Test and CI
 

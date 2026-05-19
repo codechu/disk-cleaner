@@ -1,8 +1,9 @@
-"""SuggestionPanel — akıllı öneri View'u (Gtk).
+"""SuggestionPanel — the smart-suggestions View (Gtk).
 
-State machine'i :class:`~disk_cleaner.controllers.SuggestionController`
-sahibi. Bu sınıf yalnızca widget glue + filter/sort + dialog'lar +
-right-click menu + JSON/CSV file export'tan sorumlu.
+The state machine is owned by
+:class:`~disk_cleaner.controllers.SuggestionController`. This class is
+responsible only for widget glue + filter/sort + dialogs + right-click
+menu + JSON/CSV file export.
 """
 from __future__ import annotations
 
@@ -30,9 +31,9 @@ def _idle(fn: Callable) -> Callable:
 
 
 class SuggestionPanel(Gtk.Box):
-    """Tüm tarayıcıları arka planda çalıştıran controller'ın View'u."""
+    """View for the controller that runs all scanners in the background."""
 
-    # TreeStore sütun indeksleri
+    # TreeStore column indices
     C_CHECK, C_NAME, C_SCORE_TXT, C_SCORE, C_SIZE_TXT, C_SIZE, \
         C_REASON, C_RISK_COLOR, C_KIND, C_IS_GROUP, C_TASK_ID = range(11)
 
@@ -204,7 +205,7 @@ class SuggestionPanel(Gtk.Box):
 
         self._update_total_label(0, 0)
 
-        # ---- Controller observer wire'ları ----
+        # ---- Controller observer wiring ----
         c = self.controller
         c.on_busy_changed = _idle(self._on_busy_changed)
         c.on_rows_replaced = _idle(self._on_rows_replaced)
@@ -392,7 +393,7 @@ class SuggestionPanel(Gtk.Box):
         gi, ci = self._indices_for(store_iter)
         if gi is None:
             return False
-        # Sadece yapraklar için
+        # Leaves only
         if ci is None:
             row = self.controller.rows[gi]
             if row.is_group:
@@ -480,7 +481,7 @@ class SuggestionPanel(Gtk.Box):
 
 
 def _row_to_columns(row: SuggestionRow) -> list[Any]:
-    """SuggestionRow → Gtk.TreeStore satır sütunları."""
+    """SuggestionRow → Gtk.TreeStore row columns."""
     return [
         row.checked,
         row.status_marker + row.name,

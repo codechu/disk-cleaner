@@ -1,6 +1,7 @@
-"""UI paylaşımlı yardımcılar — sabitler, küçük helper'lar.
+"""Shared UI helpers — constants and small helpers.
 
-``RISK_COLORS`` paneller arası tutarlı risk göstergesi (renk + etiket).
+``RISK_COLORS`` gives a consistent risk indicator (color + label)
+across panels.
 """
 from __future__ import annotations
 

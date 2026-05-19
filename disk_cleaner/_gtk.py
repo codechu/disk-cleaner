@@ -1,8 +1,8 @@
-"""Ortak Gtk/Gdk setup — tek noktada ``gi.require_version`` çağrısı.
+"""Shared Gtk/Gdk setup — single point for the ``gi.require_version`` call.
 
-UI modülleri ``from .._gtk import Gtk, Gdk, GLib, Pango`` ile çeker.
-``cairo`` import'u foreign-struct converter kaydı için gereklidir
-(Gdk.cairo_create vb. fonksiyonlar buna güvenir).
+UI modules pull these via ``from .._gtk import Gtk, Gdk, GLib, Pango``.
+Importing ``cairo`` is required to register the foreign-struct
+converter (functions like Gdk.cairo_create depend on it).
 """
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, GLib, Gtk, Pango  # noqa: E402
 
 try:  # noqa: SIM105
-    import cairo  # noqa: F401  — converter kaydı için import yeterli
+    import cairo  # noqa: F401  — importing it is enough to register the converter
     _ = cairo.Context
 except ImportError:
     pass

@@ -1,4 +1,4 @@
-"""ExplorerScanner — bir klasörün bir-seviye çocuklarını Task olarak yayınla."""
+"""ExplorerScanner — emit one-level children of a folder as Tasks."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,7 +10,7 @@ from .system import _CallableCleaner
 
 
 class ExplorerScanner(Scanner):
-    """Treemap / "klasörü gez" akışı için generic dinamik tarayıcı."""
+    """Generic dynamic scanner for the treemap / "browse a folder" flow."""
 
     name = "explorer"
 

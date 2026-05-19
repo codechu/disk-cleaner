@@ -1,16 +1,17 @@
-"""MainWindow — uygulamanın üst pencere kabuğu (Gtk View).
+"""MainWindow — the application's top-level window shell (Gtk View).
 
-State machine'i :class:`~disk_cleaner.controllers.MainController` sahibi.
-Bu sınıf yalnızca:
+The state machine is owned by
+:class:`~disk_cleaner.controllers.MainController`. This class is only
+responsible for:
 
-- Header bar, mount combo, trash/dry-run kutuları, watchdog butonu
+- Header bar, mount combo, trash/dry-run checkboxes, watchdog button
 - BTRFS/ZFS InfoBar, disk usage label
-- Notebook + Stack ile panel organizasyonu
-- Log expander widget'ı
-- Tray icon ve ControlServer başlatma
+- Panel organization via Notebook + Stack
+- Log expander widget
+- Tray icon and ControlServer startup
 
-için sorumlu. Mount listesi, disk usage parse, watchdog start/stop,
-settings persistence hepsi controller'da.
+Mount listing, disk-usage parsing, watchdog start/stop, and settings
+persistence all live on the controller.
 """
 from __future__ import annotations
 
@@ -37,7 +38,7 @@ from .treemap_panel import TreemapPanel
 
 
 def try_init_tray(on_open, on_quit):
-    """AppIndicator3 / Ayatana varsa tray icon oluştur ve döndür."""
+    """Create and return a tray icon if AppIndicator3 / Ayatana is available."""
     indicator = None
     for ver_pkg in (("AyatanaAppIndicator3", "0.1"), ("AppIndicator3", "0.1")):
         try:
@@ -200,7 +201,7 @@ class MainWindow(Gtk.Window):
         notebook = Gtk.Notebook()
         outer.pack_start(notebook, True, True, 0)
 
-        # Sekme 0: Akıllı Öneri
+        # Tab 0: Smart suggestions
         self.suggestion_panel = SuggestionPanel(
             self, controller=SuggestionController()
         )
@@ -208,7 +209,7 @@ class MainWindow(Gtk.Window):
             self.suggestion_panel, Gtk.Label(label=_("🎯  Suggestions"))
         )
 
-        # Sekme 1: Temizlik
+        # Tab 1: Cleanup
         from ... import _tasks
 
         sys_panel = TaskPanel(
@@ -343,7 +344,7 @@ class MainWindow(Gtk.Window):
         cleanup_box.pack_start(self.cleanup_stack, True, True, 0)
         notebook.append_page(cleanup_box, Gtk.Label(label=_("🧹  Cleanup")))
 
-        # Sekme 2: Disk haritası
+        # Tab 2: Disk map
         treemap_panel = TreemapPanel(self, controller=TreemapController())
         notebook.append_page(treemap_panel, Gtk.Label(label=_("📊  Disk map")))
         self.treemap_panel = treemap_panel
@@ -375,14 +376,14 @@ class MainWindow(Gtk.Window):
         c.on_log = _idle(self.log)
         c.on_fs_warning_changed = _idle(self._on_fs_warning_changed)
 
-        # İlk durum
+        # Initial state
         self.controller.refresh_disk_usage()
         self._on_fs_warning_changed(
             self.controller.fs_warning_for(self.controller.current_mount)
         )
         self.log(_("Ready. Trash mode ON — deleted items can be restored.\n"))
 
-        # Kontrol API'si
+        # Control API
         if not os.environ.get("DC_NO_CONTROL"):
             try:
                 self.control_server = ControlServer(self)
@@ -401,12 +402,12 @@ class MainWindow(Gtk.Window):
     # ---- Observer reactions ----
 
     def _on_mount_changed(self, target: str) -> None:
-        # Mount değişti — paneller default path'lerini güncellesin
+        # Mount changed — let panels update their default paths
         for p in self.dynamic_panels:
             p.set_default_path(target)
         if hasattr(self, "treemap_panel"):
             self.treemap_panel.set_default_path(target)
-        # Combo'yu da senkronize et (controller'ın set_mount'undan tetiklendiyse zaten doğru)
+        # Keep the combo in sync (already correct if triggered from controller's set_mount)
         if self.mount_combo.get_active_id() != target:
             self.mount_combo.set_active_id(target)
 
@@ -445,7 +446,7 @@ class MainWindow(Gtk.Window):
         from ...settings import save_settings
         from ... import events
         save_settings(SETTINGS)
-        # User-initiated preference change → kendi kanalına yayınla
+        # User-initiated preference change → publish on its own channel
         events.emit("prefs.language.changed",
                     source="user", channel="prefs",
                     old=old_lang or None, new=new_lang)
@@ -478,7 +479,7 @@ class MainWindow(Gtk.Window):
         self.log_view.scroll_to_mark(mark, 0, False, 0, 0)
 
     def update_disk_label(self) -> None:
-        """Backward compat — controller'a delege."""
+        """Backward compat — delegate to the controller."""
         self.controller.refresh_disk_usage()
 
     # ---- Backward compat (control API) ----
@@ -496,15 +497,15 @@ class MainWindow(Gtk.Window):
 
 
 def _fs_warning_markup(plain: str) -> str:
-    """``MainController.fs_warning_for`` düz metnini Pango markup'a çevir."""
-    # Plain: "⚠  BTRFS dosya sistemi — ... incelemek için: btdu"
+    """Convert plain text from ``MainController.fs_warning_for`` to Pango markup."""
+    # Plain: "⚠  BTRFS filesystem — ... to inspect: btdu"
     if "—" in plain:
         head, tail = plain.split("—", 1)
-        # FS adını <b>...</b>'a sar
+        # Wrap the FS name in <b>...</b>
         for fs in ("BTRFS", "ZFS"):
             if fs in head:
                 head = head.replace(fs, f"<b>{fs}</b>")
-        # `tool` adını <tt>...</tt>
+        # Wrap the tool name in <tt>...</tt>
         if ":" in tail:
             tail_lead, tool = tail.rsplit(":", 1)
             tail = f"{tail_lead}: <tt>{tool.strip()}</tt>"

@@ -1,9 +1,9 @@
-"""SettingsStore davranışı (geçici dizinde, üretim settings.json'a dokunma)."""
+"""SettingsStore behavior (in a temp dir, don't touch production settings.json)."""
 from __future__ import annotations
 
-# Not: SettingsStore.load global SETTINGS_FILE yolundan okur; bu testler
-# tam DI'a geçtikten sonra gerçek save/load akışını kontrol edecek.
-# Şimdilik smoke: import + erişim.
+# Note: SettingsStore.load reads from the global SETTINGS_FILE path; these
+# tests will exercise the real save/load flow once full DI lands. For
+# now, smoke test only: import + access.
 from disk_cleaner.settings import SettingsStore
 
 

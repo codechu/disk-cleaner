@@ -1,8 +1,8 @@
-"""Core domain — UI-bağımsız, test edilebilir saf mantık.
+"""Core domain — UI-independent, testable pure logic.
 
-Submodüller: ``sizing``, ``safe_remove``, ``process``, ``score``,
-``kernels``, ``walker``, ``system_helpers``, ``apps``. Public yüzey
-``__all__`` üzerinden sabit.
+Submodules: ``sizing``, ``safe_remove``, ``process``, ``score``,
+``kernels``, ``walker``, ``system_helpers``, ``apps``. The public
+surface is pinned via ``__all__``.
 """
 from __future__ import annotations
 

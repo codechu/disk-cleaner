@@ -1,10 +1,11 @@
 """CLI dispatch + ``main()`` entry point.
 
-Argument'lar argparse ile parse edilir; ``--scan``/``--clean``/
-``--watchdog-*`` headless mod, argümansız çağrı GTK GUI'yi başlatır.
+Arguments are parsed via argparse; ``--scan``/``--clean``/
+``--watchdog-*`` are headless mode, invocation without arguments starts
+the GTK GUI.
 
-Eski entry'ler (``python3 disk_cleaner.py``, ``python -m disk_cleaner``,
-``disk-cleaner``) hep buradan geçer.
+Legacy entry points (``python3 disk_cleaner.py``,
+``python -m disk_cleaner``, ``disk-cleaner``) all flow through here.
 """
 from __future__ import annotations
 
@@ -34,10 +35,11 @@ def cli_collect_tasks(
     workspace: str | None = None,
     downloads: str | None = None,
 ) -> list[dict]:
-    """``sources``: ``"system"``, ``"artifacts"``, ``"oldfiles"`` alt kümesi.
+    """``sources``: subset of ``"system"``, ``"artifacts"``, ``"oldfiles"``.
 
-    Skor ve gerekçe ile zenginleştirilmiş, boyuta göre azalan sırada dict
-    listesi döndürür. ``_task`` key'i çıkışa yazılmadan önce filtrelenmeli.
+    Returns a list of dicts enriched with score and reason, sorted by
+    size descending. The ``_task`` key must be filtered out before
+    writing to the output.
     """
     from ._tasks import (
         SYSTEM_TASKS,
@@ -93,7 +95,7 @@ def cli_collect_tasks(
             "score": int(score),
             "reason": reason,
             "risk": t.get("risk", ""),
-            "_task": t,  # internal — output'tan çıkarılacak
+            "_task": t,  # internal — stripped from output
         })
     enriched.sort(key=lambda x: -x["score"])
     return enriched
@@ -188,7 +190,7 @@ def cli_main(argv: list[str]) -> int:
     )
 
     if args.clean:
-        # Düşük risk + skor eşiği üstü + aktif değil + açık tutulmuyor
+        # Low risk + above score threshold + not active + not currently open
         targets = [
             r for r in enriched
             if r["risk"] == "low"
@@ -226,7 +228,7 @@ def cli_main(argv: list[str]) -> int:
         )
         return 0 if ok == len(targets) else 1
 
-    # --scan: çıktı
+    # --scan: output
     output_items = [
         {k: v for k, v in r.items() if not k.startswith("_")}
         for r in enriched
@@ -279,8 +281,8 @@ def cli_main(argv: list[str]) -> int:
 
 
 def main() -> None:
-    """Programın ana giriş noktası — argümana göre GUI ya da CLI."""
-    # XDG dizinleri hazırla + eski (pre-XDG) yerleşim varsa taşı
+    """Program main entry — GUI or CLI depending on arguments."""
+    # Prepare XDG directories + migrate legacy (pre-XDG) layout if present
     from .config import ensure_dirs, migrate_pre_xdg_layout
     migrate_pre_xdg_layout()
     ensure_dirs()
@@ -299,7 +301,7 @@ def main() -> None:
 
 
 def cli_entry() -> None:
-    """``disk-cleaner`` konsol giriş noktası (pyproject scripts hook)."""
+    """``disk-cleaner`` console entry point (pyproject scripts hook)."""
     cli_main(sys.argv[1:])
 
 

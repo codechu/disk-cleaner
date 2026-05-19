@@ -1,7 +1,7 @@
-"""CommandCleaner — bir shell/argv komutu çalıştır.
+"""CommandCleaner — run a shell/argv command.
 
-``need_root=True`` ise ``pkexec`` ile sarmalanır. ``DRY_RUN`` çağrı
-anında :mod:`disk_cleaner.runtime`'den okunur (runtime mutable).
+When ``need_root=True`` it is wrapped with ``pkexec``. ``DRY_RUN`` is
+read at call time from :mod:`disk_cleaner.runtime` (runtime mutable).
 """
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from .base import Cleaner
 
 
 class CommandCleaner(Cleaner):
-    """Argv listesi veya shell string komutunu çalıştır."""
+    """Run an argv list or shell string command."""
 
     def __init__(
         self,

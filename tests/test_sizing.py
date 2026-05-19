@@ -1,4 +1,4 @@
-"""Geçici dizinler üzerinde gerçek du / path_size davranışı."""
+"""Real du / path_size behavior over temporary directories."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -14,7 +14,7 @@ def test_dir_size_with_content(tmp_path):
     (tmp_path / "a.bin").write_bytes(b"x" * 4096)
     (tmp_path / "b.bin").write_bytes(b"y" * 4096)
     size = dir_size(tmp_path)
-    # du bloklarla raporlar — en az 8KB civarı, ama FS overhead'i payı bırak
+    # du reports in blocks — at least ~8KB, leave some headroom for FS overhead
     assert size >= 4096
 
 

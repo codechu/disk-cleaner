@@ -1,9 +1,9 @@
-"""Cleaner Strategy alt paketi.
+"""Cleaner Strategy subpackage.
 
-Üç temel implementasyon hazır: :class:`SafePathCleaner` (tek yol),
-:class:`ContentsCleaner` (dizin içeriği), :class:`CommandCleaner`
-(shell/argv). Yeni bir temizlik türü eklemek için :class:`Cleaner`
-ABC'sini implement et.
+Three baseline implementations are provided: :class:`SafePathCleaner`
+(single path), :class:`ContentsCleaner` (directory contents),
+:class:`CommandCleaner` (shell/argv). To add a new cleanup type,
+implement the :class:`Cleaner` ABC.
 """
 from __future__ import annotations
 

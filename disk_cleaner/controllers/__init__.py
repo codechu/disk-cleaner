@@ -1,28 +1,29 @@
-"""Presenter / Controller katmanı — View-bağımsız UI state machine'leri.
+"""Presenter / Controller layer — view-independent UI state machines.
 
-Tasarım sözleşmesi:
+Design contract:
 
-1. **Hiçbir GTK/Qt/HTML import yok.** Sadece domain modülleri
-   (``viz``, ``core``, ``_tasks``, ``settings``, ``events``,
-   ``runtime``, ``utils``) ve ``threading``/``time`` kullanılır.
-2. **Observer pattern**: her controller ``on_*`` callable attribute'lerine
-   sahiptir; View bunları register eder.
-3. **Thread-safety**: callbacks worker thread'den de çağrılabilir; View
-   kendi UI thread'ine marshalling'den sorumludur (Gtk için
-   ``GLib.idle_add`` wrapper).
-4. **Animation/hover/widget state View'da kalır** — controller yalnız
-   data state machine.
-5. **Headless test**: ``pytest`` controller'ı GUI olmadan koşturur.
+1. **No GTK/Qt/HTML imports.** Only domain modules (``viz``, ``core``,
+   ``_tasks``, ``settings``, ``events``, ``runtime``, ``utils``) plus
+   ``threading``/``time`` are used.
+2. **Observer pattern**: each controller has ``on_*`` callable
+   attributes; the View registers them.
+3. **Thread-safety**: callbacks may be invoked from worker threads;
+   the View is responsible for marshalling onto its own UI thread
+   (``GLib.idle_add`` wrapper for Gtk).
+4. **Animation/hover/widget state stays in the View** — controllers
+   are pure data state machines.
+5. **Headless test**: ``pytest`` runs controllers without a GUI.
 
-Mevcut controller'lar:
+Current controllers:
 
-- :class:`~disk_cleaner.controllers.main.MainController` — üst pencere
-  kabuğu (mount, trash/dry, watchdog, disk usage)
-- :class:`~disk_cleaner.controllers.treemap.TreemapController` — disk haritası
+- :class:`~disk_cleaner.controllers.main.MainController` — top window
+  shell (mount, trash/dry, watchdog, disk usage)
+- :class:`~disk_cleaner.controllers.treemap.TreemapController` — disk map
 - :class:`~disk_cleaner.controllers.task_list.TaskListController` —
-  tara/seç/temizle akışı (TaskPanel'in arkası)
+  scan/select/clean flow (the backing for TaskPanel)
 - :class:`~disk_cleaner.controllers.suggestion.SuggestionController` —
-  akıllı tarama + skor + grup + auto-select (SuggestionPanel'in arkası)
+  smart scan + score + group + auto-select (the backing for
+  SuggestionPanel)
 """
 from __future__ import annotations
 

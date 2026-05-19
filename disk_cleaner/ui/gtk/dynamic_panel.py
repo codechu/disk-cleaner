@@ -1,8 +1,8 @@
-"""DynamicPanel — kullanıcı girdisinden Task üretir, ``TaskPanel``'i sarmalar.
+"""DynamicPanel — builds Tasks from user input, wraps a ``TaskPanel``.
 
-Duplicate / Empty / Similar / Explorer sekmelerinde kullanılır: üstte
-"Klasör" entry'si, altında :class:`TaskPanel`. Entry değiştiğinde provider
-callback'i taze input ile çağrılır.
+Used in the Duplicate / Empty / Similar / Explorer tabs: a "Folder"
+entry on top, a :class:`TaskPanel` below. When the entry changes, the
+provider callback is invoked with the fresh input.
 """
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from ..._gtk import Gtk
 
 
 class DynamicPanel(Gtk.Box):
-    """Üstte girdi alanı, altta TaskPanel."""
+    """Input field on top, TaskPanel below."""
 
     def __init__(
         self,
@@ -57,7 +57,7 @@ class DynamicPanel(Gtk.Box):
             )
 
     def set_default_path(self, path: str) -> None:
-        """Mount değiştiğinde çağrılır — entry'yi günceller."""
+        """Called when the mount changes — updates the entry."""
         self.entry.set_text(path)
 
 

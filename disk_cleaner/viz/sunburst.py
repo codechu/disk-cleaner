@@ -1,7 +1,8 @@
 """Sunburst (radial treemap) layout + hit-test.
 
-Her halka bir derinlik. Çok küçük dilimler tek bir 'Diğer' yumağına
-toplanır; bu yumak parent'ın %15'inden küçükse gösterilmez (boş bırakılır).
+Each ring is one depth. Very small slices are collapsed into a single
+'Other' bundle; the bundle is hidden (left empty) if it would be less
+than 15% of its parent.
 """
 from __future__ import annotations
 
@@ -31,13 +32,14 @@ def layout_sunburst(
     top_idx: int = 0,
     min_arc: float = _DEFAULT_MIN_ARC,
 ) -> None:
-    """Sunburst halka yerleşimi — ``node.rect``'i 7-tuple yapar.
+    """Sunburst ring layout — sets ``node.rect`` to a 7-tuple.
 
-    ``rect = (cx, cy, r_in, r_out, a0, a1, top_idx)``. Küçük dilimler tek
-    bir 'Diğer' yumağında toplanır; eşik altında ise yumak gösterilmez.
+    ``rect = (cx, cy, r_in, r_out, a0, a1, top_idx)``. Small slices are
+    collapsed into a single 'Other' bundle; the bundle is hidden when
+    below the threshold.
     """
     node.rect = (cx, cy, r_inner, r_inner + r_step, start_angle, end_angle, top_idx)
-    # Önceki render'lardan kalan virtual 'Diğer' yumaklarını temizle.
+    # Clear leftover virtual 'Other' bundles from previous renders.
     node.children = [c for c in node.children if not c.path.startswith(OTHER_MARKER)]
     if depth >= max_depth or not node.children or node.size == 0:
         return
@@ -84,9 +86,9 @@ def sunburst_hit_test(
     depth: int = 0,
     max_depth: int = _DEFAULT_MAX_DEPTH,
 ) -> Optional[TreeNode]:
-    """Polar koordinatla fareye denk gelen en derin düğümü bul.
+    """Find the deepest node under the mouse in polar coordinates.
 
-    ``max_depth`` stale rect'leri (drill-in/out kalıntıları) görmezden gelir.
+    ``max_depth`` ignores stale rects (leftovers from drill-in/out).
     """
     if depth > max_depth:
         return None
@@ -110,9 +112,9 @@ def sunburst_hit_test(
 
 
 class SunburstStrategy(VizStrategy):
-    """:class:`VizStrategy` implementasyonu — sunburst (radial).
+    """:class:`VizStrategy` implementation — sunburst (radial).
 
-    ``draw`` UI panel'inde (Faz G'de buraya taşınacak).
+    ``draw`` lives in the UI panel for now (moves here in phase G).
     """
 
     name = "sunburst"
@@ -128,7 +130,7 @@ class SunburstStrategy(VizStrategy):
     def layout(self, node: TreeNode, w: float, h: float) -> None:
         cx = w / 2
         cy = h / 2
-        # Halka adımı min(w, h)/4 — UI panel'in eski hesabıyla uyumlu.
+        # Ring step min(w, h)/4 — compatible with the UI panel's legacy math.
         r_step = min(w, h) / (2 * (self.max_depth + 1))
         layout_sunburst(
             node, cx, cy, r_inner=r_step / 2, r_step=r_step,

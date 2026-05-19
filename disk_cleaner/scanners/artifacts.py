@@ -1,4 +1,4 @@
-"""ArtifactScanner — workspace altında build/cache artefaktları."""
+"""ArtifactScanner — build/cache artifacts under the workspace."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,10 +10,10 @@ from .system import _CallableCleaner
 
 
 class ArtifactScanner(Scanner):
-    """``workspace_root`` altında node_modules / target / dist vb. bul.
+    """Find node_modules / target / dist / etc. under ``workspace_root``.
 
-    Aktif proje (.git mtime < ~14 gün) ise risk ``high``'a çıkar ve
-    skorlayıcıda korunur.
+    For active projects (.git mtime < ~14 days), risk is escalated to
+    ``high`` and the scorer preserves them.
     """
 
     name = "artifacts"

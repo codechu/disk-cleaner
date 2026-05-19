@@ -1,4 +1,4 @@
-"""ContentsCleaner — bir dizinin içeriğini temizle (klasörü tutar)."""
+"""ContentsCleaner — clear a directory's contents (keep the directory)."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -8,10 +8,10 @@ from .base import Cleaner
 
 
 class ContentsCleaner(Cleaner):
-    """``rm_contents`` üstüne ince sarmalayıcı.
+    """Thin wrapper over ``rm_contents``.
 
-    ``force_permanent=True`` çöp kutusunu yoksayar (örn. çöp boşaltma
-    akışında veya kullanıcı açıkça istediğinde).
+    ``force_permanent=True`` ignores the trash (e.g. during a trash-empty
+    flow or when the user explicitly requests it).
     """
 
     def __init__(self, path: str | Path, force_permanent: bool = False) -> None:

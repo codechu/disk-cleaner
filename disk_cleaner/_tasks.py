@@ -1,15 +1,15 @@
-"""Task factory'leri + SYSTEM_TASKS — Scanner sınıflarının data kaynağı.
+"""Task factories + SYSTEM_TASKS — the data source for Scanner classes.
 
-Bu modül "dict-tabanlı task" şemasını barındırır: ``{name, desc, risk,
-path, size_fn, clean_fn}``. Scanner sınıfları bu factory'leri sarmalayıp
-:class:`~disk_cleaner.scanners.Task` dataclass'larına çevirir.
+This module hosts the "dict-based task" schema: ``{name, desc, risk,
+path, size_fn, clean_fn}``. Scanner classes wrap these factories and
+convert them into :class:`~disk_cleaner.scanners.Task` dataclasses.
 
-Faz E sonrası Scanner ABC üstüne kurulu yeni OOP yüzey hazır, ama
-SYSTEM_TASKS gibi geniş data listeleri ve birkaç factory burada kalıyor —
-bunlar Scanner sınıflarının state'siz "configuration" katmanı.
+After phase E, the new OOP surface built on the Scanner ABC is in place,
+but broad data lists like SYSTEM_TASKS and a few factories remain here —
+they are the stateless "configuration" layer of Scanner classes.
 
-``DRY_RUN`` ve ``TRASH_MODE`` çağrı anında :mod:`disk_cleaner.runtime`
-üzerinden okunur (runtime mutable, UI tarafından değiştirilebilir).
+``DRY_RUN`` and ``TRASH_MODE`` are read at call time via
+:mod:`disk_cleaner.runtime` (runtime is mutable; the UI may change it).
 """
 from __future__ import annotations
 
@@ -57,7 +57,7 @@ from .storage.du_cache import cached_dir_size
 from .utils import human, run
 
 
-# ---------- Cleaner factory'leri (Cleaner.execute'a bağlanır) ----------
+# ---------- Cleaner factories (bound to Cleaner.execute) ----------
 
 
 def make_rm_path_clean(path_str: str) -> Callable[[], tuple[int, str]]:
@@ -76,25 +76,25 @@ def make_cmd_clean(
     return CommandCleaner(cmd, shell=shell, need_root=need_root).execute
 
 
-# ---------- Kullanıcı tanımlı kurallar ----------
+# ---------- User-defined rules ----------
 
 
 def load_user_cleaners() -> list[dict[str, Any]]:
-    """``~/.config/disk_cleaner/cleaners/*.json`` içinden kullanıcı kurallarını yükle.
+    """Load user rules from ``~/.config/disk_cleaner/cleaners/*.json``.
 
-    Şema::
+    Schema::
 
         {
           "name": "X cache",
-          "desc": "açıklama",
+          "desc": "description",
           "risk": "low|medium|high",
           "paths": ["~/.x/cache", "~/.local/share/x/cache"],
-          "command": ["xtool", "--clear-cache"]   // opsiyonel
+          "command": ["xtool", "--clear-cache"]   // optional
         }
 
-    ``paths`` verilirse içerikleri silinir (TRASH_MODE'a uyar).
-    ``command`` verilirse onun yerine komut çalışır.
-    Her ikisi varsa önce ``paths`` sonra ``command``.
+    If ``paths`` is given, their contents are deleted (honors TRASH_MODE).
+    If ``command`` is given, the command runs instead.
+    If both are present, ``paths`` runs first, then ``command``.
     """
     if not CLEANERS_DIR.exists():
         return []
@@ -150,16 +150,16 @@ def load_user_cleaners() -> list[dict[str, Any]]:
     return out
 
 
-# ---------- Apt uygulama kaldırma ----------
+# ---------- Apt application removal ----------
 
 
 def make_app_uninstall_tasks(
     _unused_arg=None, cancel=None, progress=None,
 ) -> list[dict[str, Any]]:
-    """Yüklü uygulamaları (ve ilgili kullanıcı klasörlerini) görev olarak üret.
+    """Produce tasks for installed apps (and their related user folders).
 
-    Her satır = bir uygulama. Temizleme: apt purge + ilgili klasörler.
-    DRY_RUN çağrı anında :mod:`disk_cleaner.runtime`'den okunur.
+    Each row = one application. Cleanup: apt purge + related folders.
+    DRY_RUN is read at call time from :mod:`disk_cleaner.runtime`.
     """
     if progress:
         progress(_("Listing installed packages…"))
@@ -212,7 +212,7 @@ def make_app_uninstall_tasks(
         tasks.append({
             "name": name,
             "desc": f"{app['desc']}{rel_note}",
-            "risk": "high",  # kullanıcı bilerek kaldırmalı
+            "risk": "high",  # user must remove deliberately
             "path": f"apt:{name}",
             "size_fn": (lambda total=total: total),
             "clean_fn": make_clean(),
@@ -220,7 +220,7 @@ def make_app_uninstall_tasks(
     return tasks
 
 
-# ---------- Walker-tabanlı factory'ler ----------
+# ---------- Walker-based factories ----------
 
 
 def make_artifact_tasks(
@@ -331,7 +331,7 @@ def make_empty_tasks(folder, cancel=None, progress=None) -> list[dict[str, Any]]
             "desc": _("empty folder"),
             "risk": "low",
             "path": d,
-            "size_fn": (lambda: 4096),  # bir klasör inode'u ~4KB
+            "size_fn": (lambda: 4096),  # a directory inode is ~4KB
             "clean_fn": make_rm_path_clean(d),
         })
     for f in zero_files:
@@ -380,7 +380,7 @@ def make_old_files_tasks(folder, days: int, cancel=None) -> list[dict[str, Any]]
     return tasks
 
 
-# ---------- SYSTEM_TASKS — built-in görev listesi ----------
+# ---------- SYSTEM_TASKS — built-in task list ----------
 
 SYSTEM_TASKS: list[dict[str, Any]] = [
     {
@@ -527,7 +527,7 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
         "size_fn": lambda: dir_size("~/.cache/thumbnails"),
         "clean_fn": make_rm_contents_clean("~/.cache/thumbnails"),
     },
-    # --- Dil/runtime cache'leri ---
+    # --- Language/runtime caches ---
     {
         "name": _("pip cache"),
         "desc": _("Python pip wheel download cache."),
@@ -582,7 +582,7 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
         ),
         "clean_fn": make_cmd_clean(["conda", "clean", "--all", "-y"]),
     },
-    # --- ML / model cache'leri (medium — yeniden indirilmesi pahalı) ---
+    # --- ML / model caches (medium — expensive to re-download) ---
     {
         "name": _("Hugging Face cache"),
         "desc": _("~/.cache/huggingface — downloaded models. Will be re-downloaded."),
@@ -607,7 +607,7 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
         "size_fn": lambda: dir_size("~/.cache/tensorflow"),
         "clean_fn": make_rm_contents_clean("~/.cache/tensorflow"),
     },
-    # --- IDE / Editor cache'leri ---
+    # --- IDE / Editor caches ---
     {
         "name": _("JetBrains cache"),
         "desc": _("~/.cache/JetBrains — IntelliJ/PyCharm/WebStorm etc."),
@@ -629,7 +629,7 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
             ["~/.config/Code/Cache", "~/.config/Code/CachedData"]
         ),
     },
-    # --- Mesajlaşma/medya cache'leri ---
+    # --- Messaging/media caches ---
     {
         "name": _("Slack cache"),
         "desc": _("~/.config/Slack/Cache — will be re-downloaded."),
@@ -654,7 +654,7 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
         "size_fn": lambda: dir_size("~/.cache/spotify"),
         "clean_fn": make_rm_contents_clean("~/.cache/spotify"),
     },
-    # --- Browser ek cache'leri ---
+    # --- Additional browser caches ---
     {
         "name": _("Firefox cache2 (all profiles)"),
         "desc": _("~/.mozilla/firefox/*/cache2 — disk cache."),
@@ -663,7 +663,7 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
         "size_fn": size_firefox_cache,
         "clean_fn": lambda: clean_firefox_cache(),
     },
-    # --- Sistem tarafı ---
+    # --- System side ---
     {
         "name": _("System crash dumps"),
         "desc": _("/var/crash + /var/lib/systemd/coredump — requires root."),
@@ -692,7 +692,7 @@ SYSTEM_TASKS: list[dict[str, Any]] = [
     },
 ]
 
-# Kullanıcı tanımlı kuralları dahil et
+# Include user-defined rules
 SYSTEM_TASKS.extend(load_user_cleaners())
 
 

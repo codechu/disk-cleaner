@@ -11,7 +11,6 @@ license = { file = "LICENSE" }
 requires-python = ">=3.10"
 authors = [
     { name = "Codechu" },
-    { name = "Onur Barlık" },
 ]
 keywords = ["disk", "cleaner", "treemap", "sunburst", "linux", "gtk", "filesystem"]
 classifiers = [
@@ -29,8 +28,8 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    # Sistem paketleri: python3-gi (PyGObject), gir1.2-gtk-3.0, python3-cairo
-    # pip ile değil apt/dnf ile gelir; bu yüzden pyproject deps'de değil.
+    # System packages: python3-gi (PyGObject), gir1.2-gtk-3.0, python3-cairo
+    # installed via apt/dnf, not pip; therefore not listed in pyproject deps.
 ]
 
 [project.optional-dependencies]

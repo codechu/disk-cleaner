@@ -1,8 +1,8 @@
-"""Eski kernel paketleri (Ubuntu / Debian).
+"""Old kernel packages (Ubuntu / Debian).
 
-Mevcut kernel + en yakın yedek dışındaki tüm linux-image / headers /
-modules paketlerini listeler. ``clean_old_kernels`` ``pkexec`` ile apt
-purge çalıştırır; DRY_RUN açıkken sadece adları döner.
+Lists every linux-image / headers / modules package except the current
+kernel and the closest fallback. ``clean_old_kernels`` runs apt purge
+via ``pkexec``; when DRY_RUN is on, it only returns the names.
 """
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from ..utils import run
 
 
 def _list_kernel_pkgs() -> list[tuple[str, str, int]]:
-    """Yüklü tüm linux-image / headers / modules paketlerini döndür.
+    """Return every installed linux-image / headers / modules package.
 
     Returns ``[(package_name, version_string, size_bytes), ...]``.
     """
@@ -44,7 +44,7 @@ def _list_kernel_pkgs() -> list[tuple[str, str, int]]:
 
 
 def _old_kernel_pkgs() -> list[tuple[str, str, int]]:
-    """Mevcut + 1 yedek dışındaki paketleri döndür."""
+    """Return packages other than the current one + 1 fallback."""
     pkgs = _list_kernel_pkgs()
     if not pkgs:
         return []
@@ -62,20 +62,20 @@ def _old_kernel_pkgs() -> list[tuple[str, str, int]]:
         if below:
             keep.add(below[-1])
     else:
-        keep = set(versions[-2:])  # en yeni iki sürüm
+        keep = set(versions[-2:])  # newest two versions
     return [(n, v, s) for n, v, s in pkgs if v not in keep]
 
 
 def size_old_kernels() -> int:
-    """Eski kernel paketlerinin toplam disk kullanımı (byte)."""
+    """Total disk usage of old kernel packages (bytes)."""
     return sum(s for _, _, s in _old_kernel_pkgs())
 
 
 def clean_old_kernels() -> tuple[int, str]:
-    """Eski kernel'leri pkexec ile purge et.
+    """Purge old kernels via pkexec.
 
-    DRY_RUN runtime'da :mod:`disk_cleaner.runtime` üzerinden okunur
-    (geç bağlama). Returns ``(returncode, message)``.
+    DRY_RUN is read at runtime via :mod:`disk_cleaner.runtime` (late
+    binding). Returns ``(returncode, message)``.
     """
     from .. import runtime
 
@@ -89,7 +89,7 @@ def clean_old_kernels() -> tuple[int, str]:
     return run(cmd, timeout=900)
 
 
-# Geriye uyumlu adlar.
+# Backward-compatible names.
 list_old_kernels = _old_kernel_pkgs
 list_installed_kernels = _list_kernel_pkgs
 

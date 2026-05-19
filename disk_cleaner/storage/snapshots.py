@@ -1,11 +1,11 @@
-"""Snapshot deposu — geçmiş tarama sonuçları + 7-gün büyüme analizi.
+"""Snapshot store — historical scan results + 7-day growth analysis.
 
-Şema (eski sürümle birebir uyumlu):
+Schema (kept bit-for-bit compatible with the legacy version):
 
 - ``snapshots(id, scanned_at, mount, item_count, total_size)``
 - ``items(snapshot_id, path, kind, size, score, risk)``
 
-En son 20 snapshot tutulur; daha eskileri yazımda budanır.
+The most recent 20 snapshots are kept; older ones are pruned on write.
 """
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ CREATE INDEX IF NOT EXISTS idx_items_path ON items(path);
 
 
 def db_connect() -> sqlite3.Connection:
-    """SQLite bağlantısı + tablo/indeks garantisi."""
+    """SQLite connection + ensure tables and indexes exist."""
     SETTINGS_DIR.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(SNAPSHOTS_DB))
     conn.executescript(_SCHEMA)
@@ -51,7 +51,7 @@ def db_connect() -> sqlite3.Connection:
 
 
 def save_snapshot(items: list[dict[str, Any]], mount: str = "/") -> int | None:
-    """``items``: ``{path, kind, size_bytes, score, risk}`` dict listesi."""
+    """``items``: list of ``{path, kind, size_bytes, score, risk}`` dicts."""
     conn = db_connect()
     try:
         cur = conn.execute(
@@ -81,7 +81,7 @@ def save_snapshot(items: list[dict[str, Any]], mount: str = "/") -> int | None:
             ],
         )
         conn.commit()
-        # Eskileri buda — yalnızca son N snapshot kalsın.
+        # Prune old entries — keep only the last N snapshots.
         conn.execute(
             "DELETE FROM items WHERE snapshot_id IN "
             "(SELECT id FROM snapshots ORDER BY scanned_at DESC "
@@ -98,7 +98,7 @@ def save_snapshot(items: list[dict[str, Any]], mount: str = "/") -> int | None:
 
 
 def latest_snapshot_before(seconds_ago: float, mount: str = "/") -> dict[str, Any] | None:
-    """``seconds_ago`` sn öncesindeki en yakın snapshot'ı bul (yoksa None)."""
+    """Find the snapshot closest to ``seconds_ago`` seconds in the past (None if absent)."""
     conn = db_connect()
     try:
         cutoff = time.time() - seconds_ago
@@ -117,7 +117,7 @@ def latest_snapshot_before(seconds_ago: float, mount: str = "/") -> dict[str, An
 
 
 def snapshot_items(snapshot_id: int) -> dict[str, int]:
-    """Snapshot içindeki ``{path: size}`` dict'i döndür."""
+    """Return the ``{path: size}`` dict inside the snapshot."""
     conn = db_connect()
     try:
         cur = conn.execute(
@@ -134,11 +134,11 @@ def compute_growth(
     mount: str = "/",
     days_back: int = 7,
 ) -> dict[str, Any] | None:
-    """Mevcut taramayı ``days_back`` gün önceki ile karşılaştır.
+    """Compare the current scan against the one from ``days_back`` ago.
 
     Returns ``None`` if no historical snapshot exists yet; otherwise
     ``{prev_scanned_at, growth: [{path, name, current_size, prev_size,
-    delta, ratio}, ...]}`` — büyüyen öğeler delta'ya göre azalan sırada.
+    delta, ratio}, ...]}`` — growing items sorted by delta descending.
     """
     prev = latest_snapshot_before(days_back * 86400, mount)
     if not prev:
@@ -167,7 +167,7 @@ def compute_growth(
 
 
 class SnapshotStore:
-    """``save_snapshot`` / growth fonksiyonları üstüne ince OOP sarmalayıcı."""
+    """Thin OOP wrapper over ``save_snapshot`` / growth functions."""
 
     def __init__(self, path: Path | str = SNAPSHOTS_DB) -> None:
         self.path = Path(path)

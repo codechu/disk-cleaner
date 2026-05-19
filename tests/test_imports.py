@@ -1,6 +1,6 @@
-"""Public API import smoke testleri.
+"""Public API import smoke tests.
 
-Paket yapısı değiştiğinde refactor'ın ne kırdığını hızlıca bul.
+Quickly catch what a refactor breaks whenever the package structure changes.
 """
 from __future__ import annotations
 

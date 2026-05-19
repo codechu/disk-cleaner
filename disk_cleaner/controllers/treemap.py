@@ -1,15 +1,16 @@
-"""TreemapController — disk haritası state machine'i.
+"""TreemapController — disk map state machine.
 
-Sahip olunan state:
+Owned state:
 
 - ``root_node`` / ``current_node`` / ``history`` (drill stack)
-- ``path`` (entry'deki yol)
+- ``path`` (the path in the entry)
 - ``viz_mode`` ("treemap" | "sunburst")
 - ``_busy`` + ``_cancel_event``
 
-View'ın görevi (hover, fade animasyon, PNG export, cairo çizim) **bu
-sınıfta yok**. View click/up event'ini alır, ``hit_test`` ile node bulur,
-:meth:`drill_in` / :meth:`drill_up` çağırır.
+View responsibilities (hover, fade animation, PNG export, cairo
+drawing) are **not part of this class**. The View handles click/up
+events, calls ``hit_test`` to find the node, and calls
+:meth:`drill_in` / :meth:`drill_up`.
 """
 from __future__ import annotations
 
@@ -27,7 +28,7 @@ from ..viz.treemap import hit_test
 
 
 class TreemapController:
-    """Disk haritası state machine'i — View-bağımsız."""
+    """Disk map state machine — view-independent."""
 
     def __init__(self) -> None:
         # State
@@ -40,7 +41,7 @@ class TreemapController:
         saved_entries = SETTINGS.get("entries", {})
         self.path: str = saved_entries.get("treemap", str(HOME))
 
-        # Observer callbacks (View register eder; worker thread'den çağrılabilir)
+        # Observer callbacks (registered by the View; may be invoked from worker threads)
         self.on_busy_changed: Callable[[bool], None] = _noop
         self.on_root_loaded: Callable[[TreeNode], None] = _noop
         self.on_current_changed: Callable[[TreeNode, list[TreeNode]], None] = _noop2
@@ -52,7 +53,7 @@ class TreemapController:
     # ---- Commands ----
 
     def set_path(self, path: str) -> None:
-        """Kullanıcı yol entry'sini değiştirdiğinde."""
+        """Called when the user changes the path entry."""
         if path == self.path:
             return
         self.path = path
@@ -62,7 +63,7 @@ class TreemapController:
         save_settings(SETTINGS)
 
     def set_viz_mode(self, mode: str) -> None:
-        """treemap / sunburst arası geçiş — settings'e kaydedilir."""
+        """Switch between treemap / sunburst — persisted to settings."""
         if mode == self.viz_mode:
             return
         self.viz_mode = mode
@@ -71,7 +72,7 @@ class TreemapController:
         self.on_viz_mode_changed(mode)
 
     def start_scan(self) -> None:
-        """Yeni tarama başlat — daemon thread'de."""
+        """Start a new scan — on a daemon thread."""
         if self._busy:
             return
         self._cancel_event.clear()
@@ -91,7 +92,7 @@ class TreemapController:
         self._cancel_event.set()
 
     def drill_in(self, target: TreeNode) -> None:
-        """Bir dizine in (sadece is_dir)."""
+        """Drill into a directory (is_dir only)."""
         if not self.current_node or target is self.current_node:
             return
         if not target.is_dir:
@@ -107,7 +108,7 @@ class TreemapController:
         )
 
     def drill_up(self) -> None:
-        """Bir üst dizine çık (history'den pop)."""
+        """Go up one level (pop from history)."""
         if not self.history or not self.current_node:
             return
         prev_path = self.current_node.path
@@ -120,7 +121,7 @@ class TreemapController:
         )
 
     def drill_to(self, target: TreeNode) -> None:
-        """Breadcrumb tıklaması — history'de target'a kadar pop."""
+        """Breadcrumb click — pop history down to ``target``."""
         if not self.current_node:
             return
         for i in range(len(self.history) - 1, -1, -1):
@@ -137,7 +138,7 @@ class TreemapController:
                 return
 
     def drill_to_path(self, target_path: str) -> bool:
-        """Breadcrumb path string'ine göre drill — bulunursa True."""
+        """Drill by breadcrumb path string — True if found."""
         if not self.current_node:
             return False
         target_path = target_path.rstrip("/") or "/"
@@ -150,7 +151,7 @@ class TreemapController:
     # ---- Queries ----
 
     def hit_test(self, x: float, y: float) -> Optional[TreeNode]:
-        """Görsel mod'a göre hit test. View tıklama event'inde çağırır."""
+        """Hit test according to visual mode. Called by the View on click events."""
         if not self.current_node:
             return None
         if self.viz_mode == "sunburst":
