@@ -338,16 +338,25 @@ def main() -> None:
         try:
             sys.exit(cli_main(sys.argv[1:]))
         except KeyboardInterrupt:
-            # Standard SIGINT exit code; no traceback.
-            print(file=sys.stderr)  # newline after ^C
+            # Standard SIGINT exit code; no traceback. Match the message
+            # to the lifecycle stage we were in (already announced via
+            # the progress lines in cli_collect_tasks).
+            print(_("\nCancelled by user."), file=sys.stderr, flush=True)
             sys.exit(130)
 
     # GUI path — make Ctrl-C in the launching terminal close the window
-    # cleanly instead of dumping a Python traceback. SIGINT default
-    # behavior is restored so Gtk.main_quit runs on the next iteration.
+    # cleanly instead of dumping a Python traceback. The SIGINT handler
+    # schedules Gtk.main_quit on the main thread (signals can arrive on
+    # any thread; idle_add is thread-safe).
     import signal
 
-    signal.signal(signal.SIGINT, lambda *_: Gtk.main_quit())
+    from gi.repository import GLib
+
+    def _on_sigint(_signo: int, _frame) -> None:  # noqa: ANN001
+        print(_("\nClosing window…"), file=sys.stderr, flush=True)
+        GLib.idle_add(Gtk.main_quit)
+
+    signal.signal(signal.SIGINT, _on_sigint)
 
     from .theme import apply_user_preference
     from .ui import MainWindow
@@ -359,7 +368,9 @@ def main() -> None:
     try:
         Gtk.main()
     except KeyboardInterrupt:
-        print(file=sys.stderr)
+        # Shouldn't happen — our SIGINT handler above intercepts —
+        # but cover the path defensively.
+        print(_("\nClosing window…"), file=sys.stderr, flush=True)
         sys.exit(130)
 
 

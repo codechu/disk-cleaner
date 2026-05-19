@@ -22,7 +22,10 @@ icon: packaging/icon.svg
 
 apps:
   codechu-disk-cleaner:
-    command: bin/disk-cleaner
+    # Use the snap-bundled python3.10 explicitly so `/usr/bin/env python3`
+    # from the script shebang doesn't resolve to the host's python (which
+    # has the wrong version and no access to our staged site-packages).
+    command: usr/bin/python3.10 -m disk_cleaner
     common-id: io.github.codechu.disk-cleaner
     desktop: usr/share/applications/codechu-disk-cleaner.desktop
     environment:
@@ -30,6 +33,9 @@ apps:
       GI_TYPELIB_PATH: $SNAP/usr/lib/x86_64-linux-gnu/girepository-1.0
       LD_LIBRARY_PATH: $SNAP/usr/lib/x86_64-linux-gnu:$SNAP/usr/lib
       XDG_DATA_DIRS: $SNAP/usr/share:/usr/local/share:/usr/share
+      # Force unbuffered stdio so `--scan` output appears as it streams,
+      # not in a single end-of-process flush.
+      PYTHONUNBUFFERED: "1"
 
 parts:
   disk-cleaner:
