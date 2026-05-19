@@ -18,7 +18,9 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from .. import events, runtime
+import codechu_events as events
+
+from .. import runtime
 from ..i18n import _
 from ..settings import SETTINGS, save_settings
 from ..utils import list_real_mounts, run

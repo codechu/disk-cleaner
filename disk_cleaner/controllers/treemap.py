@@ -19,7 +19,8 @@ import threading
 from collections.abc import Callable
 from pathlib import Path
 
-from .. import events
+import codechu_events as events
+
 from ..config import HOME
 from ..i18n import _
 from ..settings import SETTINGS, save_settings

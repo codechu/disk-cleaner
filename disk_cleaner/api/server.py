@@ -18,7 +18,8 @@ import socket
 import threading
 from pathlib import Path
 
-from .. import events
+import codechu_events as events
+
 from .._gtk import Gdk, GLib, Gtk
 from ..config import CONTROL_SOCKET as _CONTROL_SOCKET_PATH
 from ..i18n import _

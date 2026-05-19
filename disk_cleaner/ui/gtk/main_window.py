@@ -443,7 +443,8 @@ class MainWindow(Gtk.Window):
         if old_lang == new_lang:
             return
         SETTINGS["language"] = new_lang
-        from ... import events
+        import codechu_events as events
+
         from ...settings import save_settings
 
         save_settings(SETTINGS)
@@ -463,7 +464,8 @@ class MainWindow(Gtk.Window):
         if old_theme == new_theme:
             return
         SETTINGS["theme"] = new_theme
-        from ... import events
+        import codechu_events as events
+
         from ...settings import save_settings
 
         save_settings(SETTINGS)

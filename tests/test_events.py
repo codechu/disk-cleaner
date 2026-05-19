@@ -5,9 +5,8 @@ from __future__ import annotations
 import threading
 import time
 
+import codechu_events as events
 import pytest
-
-from disk_cleaner import events
 
 
 @pytest.fixture(autouse=True)
@@ -62,8 +61,9 @@ def test_unsubscribe_idempotent():
 
 
 def test_subscriber_limit():
-    original = events.MAX_SUBSCRIBERS
-    events.MAX_SUBSCRIBERS = 3
+    bus = events.default_bus()
+    original = bus.max_subscribers
+    bus.max_subscribers = 3
     try:
         s1 = events.subscribe()
         events.subscribe()
@@ -75,7 +75,7 @@ def test_subscriber_limit():
         s4 = events.subscribe()
         assert s4 is not None
     finally:
-        events.MAX_SUBSCRIBERS = original
+        bus.max_subscribers = original
 
 
 def test_backpressure_drops_when_queue_full():

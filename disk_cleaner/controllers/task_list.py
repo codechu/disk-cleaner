@@ -27,7 +27,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
-from .. import events
+import codechu_events as events
+
 from ..core.sizing import apparent_size, dir_size, is_sparse, path_size
 from ..i18n import _
 from ..utils import ThrottledProgress, human

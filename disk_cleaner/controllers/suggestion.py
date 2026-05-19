@@ -19,7 +19,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-from .. import events
+import codechu_events as events
+
 from ..config import HOME
 from ..core.process import get_open_paths
 from ..core.score import compute_score_and_reason
