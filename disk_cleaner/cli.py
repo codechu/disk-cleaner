@@ -35,12 +35,17 @@ def cli_collect_tasks(
     sources: set[str],
     workspace: str | None = None,
     downloads: str | None = None,
+    progress: bool = True,
 ) -> list[dict]:
     """``sources``: subset of ``"system"``, ``"artifacts"``, ``"oldfiles"``.
 
     Returns a list of dicts enriched with score and reason, sorted by
     size descending. The ``_task`` key must be filtered out before
     writing to the output.
+
+    When ``progress`` is truthy and stderr is a TTY, prints a live
+    per-task progress line to stderr so the user sees activity during
+    long scans. Stdout (the JSON/CSV/table payload) is never touched.
     """
     from ._tasks import (
         SYSTEM_TASKS,
@@ -48,28 +53,45 @@ def cli_collect_tasks(
         make_old_files_tasks,
     )
 
+    show_progress = progress and sys.stderr.isatty()
+
+    def _sized(t: dict, kind: str) -> tuple[dict, int] | None:
+        if show_progress:
+            label = t.get("name") or t.get("path") or "?"
+            t0 = time.monotonic()
+            print(f"  scanning [{kind}] {label}…", end="", file=sys.stderr, flush=True)
+        try:
+            size = t["size_fn"]() or 0
+        except Exception:
+            size = 0
+        if show_progress:
+            elapsed_ms = int((time.monotonic() - t0) * 1000)
+            # Overwrite the in-progress line with the final result.
+            print(f"\r  scanned  [{kind}] {label} — {human(size)} ({elapsed_ms}ms)",
+                  file=sys.stderr, flush=True)
+        return (t, size) if size > 0 else None
+
     open_paths = get_open_paths()
     results: list[tuple[dict, int, str]] = []
     if "system" in sources:
+        if show_progress:
+            print(f"# {len(SYSTEM_TASKS)} system tasks", file=sys.stderr, flush=True)
         for t in SYSTEM_TASKS:
-            try:
-                size = t["size_fn"]() or 0
-            except Exception:
-                size = 0
-            if size > 0:
-                results.append((t, size, "system"))
+            r = _sized(t, "system")
+            if r:
+                results.append((r[0], r[1], "system"))
     if "artifacts" in sources:
         from pathlib import Path
 
         ws = Path(workspace or (HOME / "workspace"))
         if ws.exists():
-            for t in make_artifact_tasks(str(ws)):
-                try:
-                    size = t["size_fn"]() or 0
-                except Exception:
-                    size = 0
-                if size > 0:
-                    results.append((t, size, "artifact"))
+            tasks = list(make_artifact_tasks(str(ws)))
+            if show_progress:
+                print(f"# {len(tasks)} artifact tasks under {ws}", file=sys.stderr, flush=True)
+            for t in tasks:
+                r = _sized(t, "artifact")
+                if r:
+                    results.append((r[0], r[1], "artifact"))
     if "oldfiles" in sources:
         from pathlib import Path
 
@@ -77,13 +99,13 @@ def cli_collect_tasks(
         if not d.exists():
             d = HOME / "Downloads"
         if d.exists():
-            for t in make_old_files_tasks(str(d), 90):
-                try:
-                    size = t["size_fn"]() or 0
-                except Exception:
-                    size = 0
-                if size > 0:
-                    results.append((t, size, "oldfile"))
+            tasks = list(make_old_files_tasks(str(d), 90))
+            if show_progress:
+                print(f"# {len(tasks)} old-file tasks under {d}", file=sys.stderr, flush=True)
+            for t in tasks:
+                r = _sized(t, "oldfile")
+                if r:
+                    results.append((r[0], r[1], "oldfile"))
     enriched: list[dict] = []
     for t, size, kind in results:
         score, reason = compute_score_and_reason(t, size, kind, open_paths)
