@@ -151,8 +151,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--format",
         choices=["json", "csv", "table"],
-        default="json",
-        help=_("Output format (with --scan)"),
+        default=None,
+        help=_(
+            "Output format (with --scan). Default: table when stdout is "
+            "a terminal, json when redirected or piped."
+        ),
     )
     p.add_argument(
         "--sources",
@@ -208,15 +211,17 @@ def cli_main(argv: list[str]) -> int:
         if watchdog_stop():
             print(_("watchdog stopped"))
             return 0
+        # Not running is a normal observable state, not a failure.
         print(_("watchdog is not running"))
-        return 1
+        return 0
     if args.watchdog_status:
         if watchdog_running():
             pid = WATCHDOG_PID_FILE.read_text().strip()
             print(_("watchdog RUNNING (pid {pid})").format(pid=pid))
             return 0
+        # STOPPED is a normal observable state, not a failure.
         print(_("watchdog STOPPED"))
-        return 1
+        return 0
 
     if args.dry_run:
         runtime.DRY_RUN = True
@@ -270,17 +275,25 @@ def cli_main(argv: list[str]) -> int:
         )
         return 0 if ok == len(targets) else 1
 
-    # --scan: output
+    # --scan: output. Format defaults to a human-readable table when
+    # stdout is a TTY (interactive use) and to json when stdout is
+    # redirected to a file or pipe (machine consumption). Explicit
+    # --format overrides this.
+    fmt = args.format or ("table" if sys.stdout.isatty() else "json")
+
     output_items = [{k: v for k, v in r.items() if not k.startswith("_")} for r in enriched]
-    if args.format == "json":
+    total_bytes = sum(r["size_bytes"] for r in output_items)
+    total_human = human(total_bytes)
+
+    if fmt == "json":
         json.dump(
             {
                 "scanned_at": time.strftime("%Y-%m-%d %H:%M:%S"),
                 "items": output_items,
                 "totals": {
                     "count": len(output_items),
-                    "size_bytes": sum(r["size_bytes"] for r in output_items),
-                    "size_human": human(sum(r["size_bytes"] for r in output_items)),
+                    "size_bytes": total_bytes,
+                    "size_human": total_human,
                 },
             },
             sys.stdout,
@@ -288,7 +301,7 @@ def cli_main(argv: list[str]) -> int:
             ensure_ascii=False,
         )
         sys.stdout.write("\n")
-    elif args.format == "csv":
+    elif fmt == "csv":
         import csv
 
         w = csv.DictWriter(
@@ -308,17 +321,28 @@ def cli_main(argv: list[str]) -> int:
         for r in output_items:
             w.writerow(r)
     else:  # table
-        for r in output_items[:50]:
+        # Truncate to keep interactive output digestible. Full list is
+        # available via --format json.
+        TABLE_LIMIT = 20
+        n_total = len(output_items)
+        print(
+            _("Found {n} item(s), {total} total. Top {shown} by score:").format(
+                n=n_total, total=total_human, shown=min(TABLE_LIMIT, n_total)
+            )
+        )
+        print()
+        for r in output_items[:TABLE_LIMIT]:
             print(
                 f"{r['score']:>3}  {r['size_human']:>8}  "
                 f"{r['risk']:<7}  {r['name']}   ── {r['reason']}"
             )
-        if len(output_items) > 50:
-            extra = len(output_items) - 50
+        if n_total > TABLE_LIMIT:
+            extra = n_total - TABLE_LIMIT
+            print()
             print(
                 ngettext(
-                    "… and {n} more item",
-                    "… and {n} more items",
+                    "… and {n} more item. Run with --format json for the full list.",
+                    "… and {n} more items. Run with --format json for the full list.",
                     extra,
                 ).format(n=extra)
             )
@@ -327,6 +351,14 @@ def cli_main(argv: list[str]) -> int:
 
 def main() -> None:
     """Program main entry — GUI or CLI depending on arguments."""
+    # Set program class deterministically so GNOME shell can match the
+    # running window back to packaging/disk-cleaner.desktop's
+    # StartupWMClass and show the correct icon in the taskbar/launcher.
+    # This must happen before GTK is initialized (i.e. before MainWindow).
+    from gi.repository import GLib
+
+    GLib.set_prgname("codechu-disk-cleaner")
+
     # Prepare XDG directories + migrate legacy (pre-XDG) layout if present
     from .config import ensure_dirs, migrate_pre_xdg_layout
 
@@ -349,8 +381,6 @@ def main() -> None:
     # schedules Gtk.main_quit on the main thread (signals can arrive on
     # any thread; idle_add is thread-safe).
     import signal
-
-    from gi.repository import GLib
 
     def _on_sigint(_signo: int, _frame) -> None:  # noqa: ANN001
         print(_("\nClosing window…"), file=sys.stderr, flush=True)

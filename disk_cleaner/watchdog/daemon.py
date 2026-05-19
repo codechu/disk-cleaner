@@ -78,17 +78,23 @@ def watchdog_stop() -> bool:
 
 
 def watchdog_start_background(entry_script: str | None = None) -> bool:
-    """Start the watchdog as a background process. False if already present."""
+    """Start the watchdog as a background process. False if already present.
+
+    Spawned as ``python -m disk_cleaner --watchdog`` so the same code
+    path works under pip installs, AppImage, snap, and dev checkouts —
+    no fragile path to a shim script file.
+    """
     if watchdog_running():
         return False
-    # Call the legacy entry — backwards compatibility (disk_cleaner.py --watchdog)
-    if entry_script is None:
-        # The shim at the repo root is the default
-        entry_script = str(Path(__file__).resolve().parents[2] / "disk_cleaner.py")
     env = os.environ.copy()
+    # Ensure the runtime + data directories exist so the log/pid writes
+    # below don't fail on a fresh install.
+    WATCHDOG_PID_FILE.parent.mkdir(parents=True, exist_ok=True)
+    WATCHDOG_LOG.parent.mkdir(parents=True, exist_ok=True)
+    log_fp = open(WATCHDOG_LOG, "ab")
     proc = subprocess.Popen(
-        [sys.executable, "-B", entry_script, "--watchdog"],
-        stdout=open(WATCHDOG_LOG, "ab"),
+        [sys.executable, "-m", "disk_cleaner", "--watchdog"],
+        stdout=log_fp,
         stderr=subprocess.STDOUT,
         stdin=subprocess.DEVNULL,
         start_new_session=True,

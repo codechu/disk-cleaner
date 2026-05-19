@@ -11,6 +11,7 @@ Icon=disk-cleaner
 Terminal=false
 Categories=System;Utility;FileTools;
 StartupNotify=true
+StartupWMClass=codechu-disk-cleaner
 Keywords=disk;cleaner;treemap;sunburst;cache;
 Keywords[tr]=disk;temizleyici;treemap;sunburst;önbellek;cache;
 X-Vendor=Codechu
