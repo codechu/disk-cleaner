@@ -30,7 +30,7 @@ classifiers = [
 dependencies = [
     # System packages: python3-gi (PyGObject), gir1.2-gtk-3.0, python3-cairo
     # installed via apt/dnf, not pip; therefore not listed in pyproject deps.
-    "codechu-treeviz @ git+https://github.com/codechu/treeviz-py@main",
+    "codechu-treeviz>=0.1,<0.2",
 ]
 
 [project.optional-dependencies]
