@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Installed application list and related user data folders.
 
 Uses dpkg-query to guess packages installed manually by the user

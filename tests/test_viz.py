@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Viz layer — TreeNode, treemap layout, sunburst layout, hit_test, colors."""
 
 from __future__ import annotations

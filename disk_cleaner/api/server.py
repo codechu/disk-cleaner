@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Control API — JSON-line command server over a Unix socket.
 
 Socket path: ``$XDG_RUNTIME_DIR/disk_cleaner/control.sock``

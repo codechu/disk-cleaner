@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """TreemapPanel — disk-map View (Gtk).
 
 The state machine is owned by

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Disk Cleaner exception hierarchy.
 
 All domain errors derive from :class:`DiskCleanerError`. Modules use

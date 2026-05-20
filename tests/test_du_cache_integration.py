@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Integration test: ``cached_dir_size`` second call must hit the cache.
 
 Bug history: two consecutive ``--scan --sources system`` runs took the

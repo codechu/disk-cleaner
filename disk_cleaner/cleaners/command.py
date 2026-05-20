@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """CommandCleaner — run a shell/argv command.
 
 When ``need_root=True`` it is wrapped with ``pkexec``. ``DRY_RUN`` is

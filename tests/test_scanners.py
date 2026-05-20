@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Smoke tests for Scanner classes (verifies the Strategy surface)."""
 
 from __future__ import annotations

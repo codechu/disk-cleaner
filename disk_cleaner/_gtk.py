@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Shared Gtk/Gdk setup — single point for the ``gi.require_version`` call.
 
 UI modules pull these via ``from .._gtk import Gtk, Gdk, GLib, Pango``.

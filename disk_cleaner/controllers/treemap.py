@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """TreemapController — disk map state machine.
 
 Owned state:

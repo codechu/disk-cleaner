@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """MainWindow — the application's top-level window shell (Gtk View).
 
 The state machine is owned by

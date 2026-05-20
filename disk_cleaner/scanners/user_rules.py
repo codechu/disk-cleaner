@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """UserRulesScanner — emit rules from ``~/.config/disk_cleaner/cleaners/*.json``."""
 
 from __future__ import annotations

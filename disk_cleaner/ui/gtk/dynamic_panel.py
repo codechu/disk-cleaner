@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """DynamicPanel — builds Tasks from user input, wraps a ``TaskPanel``.
 
 Used in the Duplicate / Empty / Similar / Explorer tabs: a "Folder"

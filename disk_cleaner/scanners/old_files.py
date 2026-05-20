@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """OldFilesScanner — emit a folder's children older than ``days`` days."""
 
 from __future__ import annotations

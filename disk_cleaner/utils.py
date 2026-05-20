@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Small, UI-independent helper functions.
 
 - :func:`run` / :func:`_resolve` — subprocess wrapper with PATH enrichment

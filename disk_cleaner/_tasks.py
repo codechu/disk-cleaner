@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Task factories + SYSTEM_TASKS — the data source for Scanner classes.
 
 This module hosts the "dict-based task" schema: ``{name, desc, risk,

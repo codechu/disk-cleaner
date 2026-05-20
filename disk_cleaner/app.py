@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Composition root — ``AppContext`` wires all dependencies together.
 
 Public surface and DI point for new consumers. Consume Scanner /

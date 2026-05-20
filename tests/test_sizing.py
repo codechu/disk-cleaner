@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Real du / path_size behavior over temporary directories."""
 
 from __future__ import annotations

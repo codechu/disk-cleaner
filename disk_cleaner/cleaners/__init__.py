@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Cleaner Strategy subpackage.
 
 Three baseline implementations are provided: :class:`SafePathCleaner`

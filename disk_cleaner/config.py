@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Single source of constants and path definitions (XDG Base Directory Spec compliant).
 
 No magic numbers / magic paths — look here.

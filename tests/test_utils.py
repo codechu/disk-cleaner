@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """``human``, ``parse_size`` saf logic testleri."""
 
 from __future__ import annotations

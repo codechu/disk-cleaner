@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Application-level event bus singleton.
 
 ``codechu-events`` 0.2 removed module-level shims (``events.emit``,

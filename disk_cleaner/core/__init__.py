@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Core domain — UI-independent, testable pure logic.
 
 Submodules: ``sizing``, ``safe_remove``, ``process``, ``score``,

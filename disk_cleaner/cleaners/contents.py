@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """ContentsCleaner — clear a directory's contents (keep the directory)."""
 
 from __future__ import annotations

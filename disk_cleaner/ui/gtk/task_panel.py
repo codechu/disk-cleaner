@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """TaskPanel — task-list View (Gtk).
 
 The state machine is owned by

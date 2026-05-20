@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Smart suggestion scoring.
 
 Converts a Task + size + kind + open-process information into a score

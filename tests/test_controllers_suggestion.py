@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """SuggestionController — headless state machine testleri."""
 
 from __future__ import annotations

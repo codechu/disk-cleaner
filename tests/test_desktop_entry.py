@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Regression tests for packaging/disk-cleaner.desktop.
 
 Bug: GNOME shell shows a generic icon for Disk Cleaner because the

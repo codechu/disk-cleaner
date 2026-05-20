@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Subprocess-based CLI regression tests.
 
 Covered bugs:

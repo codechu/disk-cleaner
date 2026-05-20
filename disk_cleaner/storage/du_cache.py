@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """SQLite ``du`` cache — speeds up re-scan by ~430×.
 
 A cached result is considered safe as long as the directory ``mtime``

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Old kernel packages (Ubuntu / Debian).
 
 Lists every linux-image / headers / modules package except the current

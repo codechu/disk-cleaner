@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Storage alt paketi: SQLite du-cache + snapshot store."""
 
 from __future__ import annotations

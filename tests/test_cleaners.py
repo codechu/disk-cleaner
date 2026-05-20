@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Behavior tests for Cleaner classes."""
 
 from __future__ import annotations

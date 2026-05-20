@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """UI subpackage — platform-specific View ports.
 
 Current ports:

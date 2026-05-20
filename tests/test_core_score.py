@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Tests for ``core.score.compute_score_and_reason``.
 
 Covers the scoring/reason engine that drives smart-scan suggestions.

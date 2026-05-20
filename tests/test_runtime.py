@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """runtime module — TRASH_MODE + DRY_RUN state flags."""
 
 from __future__ import annotations

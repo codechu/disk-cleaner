@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Presenter / Controller layer — view-independent UI state machines.
 
 Design contract:

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Snapshot store — historical scan results + 7-day growth analysis.
 
 Schema (kept bit-for-bit compatible with the legacy version):

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """CLI dispatch + ``main()`` entry point.
 
 Arguments are parsed via argparse; ``--scan``/``--clean``/

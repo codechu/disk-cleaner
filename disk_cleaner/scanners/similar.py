@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """SimilarImagesScanner — emit near-duplicate images via dHash + hamming."""
 
 from __future__ import annotations

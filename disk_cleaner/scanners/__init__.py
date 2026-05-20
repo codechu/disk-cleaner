@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Scanner Strategy subpackage.
 
 Built-in scanners (all :class:`Scanner` subclasses):

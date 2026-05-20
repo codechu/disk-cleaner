@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Dark / light theme detection + user-preference override.
 
 Three layers (highest priority first):

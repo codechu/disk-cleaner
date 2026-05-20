@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """ArtifactScanner — build/cache artifacts under the workspace."""
 
 from __future__ import annotations

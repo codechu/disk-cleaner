@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """i18n setup — gettext-based message translation.
 
 Source code is in English; translations live in ``po/*.po``. Looks at

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Scanner Strategy base types.
 
 A :class:`Scanner` yields :class:`Task` objects via ``list_tasks``. To

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """AppUninstallScanner — apt purge + related folder cleanup candidates."""
 
 from __future__ import annotations

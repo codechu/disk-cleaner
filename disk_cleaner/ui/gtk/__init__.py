@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """GTK port — Linux desktop View.
 
 The current port. All widgets get their services from the

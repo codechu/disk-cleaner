@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Safe delete: trash by default, permanent only when explicitly requested.
 
 ``TRASH_MODE`` and ``DRY_RUN`` are runtime-mutable globals — UI

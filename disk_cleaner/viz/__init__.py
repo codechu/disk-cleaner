@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Visualization subpackage — thin re-export shim over ``codechu_treeviz``.
 
 The actual implementation lives in the published library

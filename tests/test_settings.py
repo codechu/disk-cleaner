@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """SettingsStore behavior (in a temp dir, don't touch production settings.json)."""
 
 from __future__ import annotations

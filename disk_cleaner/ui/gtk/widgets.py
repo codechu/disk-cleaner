@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Shared UI helpers — constants and small helpers.
 
 ``RISK_COLORS`` gives a consistent risk indicator (color + label)

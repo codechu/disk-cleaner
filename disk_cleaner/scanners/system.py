@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """SystemScanner — emit system cache tasks as :class:`Task` instances.
 
 A thin Strategy adapter over the existing ``SYSTEM_TASKS`` dict list

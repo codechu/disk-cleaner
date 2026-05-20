@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Size helpers — real (block-based) vs. nominal.
 
 Previously used ``du -sb`` (apparent size); for sparse files like

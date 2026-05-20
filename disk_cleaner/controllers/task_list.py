@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """TaskListController — state machine for scan/select/clean flow.
 
 State owned by a single task-list panel (system cache, project

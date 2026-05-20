@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """ExplorerScanner — emit one-level children of a folder as Tasks."""
 
 from __future__ import annotations

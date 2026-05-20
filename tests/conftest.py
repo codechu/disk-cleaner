@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """pytest fixtures.
 
 Pure-logic tests can run without a GTK display. UI panels do not need

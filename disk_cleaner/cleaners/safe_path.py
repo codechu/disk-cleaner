@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """SafePathCleaner — safely delete a single path (trash by default).
 
 After deletion, invalidates ``du_cache`` so the stale size does not

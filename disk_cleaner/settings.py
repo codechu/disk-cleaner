@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Settings store — JSON, atomic-ish, stable schema.
 
 The module-level shared ``SETTINGS`` dict is read/written by both the

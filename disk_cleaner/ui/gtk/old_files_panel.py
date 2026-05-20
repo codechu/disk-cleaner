@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """OldFilesPanel — old-file scanner panel.
 
 Calls ``make_old_files_tasks`` with a folder + age threshold (days).

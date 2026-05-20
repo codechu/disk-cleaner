@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Runtime mutable globals.
 
 Two state flags changed by the UI and read at call time by submodules:

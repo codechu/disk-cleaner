@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Filesystem scanners — pure, UI-independent.
 
 All functions:

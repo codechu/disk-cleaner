@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Public API import smoke tests.
 
 Quickly catch what a refactor breaks whenever the package structure changes.

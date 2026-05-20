@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Watchdog daemon — monitors disk fullness in the background.
 
 A single instance is guaranteed via the PID file. When the threshold is

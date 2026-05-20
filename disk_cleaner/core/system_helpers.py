@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """System cache/cleanup helpers.
 
 Size measurers and cleanup actions for docker / apt / journal / snap /

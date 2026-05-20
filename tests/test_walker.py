@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Pure-logic tests for ``core.walker`` (using tmp_path)."""
 
 from __future__ import annotations

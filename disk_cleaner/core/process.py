@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Open file / process awareness (``lsof`` cache).
 
 Uses a low-frequency cache so the scorer can answer "is this path

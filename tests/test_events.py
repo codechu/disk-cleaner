@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Event bus tests — multichannel, resource management, thread-safety.
 
 Each test constructs its own :class:`Bus`. With codechu-events 0.2, the

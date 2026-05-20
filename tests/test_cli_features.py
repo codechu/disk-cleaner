@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Tests for the new CLI features added to disk_cleaner.cli.
 
 Covers:

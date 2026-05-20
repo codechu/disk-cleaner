@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """SuggestionController — smart scan state machine.
 
 Runs all scanners (system caches + project artifacts + old files) in the

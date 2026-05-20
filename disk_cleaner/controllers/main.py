@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """MainController — state machine for the top window shell.
 
 Owned state:

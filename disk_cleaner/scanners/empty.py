@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """EmptyScanner — emit empty directories and 0-byte files."""
 
 from __future__ import annotations

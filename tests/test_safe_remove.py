@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Behavior of ``rm_path`` and ``safe_remove``.
 
 To avoid polluting the real trash, ``rm_path`` (permanent delete) is
