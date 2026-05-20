@@ -27,8 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
-import codechu_events as events
-
+from .._bus import bus
 from ..core.sizing import apparent_size, dir_size, is_sparse, path_size
 from ..i18n import _
 from ..utils import ThrottledProgress, human
@@ -133,7 +132,7 @@ class TaskListController:
         self._set_busy(True, _("Listing items…"))
         self.on_rows_replaced(self.rows)
         self.on_log("\n--- " + _("Scan started") + " ---\n")
-        events.emit("scan.started", panel=self.name)
+        bus.emit("scan.started", panel=self.name)
         threading.Thread(target=self._scan_thread, daemon=True).start()
 
     def cancel(self) -> None:
@@ -181,7 +180,7 @@ class TaskListController:
             return False
         self._cancel_event.clear()
         self._set_busy(True, f"0 / {len(selected)}")
-        events.emit("clean.started", panel=self.name, count=len(selected))
+        bus.emit("clean.started", panel=self.name, count=len(selected))
         threading.Thread(target=self._clean_thread, args=(selected,), daemon=True).start()
         return True
 
@@ -290,7 +289,7 @@ class TaskListController:
             self.on_log(_("Scan complete. Low-risk items >100MB auto-selected.") + "\n")
         else:
             self.on_log(_("Scan complete.") + "\n")
-        events.emit(
+        bus.emit(
             "scan.finished",
             panel=self.name,
             cancelled=cancelled,
@@ -345,7 +344,7 @@ class TaskListController:
     def _clean_done(self) -> None:
         self._set_busy(False, "")
         self.on_log("\n--- " + _("Cleanup complete") + " ---\n")
-        events.emit("clean.finished", panel=self.name)
+        bus.emit("clean.finished", panel=self.name)
 
     # ---- Internals — preview ----
 

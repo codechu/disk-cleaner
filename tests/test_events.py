@@ -1,38 +1,42 @@
-"""Event bus tests — multichannel, resource management, thread-safety."""
+"""Event bus tests — multichannel, resource management, thread-safety.
+
+Each test constructs its own :class:`Bus`. With codechu-events 0.2, the
+module-level shims (``events.emit``, ``events.subscribe``,
+``events.reset_for_tests``) are gone; isolation is achieved by giving
+each test its own bus instance.
+"""
 
 from __future__ import annotations
 
 import threading
 import time
 
-import codechu_events as events
 import pytest
+from codechu_events import QUEUE_MAX, Bus, SubscriberLimitExceeded
 
 
-@pytest.fixture(autouse=True)
-def _reset():
-    events.reset_for_tests()
-    yield
-    events.reset_for_tests()
+@pytest.fixture()
+def bus() -> Bus:
+    return Bus()
 
 
-def test_emit_to_one_subscriber():
-    sub = events.subscribe()
-    events.emit("scan.started", panel="suggestion")
+def test_emit_to_one_subscriber(bus):
+    sub = bus.subscribe()
+    bus.emit("scan.started", panel="suggestion")
     ev = sub.queue.get(timeout=1)
     assert ev["event"] == "scan.started"
     assert ev["panel"] == "suggestion"
     assert "ts" in ev
 
 
-def test_glob_channel_filter():
-    sub_scan = events.subscribe(["scan.*"])
-    sub_treemap = events.subscribe(["treemap.*"])
-    sub_all = events.subscribe(["*"])
+def test_glob_channel_filter(bus):
+    sub_scan = bus.subscribe(["scan.*"])
+    sub_treemap = bus.subscribe(["treemap.*"])
+    sub_all = bus.subscribe(["*"])
 
-    events.emit("scan.started", panel="x")
-    events.emit("treemap.drill", direction="in")
-    events.emit("mount.changed", target="/")
+    bus.emit("scan.started", panel="x")
+    bus.emit("treemap.drill", direction="in")
+    bus.emit("mount.changed", target="/")
 
     # scan.* only sees scan.started
     assert sub_scan.queue.qsize() == 1
@@ -46,58 +50,57 @@ def test_glob_channel_filter():
     assert sub_all.queue.qsize() == 3
 
 
-def test_subscribe_ctx_unsubscribes_on_exit():
-    assert events.subscriber_count() == 0
-    with events.subscribe_ctx(["*"]) as _sub:
-        assert events.subscriber_count() == 1
-    assert events.subscriber_count() == 0
+def test_subscribe_ctx_unsubscribes_on_exit(bus):
+    assert bus.subscriber_count() == 0
+    with bus.subscribe_ctx(["*"]) as _sub:
+        assert bus.subscriber_count() == 1
+    assert bus.subscriber_count() == 0
 
 
-def test_unsubscribe_idempotent():
-    sub = events.subscribe()
-    events.unsubscribe(sub)
-    events.unsubscribe(sub)  # the second call must not raise
-    assert events.subscriber_count() == 0
+def test_unsubscribe_idempotent(bus):
+    sub = bus.subscribe()
+    bus.unsubscribe(sub)
+    bus.unsubscribe(sub)  # the second call must not raise
+    assert bus.subscriber_count() == 0
 
 
-def test_subscriber_limit():
-    bus = events.default_bus()
+def test_subscriber_limit(bus):
     original = bus.max_subscribers
     bus.max_subscribers = 3
     try:
-        s1 = events.subscribe()
-        events.subscribe()
-        events.subscribe()
-        with pytest.raises(events.SubscriberLimitExceeded):
-            events.subscribe()
-        events.unsubscribe(s1)
+        s1 = bus.subscribe()
+        bus.subscribe()
+        bus.subscribe()
+        with pytest.raises(SubscriberLimitExceeded):
+            bus.subscribe()
+        bus.unsubscribe(s1)
         # a slot opened up; a new one fits
-        s4 = events.subscribe()
+        s4 = bus.subscribe()
         assert s4 is not None
     finally:
         bus.max_subscribers = original
 
 
-def test_backpressure_drops_when_queue_full():
-    sub = events.subscribe()
+def test_backpressure_drops_when_queue_full(bus):
+    sub = bus.subscribe()
     # Fill to QUEUE_MAX, then further emits must be dropped
-    for i in range(events.QUEUE_MAX):
-        events.emit("scan.progress", i=i)
+    for i in range(QUEUE_MAX):
+        bus.emit("scan.progress", i=i)
     assert sub.dropped == 0
     for i in range(50):
-        events.emit("scan.progress", i=i)
+        bus.emit("scan.progress", i=i)
     assert sub.dropped == 50
-    assert sub.queue.qsize() == events.QUEUE_MAX
-    assert sub.received == events.QUEUE_MAX
+    assert sub.queue.qsize() == QUEUE_MAX
+    assert sub.received == QUEUE_MAX
 
 
-def test_stats_reports_subscribers():
-    events.subscribe(["scan.*"])
-    events.subscribe(["*"])
-    events.emit("scan.started")
-    events.emit("mount.changed")
+def test_stats_reports_subscribers(bus):
+    bus.subscribe(["scan.*"])
+    bus.subscribe(["*"])
+    bus.emit("scan.started")
+    bus.emit("mount.changed")
 
-    st = events.stats()
+    st = bus.stats()
     assert st["subscribers"] == 2
     assert st["total_emitted"] == 2
     # s1 only sees scan.*, queue depth 1
@@ -106,15 +109,15 @@ def test_stats_reports_subscribers():
     assert depths == [1, 2]
 
 
-def test_thread_safe_emit():
+def test_thread_safe_emit(bus):
     """With 10 threads emitting in parallel, the subscriber sees all events."""
-    sub = events.subscribe()
+    sub = bus.subscribe()
     N_THREADS = 10
     N_PER_THREAD = 15
 
     def worker(tid: int) -> None:
         for i in range(N_PER_THREAD):
-            events.emit("scan.progress", thread=tid, i=i)
+            bus.emit("scan.progress", thread=tid, i=i)
 
     threads = [threading.Thread(target=worker, args=(t,)) for t in range(N_THREADS)]
     for t in threads:
@@ -125,10 +128,10 @@ def test_thread_safe_emit():
     assert sub.queue.qsize() == N_THREADS * N_PER_THREAD
 
 
-def test_iter_yields_events():
-    sub = events.subscribe(heartbeat_sec=0)  # heartbeat disabled
-    events.emit("scan.started", panel="x")
-    events.emit("scan.finished", panel="x")
+def test_iter_yields_events(bus):
+    sub = bus.subscribe(heartbeat_sec=0)  # heartbeat disabled
+    bus.emit("scan.started", panel="x")
+    bus.emit("scan.finished", panel="x")
     # terminate iter via close
     sub.close()
     got = list(sub.iter())
@@ -137,8 +140,8 @@ def test_iter_yields_events():
     assert got[1]["event"] == "scan.finished"
 
 
-def test_iter_with_timeout_returns():
-    sub = events.subscribe(heartbeat_sec=0)
+def test_iter_with_timeout_returns(bus):
+    sub = bus.subscribe(heartbeat_sec=0)
     start = time.monotonic()
     got = list(sub.iter(timeout=0.2))
     elapsed = time.monotonic() - start
@@ -146,8 +149,8 @@ def test_iter_with_timeout_returns():
     assert 0.15 < elapsed < 0.4  # returned after ~0.2s
 
 
-def test_iter_emits_heartbeat_when_idle():
-    sub = events.subscribe(heartbeat_sec=0.1)
+def test_iter_emits_heartbeat_when_idle(bus):
+    sub = bus.subscribe(heartbeat_sec=0.1)
     collected = []
 
     def consume():
@@ -164,9 +167,9 @@ def test_iter_emits_heartbeat_when_idle():
     assert all(e["event"] == "_keepalive" for e in collected)
 
 
-def test_close_terminates_iter():
-    sub = events.subscribe(heartbeat_sec=0)
-    events.emit("scan.started")
+def test_close_terminates_iter(bus):
+    sub = bus.subscribe(heartbeat_sec=0)
+    bus.emit("scan.started")
     sub.close()
     got = list(sub.iter())
     # the event arrived before close; iter then ended
@@ -174,11 +177,11 @@ def test_close_terminates_iter():
     assert got[0]["event"] == "scan.started"
 
 
-def test_async_iter():
-    """asyncio bridge — aiter ile event al."""
+def test_async_iter(bus):
+    """asyncio bridge — receive events via aiter."""
     import asyncio
 
-    sub = events.subscribe(heartbeat_sec=0)
+    sub = bus.subscribe(heartbeat_sec=0)
     collected: list[dict] = []
 
     async def consume() -> None:
@@ -191,8 +194,8 @@ def test_async_iter():
     async def produce_and_consume() -> None:
         task = asyncio.create_task(consume())
         await asyncio.sleep(0.05)
-        events.emit("scan.started")
-        events.emit("scan.finished")
+        bus.emit("scan.started")
+        bus.emit("scan.finished")
         await asyncio.wait_for(task, timeout=2)
 
     asyncio.run(produce_and_consume())

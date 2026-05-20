@@ -830,7 +830,7 @@ def cli_main(argv: list[str]) -> int:
                     n=len(targets), size=human(total),
                 )
             else:
-                prompt = c("high", _("Proceed? Will PERMANENTLY DELETE {n} items, {size} total.").format(
+                prompt = c.high(_("Proceed? Will PERMANENTLY DELETE {n} items, {size} total.").format(
                     n=len(targets), size=human(total),
                 ))
             if not confirm(prompt, default=False, assume_yes=args.yes):
@@ -908,25 +908,25 @@ def cli_main(argv: list[str]) -> int:
         else:
             print(
                 _("Found {n} item(s), {total} total. Top {shown} by score:").format(
-                    n=c("bold", str(n_total)),
-                    total=c("bold", total_human),
+                    n=c.bold(str(n_total)),
+                    total=c.bold(total_human),
                     shown=min(TABLE_LIMIT, n_total),
                 )
             )
             print()
             for r in output_items[:TABLE_LIMIT]:
                 risk_color = r["risk"] if r["risk"] in ("low", "medium", "high") else "dim"
+                risk_render = getattr(c, risk_color)(r["risk"])
                 print(
                     f"{r['score']:>3}  {r['size_human']:>8}  "
-                    f"{c(risk_color, r['risk']):<16}  {r['name']}   "
-                    f"{c('dim', '──')} {c('dim', r['reason'])}"
+                    f"{risk_render:<16}  {r['name']}   "
+                    f"{c.dim('──')} {c.dim(r['reason'])}"
                 )
             if n_total > TABLE_LIMIT:
                 extra = n_total - TABLE_LIMIT
                 print()
                 print(
-                    c(
-                        "dim",
+                    c.dim(
                         ngettext(
                             "… and {n} more item. Run with --format json for the full list.",
                             "… and {n} more items. Run with --format json for the full list.",

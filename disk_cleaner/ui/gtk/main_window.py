@@ -443,13 +443,12 @@ class MainWindow(Gtk.Window):
         if old_lang == new_lang:
             return
         SETTINGS["language"] = new_lang
-        import codechu_events as events
-
+        from ..._bus import bus
         from ...settings import save_settings
 
         save_settings(SETTINGS)
         # User-initiated preference change → publish on its own channel
-        events.emit(
+        bus.emit(
             "prefs.language.changed",
             source="user",
             channel="prefs",
@@ -464,12 +463,11 @@ class MainWindow(Gtk.Window):
         if old_theme == new_theme:
             return
         SETTINGS["theme"] = new_theme
-        import codechu_events as events
-
+        from ..._bus import bus
         from ...settings import save_settings
 
         save_settings(SETTINGS)
-        events.emit(
+        bus.emit(
             "prefs.theme.changed", source="user", channel="prefs", old=old_theme, new=new_theme
         )
         self.log(_("Theme set to {theme}. Restart to apply.\n").format(theme=new_theme))

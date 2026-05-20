@@ -30,12 +30,15 @@ the org rules:
   `po/tr.po` directly — run `cd po && make update && make compile`.
 - Vendor namespace: every path is `codechu/disk-cleaner/<...>`; the
   vendor constant lives in `disk_cleaner/config.py`.
-- The 3 extracted libraries (`events-py`, `treeviz-py`, `xdg-py`) live
-  in their own repos but are **not yet** declared as dependencies —
-  this repo still uses inline copies (`disk_cleaner/events.py`,
-  `disk_cleaner/viz/`, `disk_cleaner/runtime.py`). Don't introduce
-  imports against the external packages without first wiring them up
-  in `pyproject.toml`.
+- The 6 extracted libraries (`codechu-events`, `codechu-xdg`,
+  `codechu-cli`, `codechu-fmt`, `codechu-meter`, `codechu-spark`) plus
+  `codechu-treeviz` are declared dependencies in `pyproject.toml`:
+  events / xdg / cli at `>=0.2,<0.3`, treeviz at `>=0.1,<0.2`. The
+  application-level event bus singleton lives at
+  `disk_cleaner/_bus.py`; controllers and the control-socket server
+  import it as `from disk_cleaner._bus import bus`. XDG paths come
+  from a module-level `App(vendor, product, env, uid)` in
+  `disk_cleaner/config.py`.
 
 ## Discipline reminders (org rules apply)
 

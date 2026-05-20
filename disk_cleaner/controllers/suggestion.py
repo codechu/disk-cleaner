@@ -19,8 +19,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-import codechu_events as events
-
+from .._bus import bus
 from ..config import HOME
 from ..core.process import get_open_paths
 from ..core.score import compute_score_and_reason
@@ -131,7 +130,7 @@ class SuggestionController:
         self._next_tid = 0
         self._set_busy(True, _("Detecting open files…"))
         self.on_log("\n--- " + _("Smart scan started") + " ---\n")
-        events.emit("scan.started", panel="suggestion")
+        bus.emit("scan.started", panel="suggestion")
         threading.Thread(target=self._scan_thread, daemon=True).start()
 
     def cancel(self) -> None:
@@ -236,7 +235,7 @@ class SuggestionController:
             return False
         self._cancel_event.clear()
         self._set_busy(True, f"0 / {len(selected)}")
-        events.emit("clean.started", panel="suggestion", count=len(selected))
+        bus.emit("clean.started", panel="suggestion", count=len(selected))
         threading.Thread(target=self._clean_thread, args=(selected,), daemon=True).start()
         return True
 
@@ -385,7 +384,7 @@ class SuggestionController:
             )
             + "\n"
         )
-        events.emit(
+        bus.emit(
             "scan.finished",
             panel="suggestion",
             count=self.total_items,
@@ -562,7 +561,7 @@ class SuggestionController:
         self._set_busy(False, "")
         self.on_disk_label_dirty()
         self.on_log("--- " + _("Smart cleanup complete") + " ---\n")
-        events.emit("clean.finished", panel="suggestion")
+        bus.emit("clean.finished", panel="suggestion")
 
     def _mark_done(self, gi: int, ci: int, rc: int) -> None:
         marker = "✓ " if rc == 0 else "✗ "

@@ -18,9 +18,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 
-import codechu_events as events
-
 from .. import runtime
+from .._bus import bus
 from ..i18n import _
 from ..settings import SETTINGS, save_settings
 from ..utils import list_real_mounts, run
@@ -124,7 +123,7 @@ class MainController:
         self.on_mount_changed(target)
         self.on_fs_warning_changed(self.fs_warning_for(target))
         self.refresh_disk_usage()
-        events.emit("mount.changed", target=target)
+        bus.emit("mount.changed", target=target)
 
     def find_mount(self, target: str) -> Mount | None:
         for m in self.mounts:
@@ -163,7 +162,7 @@ class MainController:
             msg = _("Trash mode: OFF (permanent deletion!)")
         self.on_log(msg + "\n")
         self.on_trash_mode_changed(val)
-        events.emit("settings.changed", key="trash_mode", value=val)
+        bus.emit("settings.changed", key="trash_mode", value=val)
 
     def set_dry_run(self, val: bool) -> None:
         runtime.DRY_RUN = val
@@ -175,7 +174,7 @@ class MainController:
             msg = _("Dry-run: OFF")
         self.on_log(msg + "\n")
         self.on_dry_run_changed(val)
-        events.emit("settings.changed", key="dry_run", value=val)
+        bus.emit("settings.changed", key="dry_run", value=val)
 
     # ---- Watchdog ----
 

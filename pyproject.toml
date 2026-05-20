@@ -31,9 +31,9 @@ dependencies = [
     # System packages: python3-gi (PyGObject), gir1.2-gtk-3.0, python3-cairo
     # installed via apt/dnf, not pip; therefore not listed in pyproject deps.
     "codechu-treeviz>=0.1,<0.2",
-    "codechu-events>=0.1,<0.2",
-    "codechu-xdg>=0.1,<0.2",
-    "codechu-cli>=0.1,<0.2",
+    "codechu-events>=0.2,<0.3",
+    "codechu-xdg>=0.2,<0.3",
+    "codechu-cli>=0.2,<0.3",
 ]
 
 [project.optional-dependencies]

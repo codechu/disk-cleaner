@@ -18,8 +18,9 @@ import socket
 import threading
 from pathlib import Path
 
-import codechu_events as events
+from codechu_events import DEFAULT_HEARTBEAT_SEC, SubscriberLimitExceeded
 
+from .._bus import bus
 from .._gtk import Gdk, GLib, Gtk
 from ..config import CONTROL_SOCKET as _CONTROL_SOCKET_PATH
 from ..i18n import _
@@ -124,10 +125,10 @@ class ControlServer:
         on broken pipe.
         """
         types = msg.get("types") or ["*"]
-        hb = float(msg.get("heartbeat_sec", events.DEFAULT_HEARTBEAT_SEC))
+        hb = float(msg.get("heartbeat_sec", DEFAULT_HEARTBEAT_SEC))
         try:
-            sub = events.subscribe(types, heartbeat_sec=hb)
-        except events.SubscriberLimitExceeded as e:
+            sub = bus.subscribe(types, heartbeat_sec=hb)
+        except SubscriberLimitExceeded as e:
             self._send(f, {"ok": False, "error": f"limit: {e}"})
             return
         # Welcome event: subscription ack + filter echo
@@ -145,7 +146,7 @@ class ControlServer:
         except (BrokenPipeError, ConnectionResetError, OSError):
             pass
         finally:
-            events.unsubscribe(sub)
+            bus.unsubscribe(sub)
 
     def _send(self, f, obj: dict) -> None:
         try:
@@ -413,7 +414,7 @@ class ControlServer:
                 "history_paths": [n.path for n in tp.history],
             }
         if target == "bus_stats":
-            return {"ok": True, "stats": events.stats()}
+            return {"ok": True, "stats": bus.stats()}
         return {"ok": False, "error": _("unknown target: {target}").format(target=target)}
 
     def _cmd_window(self, msg: dict) -> dict:

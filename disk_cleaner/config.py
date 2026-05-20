@@ -18,15 +18,10 @@ XDG layout (computed by :mod:`codechu_xdg`):
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
-from codechu_xdg import (
-    XDG_CACHE_HOME,
-    XDG_CONFIG_HOME,
-    XDG_DATA_HOME,
-    XDG_RUNTIME_DIR,
-    App,
-)
+from codechu_xdg import App, cache_home, config_home, data_home, default_env, runtime_dir
 
 HOME: Path = Path.home()
 
@@ -34,7 +29,18 @@ HOME: Path = Path.home()
 VENDOR = "codechu"
 PRODUCT = "disk-cleaner"
 
-_app = App(VENDOR, PRODUCT)
+# Application-level App instance. ``default_env()`` snapshots the real
+# environment at import time, matching the previous behaviour of the
+# v0.1 module-level XDG_* constants.
+_env = default_env()
+_uid = os.getuid()
+_app = App(vendor=VENDOR, product=PRODUCT, env=_env, uid=_uid)
+
+# ---- XDG base directories (vendor-neutral; used for legacy migration) ----
+XDG_CONFIG_HOME: Path = config_home(_env)
+XDG_CACHE_HOME: Path = cache_home(_env)
+XDG_DATA_HOME: Path = data_home(_env)
+XDG_RUNTIME_DIR: Path = runtime_dir(_env, _uid)
 
 # ---- XDG-derived application directories (back-compat exports) ----
 SETTINGS_DIR: Path = _app.config_dir  # config (settings, rules)

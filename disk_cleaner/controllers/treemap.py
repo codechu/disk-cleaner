@@ -19,8 +19,7 @@ import threading
 from collections.abc import Callable
 from pathlib import Path
 
-import codechu_events as events
-
+from .._bus import bus
 from ..config import HOME
 from ..i18n import _
 from ..settings import SETTINGS, save_settings
@@ -101,7 +100,7 @@ class TreemapController:
         self._set_busy(True)
         path = self.path
         self.on_log("\n--- " + _("Disk map: scanning {path}").format(path=path) + " ---\n")
-        events.emit("treemap.scan.started", path=path)
+        bus.emit("treemap.scan.started", path=path)
         threading.Thread(target=self._scan_thread, args=(path,), daemon=True).start()
 
     def cancel(self) -> None:
@@ -118,7 +117,7 @@ class TreemapController:
         self.current_node = target
         self.path = target.path
         self.on_current_changed(self.current_node, self.history)
-        events.emit(
+        bus.emit(
             "treemap.drill",
             direction="in",
             from_path=prev.path,
@@ -138,7 +137,7 @@ class TreemapController:
         self.current_node = self.history.pop()
         self.path = self.current_node.path
         self.on_current_changed(self.current_node, self.history)
-        events.emit(
+        bus.emit(
             "treemap.drill",
             direction="up",
             from_path=prev_path,
@@ -158,7 +157,7 @@ class TreemapController:
                 self.history = self.history[:i]
                 self.path = self.current_node.path
                 self.on_current_changed(self.current_node, self.history)
-                events.emit(
+                bus.emit(
                     "treemap.drill",
                     direction="to",
                     from_path=prev_path,
@@ -226,7 +225,7 @@ class TreemapController:
         if node is None:
             self.on_progress(_("Scan cancelled or errored."))
             self.on_log(_("Disk map cancelled/errored.") + "\n")
-            events.emit("treemap.scan.finished", path=path, ok=False)
+            bus.emit("treemap.scan.finished", path=path, ok=False)
             return
         self.root_node = node
         self.current_node = node
@@ -234,7 +233,7 @@ class TreemapController:
         self.on_root_loaded(node)
         self.on_current_changed(node, self.history)
         self.on_log(_("Disk map ready: total {size}").format(size=human(node.size)) + "\n")
-        events.emit(
+        bus.emit(
             "treemap.scan.finished",
             path=node.path,
             size=node.size,

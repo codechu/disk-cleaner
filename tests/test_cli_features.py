@@ -32,11 +32,10 @@ def xdg_env(tmp_path, monkeypatch):
     for sub in ("config", "data", "cache", "runtime"):
         (tmp_path / sub).mkdir(parents=True, exist_ok=True)
 
-    # Reload modules that snapshot XDG paths at import time so the
-    # patched env actually takes effect for this test.
-    import codechu_xdg
-
-    importlib.reload(codechu_xdg)
+    # Reload disk_cleaner.config so its App / XDG_* snapshot picks up
+    # the patched environment (codechu_xdg 0.2 has no module-level
+    # constants; only the App instance and helpers, which read env
+    # explicitly).
     from disk_cleaner import config as dc_config
 
     importlib.reload(dc_config)
