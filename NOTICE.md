@@ -36,9 +36,11 @@ not redistribute their source.
 
 ## Trademarks
 
-"Codechu" is a trademark of the Codechu project (Onur Barlık).
-Registration is in progress; pending registration the mark is
-asserted under common-law / unregistered trademark principles.
+"Codechu" is a registered trademark of Onur Barlık in Türkiye
+(TÜRKPATENT 2012/93779, Nice Class 42, protected through
+10.11.2032). Use of the mark outside the registered scope is
+asserted under unregistered / common-law principles pending
+expansion to additional classes and jurisdictions.
 
 Inclusion of MIT-licensed libraries under this NOTICE does **not**
 grant any right to use the "Codechu" mark.

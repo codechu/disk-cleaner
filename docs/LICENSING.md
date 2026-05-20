@@ -16,9 +16,12 @@ signing a CLA.
   the codebase, polish it, and ship a closed-source competitor under
   a different name. GPL-3's copyleft requires any redistributed
   derivative to remain GPL-3, which materially reduces this risk.
-  Trademark protection is not yet in place (see
-  [FOLLOWUP](../../codechu-internal/legal/FOLLOWUP.md)), so the
-  license is the primary defence.
+  The "Codechu" mark itself is protected in Türkiye (TÜRKPATENT
+  2012/93779, Class 42, through 2032) but Class 9 (downloadable
+  software) and international jurisdictions are still open — see
+  [FOLLOWUP item 1](../../codechu-internal/legal/FOLLOWUP.md). The
+  license is the primary defence for the *code*; the trademark is
+  the primary defence for the *name*.
 - **GTK ecosystem norm.** GTK, GNOME, and most desktop apps that
   consume them ship under GPL-family licenses. GPL-3 fits the
   ecosystem's expectations and does not surprise packagers
