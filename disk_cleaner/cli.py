@@ -18,9 +18,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import __version__
-from ._gtk import Gtk
-from .cli_helpers import (
+from codechu_cli import (
     Color,
     ProgressLine,
     banner,
@@ -28,6 +26,9 @@ from .cli_helpers import (
     format_examples,
     resolve_format,
 )
+
+from . import __version__
+from ._gtk import Gtk
 from .config import HOME, SETTINGS_FILE, SNAPSHOTS_DB, USER_CLEANERS_DIR
 from .core.process import get_open_paths
 from .core.score import compute_score_and_reason

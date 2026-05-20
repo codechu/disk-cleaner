@@ -33,6 +33,7 @@ dependencies = [
     "codechu-treeviz>=0.1,<0.2",
     "codechu-events>=0.1,<0.2",
     "codechu-xdg>=0.1,<0.2",
+    "codechu-cli>=0.1,<0.2",
 ]
 
 [project.optional-dependencies]
