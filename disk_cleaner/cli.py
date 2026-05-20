@@ -21,9 +21,12 @@ from pathlib import Path
 from codechu_cli import (
     Color,
     ProgressLine,
+    Spinner,
     banner,
+    capabilities,
     confirm,
     format_examples,
+    multiselect,
     resolve_format,
 )
 
@@ -58,6 +61,7 @@ def cli_collect_tasks(
     workspace: str | None = None,
     downloads: str | None = None,
     progress: bool = True,
+    caps: set[str] | None = None,
 ) -> list[dict]:
     """``sources``: subset of ``"system"``, ``"artifacts"``, ``"oldfiles"``.
 
@@ -76,6 +80,7 @@ def cli_collect_tasks(
     )
 
     pl = ProgressLine(stream=sys.stderr, enabled=(progress and sys.stderr.isatty()))
+    spinner_enabled = progress and sys.stderr.isatty()
     state = {"done": 0, "total": 0, "bytes": 0}
 
     def _redraw(label: str) -> None:
@@ -101,7 +106,13 @@ def cli_collect_tasks(
         ))
         return (t, size) if size > 0 else None
 
-    open_paths = get_open_paths()
+    with Spinner(
+        _("Probing open file handles…"),
+        stream=sys.stderr,
+        enabled=spinner_enabled,
+        caps=caps,
+    ):
+        open_paths = get_open_paths()
     results: list[tuple[dict, int, str]] = []
     if "system" in sources:
         state["total"] += len(SYSTEM_TASKS)
@@ -585,6 +596,25 @@ def _build_parser() -> argparse.ArgumentParser:
         help=_("Assume yes; do not prompt for confirmation on --clean"),
     )
     p.add_argument(
+        "--no-color", action="store_true",
+        help=_("Disable ANSI colors even on a TTY (default: auto-detect)"),
+    )
+    p.add_argument(
+        "--no-progress", action="store_true",
+        help=_("Disable progress lines + spinners even on a TTY (default: auto)"),
+    )
+    p.add_argument(
+        "--non-interactive", action="store_true",
+        help=_(
+            "Script mode: implies --yes, --no-progress, --no-color; "
+            "never prompts; defaults --format to json"
+        ),
+    )
+    p.add_argument(
+        "--interactive-clean", action="store_true",
+        help=_("After --scan, pick items to clean via multiselect (TTY only)"),
+    )
+    p.add_argument(
         "--items",
         help=_("Only clean tasks whose name is in this comma-separated list"),
     )
@@ -680,6 +710,20 @@ def _selected_exclusive_count(args: argparse.Namespace) -> int:
     return sum(1 for f in flags if f)
 
 
+def _is_interactive(args) -> bool:
+    """True when both stdout+stderr are TTYs and --non-interactive isn't set.
+
+    Used to gate interactive flows (multiselect, prompts, spinners). Read
+    once in ``cli_main`` and threaded down; never re-evaluated deep in
+    helpers.
+    """
+    return (
+        sys.stdout.isatty()
+        and sys.stderr.isatty()
+        and not args.non_interactive
+    )
+
+
 def cli_main(argv: list[str]) -> int:
     """Headless CLI dispatcher."""
     from . import runtime
@@ -687,9 +731,35 @@ def cli_main(argv: list[str]) -> int:
     p = _build_parser()
     args = p.parse_args(argv)
 
+    # --non-interactive implies --yes, --no-progress, --no-color, and
+    # defaults --format to json. The user can still pass an explicit
+    # --format to override.
+    if args.non_interactive:
+        args.yes = True
+        args.no_progress = True
+        args.no_color = True
+        if args.format is None:
+            args.format = "json"
+
+    # Capability + color objects — single source of truth.
+    color_enabled = (not args.no_color) and sys.stderr.isatty()
+    caps_err: set[str] | None = capabilities(sys.stderr) if not args.no_color else set()
+    c_err = Color(sys.stderr, enabled=color_enabled)
+
+    def _err(msg: str) -> None:
+        print(c_err.high(f"error: {msg}") if color_enabled else f"error: {msg}",
+              file=sys.stderr)
+
+    def _warn(msg: str) -> None:
+        print(c_err.medium(f"warning: {msg}") if color_enabled else f"warning: {msg}",
+              file=sys.stderr)
+
+    def _ok(msg: str) -> None:
+        print(c_err.low(msg) if color_enabled else msg, file=sys.stderr)
+
     # Interactive banner — single source of truth for "headline" output
     # that lets the user confirm they're in the right tool/mode at a glance.
-    if sys.stderr.isatty() and (args.scan or args.clean):
+    if sys.stderr.isatty() and not args.non_interactive and (args.scan or args.clean):
         if args.dry_run:
             mode = "dry-run"
         elif args.clean:
@@ -747,12 +817,15 @@ def cli_main(argv: list[str]) -> int:
         print(_("watchdog is not running"))
         return 0
     if args.watchdog_status:
+        c_out = Color(sys.stdout, enabled=(not args.no_color) and sys.stdout.isatty())
         if watchdog_running():
             pid = WATCHDOG_PID_FILE.read_text().strip()
-            print(_("watchdog RUNNING (pid {pid})").format(pid=pid))
+            badge = c_out.low("●")
+            print(_("watchdog {b} RUNNING (pid {pid})").format(b=badge, pid=pid))
             return 0
         # STOPPED is a normal observable state, not a failure.
-        print(_("watchdog STOPPED"))
+        badge = c_out.high("●")
+        print(_("watchdog {b} STOPPED").format(b=badge))
         return 0
 
     if args.dry_run:
@@ -764,9 +837,44 @@ def cli_main(argv: list[str]) -> int:
         p.print_help()
         return 0
 
+    # Source picker — only when interactive and the user didn't pass an
+    # explicit --sources. Argparse gives the default "system,artifacts,
+    # oldfiles", so detect that case by checking the raw argv.
+    sources_explicit = any(a == "--sources" or a.startswith("--sources=") for a in argv)
+    interactive = _is_interactive(args)
+
+    # Safety guard — short-circuit BEFORE expensive scan: script-mode
+    # cleanup with no constraints is a mass-delete footgun.
+    if args.clean and args.non_interactive and not args.items and not sources_explicit:
+        _err(_(
+            "--non-interactive --clean requires --items=NAMES or "
+            "--sources=... to constrain what gets cleaned"
+        ))
+        return 2
+    if interactive and not sources_explicit:
+        try:
+            picked = multiselect(
+                _("Which sources to scan?"),
+                ["system", "artifacts", "oldfiles"],
+                defaults=(0, 1, 2),
+                stream=sys.stderr,
+                caps=caps_err,
+            )
+            if picked:
+                args.sources = ",".join(str(p) for p in picked)
+        except (KeyboardInterrupt, EOFError):
+            _warn(_("source pick cancelled — using defaults"))
+
     sources = {s.strip() for s in args.sources.split(",") if s.strip()}
+    progress_on = not args.no_progress
     scan_t0 = time.monotonic()
-    enriched = cli_collect_tasks(sources, workspace=args.workspace, downloads=args.downloads)
+    enriched = cli_collect_tasks(
+        sources,
+        workspace=args.workspace,
+        downloads=args.downloads,
+        progress=progress_on,
+        caps=caps_err,
+    )
     scan_elapsed = time.monotonic() - scan_t0
 
     if args.clean:
@@ -785,17 +893,11 @@ def cli_main(argv: list[str]) -> int:
                     if len(matches) == 1:
                         hit = matches[0]
                 if hit is None:
-                    print(
-                        _("warning: no task named {n!r}, skipping").format(n=name),
-                        file=sys.stderr,
-                    )
+                    _warn(_("no task named {n!r}, skipping").format(n=name))
                     continue
                 targets.append(hit)
             if not targets:
-                print(
-                    _("error: none of the requested items matched a known task"),
-                    file=sys.stderr,
-                )
+                _err(_("none of the requested items matched a known task"))
                 return 2
         else:
             # Low risk + above score threshold + not active + not currently open
@@ -807,6 +909,32 @@ def cli_main(argv: list[str]) -> int:
                 and "ACTIVE" not in (r.get("reason", "") + r.get("name", ""))
                 and "currently open" not in r.get("reason", "")
             ]
+            # Interactive cleanup picker: when running --scan --clean (or
+            # --interactive-clean explicitly) on a TTY without --items, let
+            # the user trim the auto-selected set with a multiselect.
+            if interactive and targets and (args.interactive_clean or args.scan):
+                labels = [
+                    f"{r['size_human']:>10} · {r['name']} ({r['reason']})"
+                    for r in targets
+                ]
+                try:
+                    picked_labels = multiselect(
+                        _("Pick items to clean (Space=toggle, Enter=confirm)"),
+                        labels,
+                        defaults=tuple(range(len(labels))),
+                        stream=sys.stderr,
+                        caps=caps_err,
+                    )
+                    picked_set = set(picked_labels)
+                    targets = [
+                        r for r, lbl in zip(targets, labels, strict=True) if lbl in picked_set
+                    ]
+                except (KeyboardInterrupt, EOFError):
+                    _warn(_("cleanup pick cancelled — aborting"))
+                    return 1
+                if not targets:
+                    _ok(_("Nothing selected. Done."))
+                    return 0
         total = sum(r["size_bytes"] for r in targets)
         if runtime.DRY_RUN:
             mode = _("DRY-RUN")
@@ -824,17 +952,18 @@ def cli_main(argv: list[str]) -> int:
         # Confirmation gate — skip for --dry-run (read-only), respect
         # -y/--yes, and short-circuit when stderr is not a TTY (CI/pipe).
         if not runtime.DRY_RUN and targets:
-            c = Color(sys.stderr)
             if runtime.TRASH_MODE:
-                prompt = _("Proceed? Will trash {n} items, {size} total.").format(
+                prompt_msg = _("Proceed? Will trash {n} items, {size} total.").format(
                     n=len(targets), size=human(total),
                 )
             else:
-                prompt = c.high(_("Proceed? Will PERMANENTLY DELETE {n} items, {size} total.").format(
-                    n=len(targets), size=human(total),
-                ))
-            if not confirm(prompt, default=False, assume_yes=args.yes):
-                print(_("Aborted."), file=sys.stderr)
+                prompt_msg = c_err.high(
+                    _("Proceed? Will PERMANENTLY DELETE {n} items, {size} total.").format(
+                        n=len(targets), size=human(total),
+                    )
+                )
+            if not confirm(prompt_msg, default=False, assume_yes=args.yes):
+                _ok(_("Aborted."))
                 return 1
 
         ok = 0
@@ -902,7 +1031,8 @@ def cli_main(argv: list[str]) -> int:
     else:  # table
         TABLE_LIMIT = 20
         n_total = len(output_items)
-        c = Color(sys.stdout)
+        stdout_color_enabled = (not args.no_color) and sys.stdout.isatty()
+        c = Color(sys.stdout, enabled=stdout_color_enabled)
         if n_total == 0:
             print(_("No items found in the selected sources. Nothing to do."))
         else:

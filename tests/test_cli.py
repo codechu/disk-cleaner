@@ -106,3 +106,73 @@ def test_scan_redirected_to_file_does_not_crash(tmp_path):
 
     data = json.loads(out_file.read_text())
     assert "items" in data and "totals" in data
+
+
+# ---------- script-mode flags ----------
+
+
+_ANSI_RE = __import__("re").compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+
+def test_non_interactive_scan_json(tmp_path):
+    """--non-interactive implies --format=json + no color + no progress."""
+    env = _env_with_tmp_xdg(tmp_path)
+    r = subprocess.run(
+        [
+            sys.executable, "-m", "disk_cleaner",
+            "--non-interactive", "--scan", "--sources", "system",
+        ],
+        capture_output=True, text=True, env=env, cwd=str(REPO_ROOT), timeout=120,
+    )
+    assert r.returncode == 0, f"stderr={r.stderr!r}"
+    # Default format must be json under --non-interactive.
+    import json as _json
+    data = _json.loads(r.stdout)
+    assert "items" in data and "totals" in data
+    # No ANSI anywhere.
+    assert not _ANSI_RE.search(r.stdout)
+    assert not _ANSI_RE.search(r.stderr)
+
+
+def test_no_color_strips_ansi(tmp_path):
+    """--no-color produces ANSI-free output even when format=table is forced."""
+    env = _env_with_tmp_xdg(tmp_path)
+    # Force a TTY-style format explicitly; stdout is a pipe here so colors
+    # would already be off — but --no-color must work in *both* cases.
+    r = subprocess.run(
+        [
+            sys.executable, "-m", "disk_cleaner",
+            "--scan", "--sources", "system", "--format", "table", "--no-color",
+        ],
+        capture_output=True, text=True, env=env, cwd=str(REPO_ROOT), timeout=120,
+    )
+    assert r.returncode == 0
+    assert not _ANSI_RE.search(r.stdout)
+    assert not _ANSI_RE.search(r.stderr)
+
+
+def test_no_progress_no_progress_line(tmp_path):
+    """--no-progress suppresses the per-task progress redraw on stderr."""
+    env = _env_with_tmp_xdg(tmp_path)
+    r = subprocess.run(
+        [
+            sys.executable, "-m", "disk_cleaner",
+            "--scan", "--sources", "system", "--format", "json", "--no-progress",
+        ],
+        capture_output=True, text=True, env=env, cwd=str(REPO_ROOT), timeout=120,
+    )
+    assert r.returncode == 0
+    # ProgressLine uses CR ("\r") for redraws; with --no-progress stderr
+    # should not contain that.
+    assert "\r" not in r.stderr
+
+
+def test_non_interactive_clean_without_items_or_sources_refused(tmp_path):
+    """Safety: --non-interactive --clean with no constraints must refuse."""
+    env = _env_with_tmp_xdg(tmp_path)
+    r = subprocess.run(
+        [sys.executable, "-m", "disk_cleaner", "--non-interactive", "--clean"],
+        capture_output=True, text=True, env=env, cwd=str(REPO_ROOT), timeout=120,
+    )
+    assert r.returncode == 2, f"expected exit 2, got {r.returncode}; stderr={r.stderr!r}"
+    assert "items" in r.stderr.lower() or "sources" in r.stderr.lower()
