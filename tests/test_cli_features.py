@@ -310,6 +310,110 @@ def test_help_contains_examples(xdg_env, monkeypatch):
     assert "--scan" in text
 
 
+# ---------- unified error helpers ----------
+
+
+_ANSI_RE = __import__("re").compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+
+def test_cmd_set_error_uses_unified_reporter(xdg_env, monkeypatch):
+    """``_cmd_set`` reports schema errors via the unified ``error: ...`` prefix.
+
+    Because tests replace stderr with a StringIO (non-TTY), the reporter
+    falls back to plain text — assert the prefix is present and no ANSI
+    escapes leak into a captured stream.
+    """
+    cli, _ = xdg_env
+    _out, err = _capture(monkeypatch)
+    rc = cli.cli_main(["--set", "bogus=1"])
+    assert rc == 2
+    text = err.getvalue()
+    assert text.startswith("error: ") or "\nerror: " in "\n" + text
+    assert "unknown key" in text
+    assert not _ANSI_RE.search(text)
+
+
+def test_cmd_snapshot_bad_subaction_uses_unified_reporter(xdg_env, monkeypatch):
+    cli, _ = xdg_env
+    _out, err = _capture(monkeypatch)
+    rc = cli.cli_main(["--snapshot", "bogus"])
+    assert rc == 2
+    assert "error: " in err.getvalue()
+
+
+def test_cmd_add_cleaner_invalid_json_uses_unified_reporter(tmp_path, xdg_env, monkeypatch):
+    cli, _ = xdg_env
+    bad = tmp_path / "bad.json"
+    bad.write_text("{not json")
+    _out, err = _capture(monkeypatch)
+    rc = cli.cli_main(["--add-cleaner", str(bad)])
+    assert rc == 1
+    assert "error: " in err.getvalue()
+    assert "invalid JSON" in err.getvalue()
+
+
+# ---------- enriched --watchdog-status ----------
+
+
+def test_watchdog_status_stopped_shows_threshold_and_interval(xdg_env, monkeypatch):
+    """When stopped, status still prints threshold + interval rows."""
+    cli, _ = xdg_env
+    out, _err = _capture(monkeypatch)
+    rc = cli.cli_main(["--watchdog-status", "--no-color"])
+    assert rc == 0
+    text = out.getvalue()
+    assert "STOPPED" in text
+    assert "threshold" in text
+    assert "interval" in text
+    # No PID/uptime when stopped.
+    assert "pid" not in text
+    assert "uptime" not in text
+
+
+def test_watchdog_status_running_shows_pid_and_uptime(xdg_env, monkeypatch):
+    """Mock ``watchdog_running`` + a fake PID file: rendered output
+    must include pid, uptime, threshold, interval."""
+    cli, config = xdg_env
+    # Drop a fake PID file under XDG_RUNTIME_DIR so _watchdog_pid_uptime
+    # can read it. config.WATCHDOG_PID points there.
+    from disk_cleaner.watchdog import daemon as dmn
+
+    dmn.WATCHDOG_PID_FILE.parent.mkdir(parents=True, exist_ok=True)
+    dmn.WATCHDOG_PID_FILE.write_text("12345")
+    # Patch the cli's view of WATCHDOG_PID_FILE too (imported at top).
+    monkeypatch.setattr(cli, "WATCHDOG_PID_FILE", dmn.WATCHDOG_PID_FILE)
+    monkeypatch.setattr(cli, "watchdog_running", lambda: True)
+
+    # Pre-seed a threshold so the row content is predictable.
+    assert cli.cli_main(["--set", "watchdog.threshold=5G"]) == 0
+    out, _err = _capture(monkeypatch)
+    rc = cli.cli_main(["--watchdog-status", "--no-color"])
+    assert rc == 0
+    text = out.getvalue()
+    assert "RUNNING" in text
+    assert "12345" in text  # pid
+    assert "uptime" in text
+    assert "threshold" in text and "5G" in text
+    assert "interval" in text
+
+
+# ---------- enriched epilog ----------
+
+
+def test_help_epilog_includes_new_examples(xdg_env, monkeypatch):
+    cli, _ = xdg_env
+    out, err = _capture(monkeypatch)
+    with pytest.raises(SystemExit):
+        cli.cli_main(["--help"])
+    text = out.getvalue() + err.getvalue()
+    # Script-mode (system + json)
+    assert "--non-interactive --scan --sources system --format json" in text
+    # Interactive cleanup (scan + clean)
+    assert "--scan --clean" in text
+    # Watchdog with threshold
+    assert "watchdog.threshold=5G" in text
+
+
 # ---------- confirm gate ----------
 
 

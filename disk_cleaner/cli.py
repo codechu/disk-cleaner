@@ -45,6 +45,57 @@ from .watchdog.daemon import (
     watchdog_stop,
 )
 
+# ---------- Colored error/warn/ok helpers ----------
+#
+# Module-level so every ``_cmd_*`` function can call them without
+# threading state through every signature. ``_make_reporter`` builds
+# the (color, _err, _warn, _ok) bundle from a stream; callers that
+# don't pass one get a default tied to ``sys.stderr`` with auto-detect.
+
+
+def _make_reporter(no_color: bool = False, stream=None):
+    """Return ``(color, err, warn, ok)`` writers bound to ``stream``.
+
+    ``stream`` defaults to ``sys.stderr``. Colors are auto-enabled when
+    the stream is a TTY and ``no_color`` is falsy.
+    """
+    stream = stream if stream is not None else sys.stderr
+    enabled = (not no_color) and stream.isatty()
+    c = Color(stream, enabled=enabled)
+
+    def err(msg: str) -> None:
+        print(c.high(f"error: {msg}") if enabled else f"error: {msg}", file=stream)
+
+    def warn(msg: str) -> None:
+        print(c.medium(f"warning: {msg}") if enabled else f"warning: {msg}", file=stream)
+
+    def ok(msg: str) -> None:
+        print(c.low(msg) if enabled else msg, file=stream)
+
+    return c, err, warn, ok
+
+
+def _default_err(msg: str) -> None:
+    """Fallback ``err`` used by ``_cmd_*`` when no reporter is passed in.
+
+    Auto-detects color on stderr at call time; never colors a redirected
+    stream. Tests using ``_capture(monkeypatch)`` replace ``sys.stderr``
+    with a StringIO, so colors stay off automatically.
+    """
+    _c, err, _w, _o = _make_reporter()
+    err(msg)
+
+
+def _default_warn(msg: str) -> None:
+    _c, _e, warn, _o = _make_reporter()
+    warn(msg)
+
+
+def _default_ok(msg: str) -> None:
+    _c, _e, _w, ok = _make_reporter()
+    ok(msg)
+
+
 # Known settings keys for --set/--get/--list-settings.
 # Dotted keys are stored as nested JSON.
 _KNOWN_SETTINGS: dict[str, dict] = {
@@ -236,41 +287,39 @@ def _validate_and_coerce(key: str, raw_value: str):
 
 def _cmd_set(arg: str) -> int:
     if "=" not in arg:
-        print(_("error: --set requires KEY=VALUE"), file=sys.stderr)
+        _default_err(_("--set requires KEY=VALUE"))
         return 2
     key, _sep, value = arg.partition("=")
     key = key.strip()
     if key not in _KNOWN_SETTINGS:
-        print(
-            _("error: unknown key {key!r}. Known keys: {keys}").format(
+        _default_err(
+            _("unknown key {key!r}. Known keys: {keys}").format(
                 key=key, keys=", ".join(sorted(_KNOWN_SETTINGS)),
-            ),
-            file=sys.stderr,
+            )
         )
         return 2
     try:
         coerced = _validate_and_coerce(key, value)
     except ValueError as e:
-        print(_("error: {msg}").format(msg=str(e)), file=sys.stderr)
+        _default_err(str(e))
         return 2
     data = _load_settings_json()
     _settings_set(data, key, coerced)
     try:
         _save_settings_json(data)
     except Exception as e:
-        print(_("error: failed to write settings: {msg}").format(msg=e), file=sys.stderr)
+        _default_err(_("failed to write settings: {msg}").format(msg=e))
         return 1
-    print(f"set {key}={value}", file=sys.stderr)
+    _default_ok(f"set {key}={value}")
     return 0
 
 
 def _cmd_get(key: str) -> int:
     if key not in _KNOWN_SETTINGS:
-        print(
-            _("error: unknown key {key!r}. Known keys: {keys}").format(
+        _default_err(
+            _("unknown key {key!r}. Known keys: {keys}").format(
                 key=key, keys=", ".join(sorted(_KNOWN_SETTINGS)),
-            ),
-            file=sys.stderr,
+            )
         )
         return 2
     data = _load_settings_json()
@@ -325,54 +374,47 @@ def _cmd_list_cleaners() -> int:
 def _cmd_add_cleaner(path: str, *, force: bool = False) -> int:
     src = Path(path).expanduser()
     if not src.is_file():
-        print(_("error: file not found: {p}").format(p=src), file=sys.stderr)
+        _default_err(_("file not found: {p}").format(p=src))
         return 1
     try:
         data = json.loads(src.read_text(encoding="utf-8"))
     except Exception as e:
-        print(_("error: invalid JSON: {msg}").format(msg=e), file=sys.stderr)
+        _default_err(_("invalid JSON: {msg}").format(msg=e))
         return 1
     # Schema validation matches disk_cleaner._tasks.load_user_cleaners().
     # Required: "name". At least one of "paths" or "command" must be present
     # so the rule actually does something.
     name = data.get("name")
     if not name or not isinstance(name, str):
-        print(_("error: cleaner JSON must have a non-empty 'name'"), file=sys.stderr)
+        _default_err(_("cleaner JSON must have a non-empty 'name'"))
         return 1
     if not data.get("paths") and not data.get("command"):
-        print(
-            _("error: cleaner JSON must have at least one of 'paths' or 'command'"),
-            file=sys.stderr,
-        )
+        _default_err(_("cleaner JSON must have at least one of 'paths' or 'command'"))
         return 1
     risk = data.get("risk", "medium")
     if risk not in ("low", "medium", "high"):
-        print(
-            _("error: 'risk' must be one of: low, medium, high (got {r!r})").format(r=risk),
-            file=sys.stderr,
+        _default_err(
+            _("'risk' must be one of: low, medium, high (got {r!r})").format(r=risk)
         )
         return 1
     # Safe filename — strip path separators from the rule name.
     safe = name.replace("/", "_").replace("\\", "_")
     dest = _cleaner_paths_dir() / f"{safe}.json"
     if dest.exists() and not force:
-        print(
-            _("error: {p} exists. Use --force to overwrite.").format(p=dest),
-            file=sys.stderr,
-        )
+        _default_err(_("{p} exists. Use --force to overwrite.").format(p=dest))
         return 1
     shutil.copyfile(src, dest)
-    print(_("installed: {p}").format(p=dest), file=sys.stderr)
+    _default_ok(_("installed: {p}").format(p=dest))
     return 0
 
 
 def _cmd_remove_cleaner(name: str) -> int:
     target = _cleaner_paths_dir() / f"{name}.json"
     if not target.exists():
-        print(_("error: no cleaner named {n!r}").format(n=name), file=sys.stderr)
+        _default_err(_("no cleaner named {n!r}").format(n=name))
         return 1
     target.unlink()
-    print(_("removed: {p}").format(p=target), file=sys.stderr)
+    _default_ok(_("removed: {p}").format(p=target))
     return 0
 
 
@@ -381,7 +423,7 @@ def _cmd_remove_cleaner(name: str) -> int:
 
 def _cmd_snapshot(args_list: list[str]) -> int:
     if not args_list:
-        print(_("error: --snapshot requires a subaction: create|list|diff"), file=sys.stderr)
+        _default_err(_("--snapshot requires a subaction: create|list|diff"))
         return 2
     sub = args_list[0]
     rest = args_list[1:]
@@ -410,7 +452,7 @@ def _cmd_snapshot(args_list: list[str]) -> int:
             )
         sid = save_snapshot(items)
         if sid is None:
-            print(_("error: failed to save snapshot"), file=sys.stderr)
+            _default_err(_("failed to save snapshot"))
             return 1
         print(sid)
         return 0
@@ -443,20 +485,21 @@ def _cmd_snapshot(args_list: list[str]) -> int:
         elif len(rest) == 2:
             a_s, b_s = rest
         else:
-            print(_("error: --snapshot diff requires A B (or A:B)"), file=sys.stderr)
+            _default_err(_("--snapshot diff requires A B (or A:B)"))
             return 2
         try:
             a, b = int(a_s), int(b_s)
         except ValueError:
-            print(_("error: snapshot ids must be integers"), file=sys.stderr)
+            _default_err(_("snapshot ids must be integers"))
             return 2
         from .storage.snapshots import snapshot_items
 
         a_items = snapshot_items(a)
         b_items = snapshot_items(b)
         if not a_items and not b_items:
-            print(_("error: no items found for snapshots {a} and {b}").format(a=a, b=b),
-                  file=sys.stderr)
+            _default_err(
+                _("no items found for snapshots {a} and {b}").format(a=a, b=b)
+            )
             return 1
         paths = sorted(set(a_items) | set(b_items))
         for p in paths:
@@ -474,7 +517,7 @@ def _cmd_snapshot(args_list: list[str]) -> int:
             sign = "+" if delta >= 0 else "-"
             print(f"{tag}\t{sign}{human(abs(delta))}\t{human(sa)} -> {human(sb)}\t{p}")
         return 0
-    print(_("error: unknown --snapshot subaction {s!r}").format(s=sub), file=sys.stderr)
+    _default_err(_("unknown --snapshot subaction {s!r}").format(s=sub))
     return 2
 
 
@@ -496,15 +539,14 @@ def export_treemap_png(
         import cairo  # noqa: F401  — checked early so we can surface a clear error
         from codechu_treeviz import build_tree, layout_treemap, node_color
     except Exception as e:
-        print(
-            _("error: treemap export requires cairo + codechu_treeviz: {msg}").format(msg=e),
-            file=sys.stderr,
+        _default_err(
+            _("treemap export requires cairo + codechu_treeviz: {msg}").format(msg=e)
         )
         return 2
 
     root = build_tree(root_path)
     if root is None:
-        print(_("error: path not readable: {p}").format(p=root_path), file=sys.stderr)
+        _default_err(_("path not readable: {p}").format(p=root_path))
         return 1
     layout_treemap(root, 0, 0, float(width), float(height))
 
@@ -548,9 +590,124 @@ def export_treemap_png(
     try:
         surf.write_to_png(out_path)
     except Exception as e:
-        print(_("error: failed to write {p}: {msg}").format(p=out_path, msg=e),
-              file=sys.stderr)
+        _default_err(_("failed to write {p}: {msg}").format(p=out_path, msg=e))
         return 1
+    return 0
+
+
+# ---------- Watchdog status ----------
+
+
+def _format_uptime(seconds: float) -> str:
+    """Human-readable uptime. Uses codechu_fmt.format_duration when
+    available; falls back to a tiny inline formatter.
+    """
+    try:
+        from codechu_fmt import format_duration
+        return format_duration(seconds)
+    except Exception:
+        s = int(seconds)
+        if s < 60:
+            return f"{s}s"
+        m, s = divmod(s, 60)
+        if m < 60:
+            return f"{m}m {s}s"
+        h, m = divmod(m, 60)
+        if h < 24:
+            return f"{h}h {m}m"
+        d, h = divmod(h, 24)
+        return f"{d}d {h}h"
+
+
+def _watchdog_pid_uptime() -> tuple[int | None, float | None]:
+    """Return ``(pid, uptime_seconds)`` for the running watchdog, or
+    ``(None, None)`` when it can't be determined.
+
+    Uses ``WATCHDOG_PID_FILE``'s mtime as the start reference — accurate
+    to within a few ms of ``watchdog_start_background``.
+    """
+    if not WATCHDOG_PID_FILE.exists():
+        return None, None
+    try:
+        pid = int(WATCHDOG_PID_FILE.read_text().strip())
+    except (ValueError, OSError):
+        return None, None
+    try:
+        started = WATCHDOG_PID_FILE.stat().st_mtime
+        uptime = max(0.0, time.time() - started)
+    except OSError:
+        uptime = None
+    return pid, uptime
+
+
+def _watchdog_last_event() -> str | None:
+    """Best-effort last-event timestamp from the watchdog log.
+
+    The watchdog writes ``[HH:MM:SS] / = NN%`` lines; we return the
+    most recent timestamp with today's date prefix. None if no log or
+    no parseable lines.
+    """
+    from .watchdog.daemon import WATCHDOG_LOG
+
+    if not WATCHDOG_LOG.exists():
+        return None
+    try:
+        text = WATCHDOG_LOG.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    last_ts = None
+    for line in text.splitlines():
+        # Lines start with "[HH:MM:SS] " when emitted by watchdog_loop.
+        if len(line) > 10 and line.startswith("[") and line[9:11] == "] ":
+            last_ts = line[1:9]
+    if not last_ts:
+        return None
+    today = time.strftime("%Y-%m-%d")
+    return f"{today}T{last_ts}"
+
+
+def _cmd_watchdog_status(no_color: bool = False) -> int:
+    """Print enriched watchdog status (badge + pid/uptime/threshold/...)."""
+    c_out = Color(sys.stdout, enabled=(not no_color) and sys.stdout.isatty())
+    running = watchdog_running()
+    if running:
+        badge = c_out.low("●")
+        state = c_out.low("RUNNING") if c_out.enabled else "RUNNING"
+    else:
+        badge = c_out.high("●")
+        state = c_out.high("STOPPED") if c_out.enabled else "STOPPED"
+    print(_("watchdog {b} {s}").format(b=badge, s=state))
+
+    # Settings — read fresh so live edits via --set are reflected.
+    sdata = _load_settings_json()
+    threshold = (
+        _settings_get(sdata, "watchdog.threshold")
+        or sdata.get("watchdog_threshold")
+        or 85
+    )
+    interval = (
+        _settings_get(sdata, "watchdog.interval")
+        or sdata.get("watchdog_interval")
+        or 600
+    )
+
+    rows: list[tuple[str, str]] = []
+    if running:
+        pid, uptime = _watchdog_pid_uptime()
+        if pid is not None:
+            rows.append(("pid", str(pid)))
+        if uptime is not None:
+            rows.append(("uptime", _format_uptime(uptime)))
+    rows.append(("threshold", f"{threshold}"))
+    rows.append(("interval", f"{interval}s"))
+    last = _watchdog_last_event()
+    if last:
+        rows.append(("last event", last))
+
+    if rows:
+        width = max(len(k) for k, _v in rows)
+        for k, v in rows:
+            print(f"  {k.ljust(width)}  {v}")
     return 0
 
 
@@ -560,12 +717,21 @@ def export_treemap_png(
 def _build_parser() -> argparse.ArgumentParser:
     epilog = format_examples([
         ("disk-cleaner --scan", _("Smart scan with table output")),
-        ("disk-cleaner --scan > scan.json", _("Headless JSON for scripts")),
+        ("disk-cleaner --scan --clean",
+         _("Interactive cleanup: multiselect picker before deletion")),
+        ("disk-cleaner --non-interactive --scan --sources system --format json",
+         _("Script mode: system-only JSON, no prompts/progress/color")),
+        ("disk-cleaner --non-interactive --scan --format json > scan.json",
+         _("Script-mode headless scan")),
         ("disk-cleaner --clean --items 'Chrome cache,pip cache'",
          _("Clean only the named items")),
         ("disk-cleaner --clean --dry-run", _("Preview the clean")),
+        ("disk-cleaner --interactive-clean --clean",
+         _("Pick items to clean via multiselect")),
         ("disk-cleaner --watchdog-start && disk-cleaner --watchdog-status",
          _("Start watchdog + check status")),
+        ("disk-cleaner --set watchdog.threshold=5G && disk-cleaner --watchdog-start",
+         _("Set free-space threshold then arm the watchdog")),
         ("disk-cleaner --set language=tr", _("Change a setting")),
         ("disk-cleaner --snapshot create && disk-cleaner --snapshot list",
          _("Take + list snapshots")),
@@ -741,21 +907,12 @@ def cli_main(argv: list[str]) -> int:
         if args.format is None:
             args.format = "json"
 
-    # Capability + color objects — single source of truth.
-    color_enabled = (not args.no_color) and sys.stderr.isatty()
+    # Capability + color objects — single source of truth. The
+    # _err/_warn/_ok closures are local aliases over the module-level
+    # _make_reporter; _cmd_* helpers use the module-level _default_*
+    # equivalents so error formatting stays uniform everywhere.
     caps_err: set[str] | None = capabilities(sys.stderr) if not args.no_color else set()
-    c_err = Color(sys.stderr, enabled=color_enabled)
-
-    def _err(msg: str) -> None:
-        print(c_err.high(f"error: {msg}") if color_enabled else f"error: {msg}",
-              file=sys.stderr)
-
-    def _warn(msg: str) -> None:
-        print(c_err.medium(f"warning: {msg}") if color_enabled else f"warning: {msg}",
-              file=sys.stderr)
-
-    def _ok(msg: str) -> None:
-        print(c_err.low(msg) if color_enabled else msg, file=sys.stderr)
+    c_err, _err, _warn, _ok = _make_reporter(no_color=args.no_color, stream=sys.stderr)
 
     # Interactive banner — single source of truth for "headline" output
     # that lets the user confirm they're in the right tool/mode at a glance.
@@ -786,7 +943,7 @@ def cli_main(argv: list[str]) -> int:
         return _cmd_snapshot(args.snapshot)
     if args.export_treemap is not None:
         if not args.output:
-            print(_("error: --export-treemap requires -o OUTPUT"), file=sys.stderr)
+            _err(_("--export-treemap requires -o OUTPUT"))
             return 2
         return export_treemap_png(args.export_treemap, args.output)
 
@@ -817,16 +974,7 @@ def cli_main(argv: list[str]) -> int:
         print(_("watchdog is not running"))
         return 0
     if args.watchdog_status:
-        c_out = Color(sys.stdout, enabled=(not args.no_color) and sys.stdout.isatty())
-        if watchdog_running():
-            pid = WATCHDOG_PID_FILE.read_text().strip()
-            badge = c_out.low("●")
-            print(_("watchdog {b} RUNNING (pid {pid})").format(b=badge, pid=pid))
-            return 0
-        # STOPPED is a normal observable state, not a failure.
-        badge = c_out.high("●")
-        print(_("watchdog {b} STOPPED").format(b=badge))
-        return 0
+        return _cmd_watchdog_status(no_color=args.no_color)
 
     if args.dry_run:
         runtime.DRY_RUN = True
