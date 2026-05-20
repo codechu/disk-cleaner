@@ -666,7 +666,7 @@ class TreemapPanel(Gtk.Box):
             cr.show_text(up)
 
     def _draw_child(self, cr, node: TreeNode, idx: int) -> None:
-        if node.rect is None:
+        if node.rect is None or len(node.rect) != 4:
             return
         x, y, w, h = node.rect
         if w < 2 or h < 2:
