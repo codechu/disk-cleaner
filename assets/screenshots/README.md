@@ -10,14 +10,26 @@ Dört set var — iki dil × iki tema:
 
 ```
 assets/screenshots/
+├── cli/        ← CLI screenshots (terminal output)
 ├── en/light/   ← English UI, light theme
 ├── en/dark/    ← English UI, dark theme
 ├── tr/light/   ← Türkçe UI, light theme
 └── tr/dark/    ← Türkçe UI, dark theme
 ```
 
-Her set 5 dosya: `mainwindow.png`, `suggestion.png`, `cleanup.png`,
-`treemap.png`, `sunburst.png` (hepsi 910×676).
+GUI setlerinin her biri 5 dosya: `mainwindow.png`, `suggestion.png`,
+`cleanup.png`, `treemap.png`, `sunburst.png` (hepsi 910×676).
+
+CLI seti 6 dosya:
+
+| Dosya | Komut | Ne gösterir |
+|-------|-------|-------------|
+| `help.png` | `disk-cleaner --help` | Tam usage + epilog'daki yeni örnekler |
+| `scan-system.png` | `--scan --sources system --format table` | Renkli risk rozetleriyle tablo |
+| `scan-json.png` | `--non-interactive --scan --sources system --format json` | Script-mode JSON çıkışı |
+| `watchdog.png` | `--watchdog-status` | Renkli ● rozetli RUNNING + zenginleştirilmiş alanlar (pid, uptime, threshold, interval, last event) |
+| `clean-picker.png` | `--scan --clean --dry-run --sources system` (interaktif) | Multiselect picker prompt'u: "Pick items to clean" + kutucuklar + hint |
+| `clean-dry-run.png` | `--clean --dry-run --sources system -y` | Picker'ı atlayarak `[TAMAM]` rozetli son özet |
 
 README.md / README.tr.md `<picture>` element ile GitHub'ın
 `prefers-color-scheme` sorgusuna göre otomatik geçiş yapar.
@@ -64,6 +76,46 @@ done
 # 4. Cleanup
 pkill -9 -f "Xvfb :99"
 ```
+
+## CLI screenshots yeniden üretimi
+
+CLI shotları Xvfb :99 üzerinde `xterm` ile yakalanır; `import`
+(ImageMagick) xterm pencere ID'sine göre crop yapar.
+
+```bash
+# Xvfb başlat (snap env leak için env -i)
+env -i HOME=$HOME PATH=$PATH Xvfb :99 -screen 0 1400x1100x24 -ac &
+sleep 1
+
+shoot() {  # shoot <out.png> <geom> <wait> <cmd>
+  DISPLAY=:99 xterm -title DCSHOT -geometry "$2" \
+    -fa "DejaVu Sans Mono" -fs 10 -bg "#1e1e2e" -fg "#cdd6f4" \
+    -e bash -c "$4; echo; echo '--- end ---'; sleep 120" &
+  PID=$!; sleep "$3"
+  WID=$(DISPLAY=:99 xwininfo -root -tree | grep '"DCSHOT"' | head -1 | awk '{print $1}')
+  DISPLAY=:99 import -window "$WID" "$1"
+  kill $PID 2>/dev/null; wait 2>/dev/null
+}
+
+cd /home/onur/workspace/disk-space
+DC='python3 -c "from disk_cleaner.cli import main; main()"'
+
+shoot assets/screenshots/cli/help.png         120x90 2 "$DC --help"
+shoot assets/screenshots/cli/scan-system.png  110x42 8 "$DC --scan --sources system --format table"
+shoot assets/screenshots/cli/scan-json.png    90x36  8 "$DC --non-interactive --scan --sources system --format json 2>/dev/null | head -32"
+$DC --watchdog-start && sleep 1
+shoot assets/screenshots/cli/watchdog.png     70x14  2 "$DC --watchdog-status"
+$DC --watchdog-stop
+shoot assets/screenshots/cli/clean-picker.png 110x36 10 "$DC --scan --clean --dry-run --sources system"
+shoot assets/screenshots/cli/clean-dry-run.png 110x36 10 "$DC --clean --dry-run --sources system -y"
+
+pkill -9 -f "Xvfb :99"
+```
+
+`clean-picker.png` interaktif picker'ı durmuş haliyle yakalar (10s
+gecikmeyle multiselect ekrandadır, hiçbir tuşa basılmaz).
+`clean-dry-run.png` ise picker'ı tamamen atlayan komutla (`--clean`
+ama `--scan` değil) sonuç özetini gösterir.
 
 ## Sıklık
 
