@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **codechu-* library migration (v0.2).** Helpers previously inlined
+  in the package are now consumed as PyPI dependencies declared in
+  `pyproject.toml`: `codechu-events` (Bus), `codechu-xdg` (App + path
+  helpers), `codechu-cli` (Color, ProgressLine, Spinner, banner,
+  confirm, multiselect, resolve_format, format_examples, capabilities),
+  `codechu-treeviz` (treemap geometry). See
+  [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the new
+  application-level Bus singleton (`disk_cleaner/_bus.py`) and the
+  `codechu-xdg` App composition in `disk_cleaner/config.py`.
+- **Interactive CLI UX v2.** New flags `--no-color`, `--no-progress`,
+  `--non-interactive`, `--interactive-clean`. The CLI now offers a
+  source-picker multiselect when `--sources` is omitted on a TTY, a
+  spinner during open-file probing, a cleanup multiselect when
+  `--scan --clean` is used together (or `--interactive-clean`
+  explicitly) without `--items`, and colored error/warning/ok helpers.
+  Script-mode safety: `--non-interactive --clean` without `--items` or
+  `--sources` is refused with exit code 2. `--watchdog-status` now
+  prints a colored badge (`● RUNNING` / `● STOPPED`). See
+  [docs/CLI.md](docs/CLI.md).
 - **Internationalization (i18n) via gettext.** Source code transitioned
   to English; Turkish (`tr.po`) shipped as translation. UI auto-detects
   via `LANG` / `LC_MESSAGES`; explicit override with
